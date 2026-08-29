@@ -1,0 +1,44 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build output
+dist/
+build/
+*.tsbuildinfo
+
+# Test / coverage
+coverage/
+playwright-report/
+test-results/
+.playwright/
+
+# Turbo
+.turbo/
+
+# Env
+.env
+.env.*
+!.env.example
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# Local infra state
+infra/terraform/**/.terraform/
+infra/terraform/**/*.tfstate
+infra/terraform/**/*.tfstate.*
+infra/terraform/**/*.tfvars
+!infra/terraform/**/*.tfvars.example
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# DynamoDB Local data
+.dynamodb/

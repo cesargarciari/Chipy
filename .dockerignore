@@ -1,0 +1,14 @@
+**/node_modules
+**/dist
+**/build
+**/.turbo
+**/coverage
+**/playwright-report
+**/test-results
+**/*.log
+**/.DS_Store
+.git
+.github
+infra
+docs
+**/*.test.ts

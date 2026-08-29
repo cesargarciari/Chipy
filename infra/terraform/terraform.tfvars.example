@@ -1,0 +1,6 @@
+# cp terraform.tfvars.example terraform.tfvars  (Milestone 2)
+project            = "chipy"
+environment        = "prod"
+aws_region         = "ca-central-1"
+domain_name        = ""
+monthly_budget_usd = 5

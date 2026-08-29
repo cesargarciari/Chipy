@@ -1,0 +1,39 @@
+@import 'tailwindcss';
+
+/* Dark, arena-at-night look. Committed single theme for Milestone 1. */
+@theme {
+  --color-court-950: #0a0a0b;
+  --color-court-900: #131316;
+  --color-court-800: #1d1d22;
+  --color-court-700: #2a2a31;
+  --color-court-600: #3b3b45;
+  --color-ink: #ececf1;
+  --color-ink-dim: #a1a1ad;
+  --color-amber: #f97316;
+  --color-amber-soft: #fb923c;
+  --font-display: 'Bebas Neue', 'Arial Narrow', system-ui, sans-serif;
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+  }
+  body {
+    margin: 0;
+    background: var(--color-court-950);
+    color: var(--color-ink);
+    font-family:
+      ui-sans-serif,
+      system-ui,
+      -apple-system,
+      'Segoe UI',
+      Roboto,
+      Helvetica,
+      Arial,
+      sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  * {
+    scrollbar-color: var(--color-court-600) transparent;
+  }
+}
