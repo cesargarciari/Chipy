@@ -113,6 +113,7 @@ describe('trades in a career', () => {
           ).id;
         else if (p.kind === 'landing') choiceId = p.landing!.offers[0]!.id;
         else if (p.kind === 'midseason') choiceId = p.midseason!.decision.options[0]!.id;
+        else if (p.kind === 'chemistry') choiceId = p.chemistry!.decision.options[1]!.id;
         else if (p.kind === 'overseas_offer') choiceId = p.overseasOffer!.options[0]!.id;
         else if (p.kind === 'farewell') choiceId = 'quiet_goodbye';
         else {
@@ -158,6 +159,7 @@ describe('trades in a career', () => {
           ).id;
         else if (p.kind === 'landing') choiceId = p.landing!.offers[0]!.id;
         else if (p.kind === 'midseason') choiceId = p.midseason!.decision.options[0]!.id;
+        else if (p.kind === 'chemistry') choiceId = p.chemistry!.decision.options[1]!.id;
         else if (p.kind === 'overseas_offer') choiceId = p.overseasOffer!.options[0]!.id;
         else if (p.kind === 'farewell') choiceId = 'quiet_goodbye';
         else {

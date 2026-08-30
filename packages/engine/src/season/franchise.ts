@@ -46,6 +46,7 @@ const RESULT_REP: Partial<Record<TeamResult, number>> = {
   conf_finals: 4,
   second_round: 2,
   first_round: 1,
+  play_in: 0.5,
 };
 
 export interface SeasonRepArgs {
@@ -63,7 +64,7 @@ export function seasonFranchiseRep(a: SeasonRepArgs): number {
   if (!a.played) return 2;
   let pts = 6 + ROLE_REP[a.role] + (RESULT_REP[a.teamResult] ?? 0);
   for (const id of a.awards) pts += AWARD_REP[id] ?? 0;
-  // Loyalty compounds — a few years in one place and the city adopts you.
+  // Loyalty compounds - a few years in one place and the city adopts you.
   if (a.seasonsWithTeam >= 4) pts += Math.min(a.seasonsWithTeam - 3, 6) * 2;
   return pts;
 }
@@ -103,7 +104,7 @@ export function tierRank(t: FranchiseTier): number {
 
 const LEGEND_SCORE = 210;
 
-/** 0..100 fill for an "idolatry" bar — 100 once the standing is legend-level. */
+/** 0..100 fill for an "idolatry" bar - 100 once the standing is legend-level. */
 export function franchiseProgress(score: number): number {
   return Math.max(0, Math.min(100, Math.round((score / LEGEND_SCORE) * 100)));
 }

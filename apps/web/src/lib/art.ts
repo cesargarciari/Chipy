@@ -13,7 +13,7 @@
  *             e.g. real_madrid.png    (snake_case ids from EURO_CLUBS)
  *
  * Drop the file in the right folder with the id as its name and it is wired up
- * automatically (Vite `import.meta.glob`) — no import, no re-deploy step.
+ * automatically (Vite `import.meta.glob`) - no import, no re-deploy step.
  * Filenames are case-sensitive. See the README in each folder for the full id
  * list.
  */

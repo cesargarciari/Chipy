@@ -15,7 +15,7 @@ export function buildPrologueNodes(rng: Rng): PrologueNode[] {
   return [buildHighSchoolNode(rng), buildRecruitingNode(rng)];
 }
 
-/** Labels only — used by `describeChoice` for the "N% also chose" rollup. */
+/** Labels only - used by `describeChoice` for the "N% also chose" rollup. */
 const LABELS: Record<string, Record<string, string>> = {
   highschool: Object.fromEntries(HIGH_SCHOOL_TEMPLATE.options.map((o) => [o.id, o.label])),
   recruiting: Object.fromEntries(RECRUITING_TEMPLATE.options.map((o) => [o.id, o.label])),

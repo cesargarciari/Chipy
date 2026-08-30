@@ -3,11 +3,11 @@ import type { InjurySeverity } from '../types.js';
 
 export interface InjuryRollCtx {
   age: number;
-  /** 20..100 — the single biggest lever on how often you get hurt. */
+  /** 20..100 - the single biggest lever on how often you get hurt. */
   durability: number;
-  /** Prior entries on the injury record — wear compounds. */
+  /** Prior entries on the injury record - wear compounds. */
   injuryCount: number;
-  /** 0..1 from perks (medical team, recovery staff) — cuts the odds down. */
+  /** 0..1 from perks (medical team, recovery staff) - cuts the odds down. */
   injuryResist: number;
 }
 
@@ -20,7 +20,7 @@ export interface RolledInjury {
   /** Permanent hit applied through the season `effect`. */
   athleticismHit: number;
   durabilityHit: number;
-  /** Flat OVR drop — the season pipeline subtracts this from every rating. */
+  /** Flat OVR drop - the season pipeline subtracts this from every rating. */
   overallHit: number;
   /** Ends the career on the spot. */
   careerEnding: boolean;
@@ -36,7 +36,7 @@ interface InjuryType {
   games: [number, number];
   athHit?: [number, number];
   durHit?: [number, number];
-  /** Flat OVR drop range — only the surgery-grade injuries carry one. */
+  /** Flat OVR drop range - only the surgery-grade injuries carry one. */
   ovrHit?: [number, number];
   /** `true` = always season-ending; `number` = chance it is (surgery call). */
   seasonEnding?: true | number;
@@ -48,7 +48,7 @@ interface InjuryType {
  * The catalogue. Minor knocks are common and cost a handful of games; the
  * surgery-grade knee/achilles injuries at the bottom are season-ending, take a
  * chunk of your athleticism *and* two-plus OVR points for good, and carry a
- * real career-ending chance. Nothing is impossible — a healthy 24-year-old can
+ * real career-ending chance. Nothing is impossible - a healthy 24-year-old can
  * still tear an ACL, just rarely.
  */
 export const INJURY_CATALOG: readonly InjuryType[] = [

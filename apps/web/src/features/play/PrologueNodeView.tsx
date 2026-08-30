@@ -9,7 +9,7 @@ export function PrologueNodeView({
   onChoose: (choiceId: string) => void;
 }) {
   return (
-    <div className="space-y-4">
+    <div className="decision-enter space-y-4">
       <div>
         <div className="text-xs uppercase tracking-wide text-ink-dim">{node.stage}</div>
         <h2 className="mt-1 text-3xl">{node.title}</h2>

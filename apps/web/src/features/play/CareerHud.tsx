@@ -6,7 +6,7 @@ import { countryName, moneyM } from '../../lib/format.js';
 /**
  * The persistent heads-up display above every in-career decision: a big
  * OVERALL with FAME beside it, the money line (bank / salary / market value),
- * and the stat-tile strip — `highlight` keys lit gold while an option is hovered.
+ * and the stat-tile strip - `highlight` keys lit gold while an option is hovered.
  */
 export function CareerHud({
   preview,
@@ -60,7 +60,7 @@ export function CareerHud({
         {preview.league === 'nba' && (
           <span
             className="inline-flex items-baseline gap-1.5"
-            title="How you gel with teammates — low chemistry gets you traded"
+            title="How you gel with teammates - low chemistry gets you traded"
           >
             <span className="text-[11px] uppercase tracking-wide text-ink-dim">Chemistry</span>
             <span
@@ -91,7 +91,7 @@ export function CareerHud({
         {preview.ringWindow > 0 && (
           <span
             className="inline-flex items-center gap-1.5 rounded-full bg-amber/15 px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide text-amber"
-            title="You're a proven winner — the title window is still open"
+            title="You're a proven winner - the title window is still open"
           >
             🏆 Contention window · {preview.ringWindow}y
           </span>

@@ -20,7 +20,7 @@ export const DISPLAY_AXES: DisplayAxis[] = [
   { key: 'basketballIQ', label: 'BASKETBALL IQ', short: 'IQ' },
 ];
 
-/** The value to show for a display axis — defense is the mean of the two D's. */
+/** The value to show for a display axis - defense is the mean of the two D's. */
 export function displayRatingValue(ratings: Ratings, key: string): number {
   if (key === 'defense') {
     return Math.round((ratings.perimeterDefense + ratings.interiorDefense) / 2);

@@ -4,7 +4,7 @@ import type { OptionEffect, RatingKey } from '../types.js';
 /**
  * Non-IQ rating keys only. Basketball IQ is scaled so hard on the card
  * (`IQ_SCALE` in `options.ts`) that spending a prologue budget on it would make
- * that option look strictly worse — so the summer-circuit / recruiting splits
+ * that option look strictly worse - so the summer-circuit / recruiting splits
  * never touch it. IQ still shows up through `growthBias`, which is a separate
  * long-term channel.
  */

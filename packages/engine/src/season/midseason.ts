@@ -4,11 +4,11 @@ import type { SeasonEffect } from './effects.js';
 import type { Scenario, ScenarioContext } from './scenario-types.js';
 
 /**
- * Bizarre, branching in-season situations — drawn ~30% of seasons in place of
+ * Bizarre, branching in-season situations - drawn ~30% of seasons in place of
  * the silent auto-event. These never touch ratings: they hit *this season's*
  * development instead (minutes, role, chemistry, focus) and how much the
  * front office / fans trust you. The concrete cost is rolled at resolve time
- * and scaled by the player's status — a young player loses minutes, a star just
+ * and scaled by the player's status - a young player loses minutes, a star just
  * loses goodwill.
  */
 export const MIDSEASON_SCENARIOS: Scenario[] = [
@@ -22,7 +22,7 @@ export const MIDSEASON_SCENARIOS: Scenario[] = [
       {
         id: 'msx_fight_hash',
         label: 'HASH IT OUT',
-        blurb: 'Clear the air. His team, his ball — you fit in around it.',
+        blurb: 'Clear the air. His team, his ball - you fit in around it.',
         effect: {},
         stance: { tag: 'Deferring' },
       },
@@ -40,7 +40,7 @@ export const MIDSEASON_SCENARIOS: Scenario[] = [
     theme: 'media',
     gate: { minSeason: 2, weight: 1 },
     title: 'A PHOTO SURFACES',
-    prompt: 'You, a club, 2 a.m. — the night before a nationally televised game.',
+    prompt: 'You, a club, 2 a.m. - the night before a nationally televised game.',
     options: [
       {
         id: 'msx_club_apology',
@@ -224,7 +224,7 @@ export const MIDSEASON_SCENARIOS: Scenario[] = [
     theme: 'money',
     gate: { minSeason: 4, weight: 0.9 },
     title: 'YOUR NUMBER IS IN THE PAPERS',
-    prompt: 'Someone — probably your agent — leaked what you want on the next deal.',
+    prompt: 'Someone - probably your agent - leaked what you want on the next deal.',
     options: [
       {
         id: 'msx_leak_lean',
@@ -316,7 +316,7 @@ export const MIDSEASON_SCENARIOS: Scenario[] = [
     theme: 'team',
     gate: { minSeason: 2, weight: 1 },
     title: "IT'S A TEAMMATE'S 30TH",
-    prompt: 'Half the roster is going out tonight — and there is a game tomorrow.',
+    prompt: 'Half the roster is going out tonight - and there is a game tomorrow.',
     options: [
       {
         id: 'msx_bday_out',
@@ -360,7 +360,7 @@ export const MIDSEASON_SCENARIOS: Scenario[] = [
 ];
 
 // ---------------------------------------------------------------------------
-// Outcomes — how each option lands, resolved against the player's status
+// Outcomes - how each option lands, resolved against the player's status
 // ---------------------------------------------------------------------------
 
 export interface MidResolveCtx {
@@ -375,7 +375,7 @@ export interface MidResolution {
   franchiseDelta: number;
   /** Change to team chemistry (0..100). Negative from drama, positive from bonding. */
   chemistryDelta: number;
-  /** One-line description of how it actually landed — a real consequence. */
+  /** One-line description of how it actually landed - a real consequence. */
   note: string;
 }
 
@@ -389,7 +389,7 @@ interface ResolveArgs {
 
 type OutcomeFn = (a: ResolveArgs) => Partial<MidResolution> & { effect?: SeasonEffect };
 
-/** "The front office isn't happy — the situation is tense." Feeds trade odds. */
+/** "The front office isn't happy - the situation is tense." Feeds trade odds. */
 function frontOfficeCold(a: ResolveArgs): Partial<MidResolution> {
   return {
     franchiseDelta: -Math.round((a.star ? 22 : 12) * a.m),
@@ -399,19 +399,19 @@ function frontOfficeCold(a: ResolveArgs): Partial<MidResolution> {
   };
 }
 
-/** A groggy stretch or a nagging distraction — a real hit to your play. */
+/** A groggy stretch or a nagging distraction - a real hit to your play. */
 function ownGameDips(a: ResolveArgs, ovr = 0): Partial<MidResolution> {
   return {
     effect: ovr > 0 ? { overallHit: ovr } : { impactMult: 1 - (0.03 + 0.05 * a.m) },
     note:
       ovr > 0
-        ? `It costs you a real step — about ${ovr} off your overall.`
+        ? `It costs you a real step - about ${ovr} off your overall.`
         : 'It nags at your game the rest of the year.',
   };
 }
 
 /**
- * Per-option resolvers. Every branch produces a *concrete* consequence — lost
+ * Per-option resolvers. Every branch produces a *concrete* consequence - lost
  * overall, a chemistry swing, a colder front office (which raises trade odds),
  * or a genuine spark. Anything not listed just blows over.
  */
@@ -420,12 +420,12 @@ export const MIDSEASON_OUTCOMES: Record<string, OutcomeFn> = {
   msx_fight_hash: (a) => ({
     effect: { roleBias: -(0.2 + 0.4 * a.m), mpgBias: -(2 + 3 * a.m) },
     chemistryDelta: -Math.round(4 * a.m),
-    note: 'You fold in around him — fewer touches, smaller role for a while.',
+    note: 'You fold in around him - fewer touches, smaller role for a while.',
   }),
   msx_fight_trade: (a) => ({
     effect: { forceTrade: true, impactMult: 1 + 0.02 * a.m },
     chemistryDelta: -20,
-    note: 'One of you had to go. You get your wish — moved by the deadline.',
+    note: 'One of you had to go. You get your wish - moved by the deadline.',
   }),
   // Nightclub photo
   msx_club_apology: () => ({ note: 'You get in front of it. It blows over in a week.' }),
@@ -444,13 +444,13 @@ export const MIDSEASON_OUTCOMES: Record<string, OutcomeFn> = {
   msx_viral_milk: (a) => ownGameDips(a),
   msx_viral_lock: (a) => ({
     effect: { impactMult: 1 + 0.02 * a.m },
-    note: 'Back to work — you stay sharp.',
+    note: 'Back to work - you stay sharp.',
   }),
   // Family emergency
   msx_family_home: (a) => ({
     effect: { injuredGames: Math.round(5 + 4 * a.m) },
     chemistryDelta: Math.round(4 * a.m),
-    note: 'You miss a road trip — the guys have your back when you return.',
+    note: 'You miss a road trip - the guys have your back when you return.',
   }),
   msx_family_stay: () => ({
     effect: { hype: -1 },
@@ -463,7 +463,7 @@ export const MIDSEASON_OUTCOMES: Record<string, OutcomeFn> = {
   }),
   msx_ref_edge: (a) => ({
     effect: { injuredGames: Math.round(2 + 3 * a.m), impactMult: 1 + 0.02 * a.m },
-    note: 'You eat a one-game suspension, but the edge stays — and it shows.',
+    note: 'You eat a one-game suspension, but the edge stays - and it shows.',
   }),
   // Cryptic tweet
   msx_tweet_clarify: () => ({ note: 'You walk it back. The beat moves on.' }),
@@ -478,7 +478,7 @@ export const MIDSEASON_OUTCOMES: Record<string, OutcomeFn> = {
   msx_pos_embrace: (a) => ({
     effect: { growth: { playmaking: 1, perimeterDefense: 1 } },
     chemistryDelta: Math.round(3 * a.m),
-    note: 'You buy in. More versatile is more valuable — the staff loves it.',
+    note: 'You buy in. More versatile is more valuable - the staff loves it.',
   }),
   msx_pos_resist: (a) =>
     a.rng() < 0.5
@@ -521,27 +521,27 @@ export const MIDSEASON_OUTCOMES: Record<string, OutcomeFn> = {
   msx_bday_out: (a) => ({
     chemistryDelta: Math.round(12 + 6 * a.m),
     effect: { overallHit: 2 },
-    note: 'The room loves you for it — but a groggy month costs you ~2 overall.',
+    note: 'The room loves you for it - but a groggy month costs you ~2 overall.',
   }),
   msx_bday_home: (a) => ({
     chemistryDelta: -Math.round(8 + 4 * a.m),
-    note: "The professional call — and the guys notice you didn't show.",
+    note: "The professional call - and the guys notice you didn't show.",
   }),
   // Burner account
   msx_burner_own: () => ({
     chemistryDelta: -60,
-    note: 'You come clean. The locker room ices you out — trade talk starts within the week.',
+    note: 'You come clean. The locker room ices you out - trade talk starts within the week.',
   }),
   msx_burner_deny: (a) => ({
     effect: { overallHit: 3 },
     chemistryDelta: -Math.round(10 * a.m),
-    note: 'Nobody believes you. It gnaws at your game all year — about 3 off your overall.',
+    note: 'Nobody believes you. It gnaws at your game all year - about 3 off your overall.',
   }),
 };
 
 /**
  * Turn a chosen option into this season's concrete consequence, rolled and
- * scaled by status. Consumes RNG — call once, at resolve time.
+ * scaled by status. Consumes RNG - call once, at resolve time.
  */
 export function resolveMidseason(rng: Rng, optionId: string, ctx: MidResolveCtx): MidResolution {
   const fn = MIDSEASON_OUTCOMES[optionId];

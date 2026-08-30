@@ -12,7 +12,7 @@ import { trainingScenarios } from './training.js';
 /**
  * The whole scenario library. Adding content = append an object to one of the
  * themed files. `buildScenarioIndex()` validates the pack (unique ids, 2–4
- * options, always at least one ungated fallback) — called from the test suite.
+ * options, always at least one ungated fallback) - called from the test suite.
  */
 export const SCENARIOS: readonly Scenario[] = [
   ...trainingScenarios,

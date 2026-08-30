@@ -1,5 +1,6 @@
 import { clamp, type Rng } from '../rng.js';
-import type { AwardId } from '../types.js';
+import type { AwardId, StatusTier } from '../types.js';
+import { statusRank } from './status.js';
 
 export interface IntlContext {
   seasonIndex: number;
@@ -9,6 +10,10 @@ export interface IntlContext {
   hype: number;
   /** Birth country's basketball pedigree, 0..1. */
   countryPedigree: number;
+  /** True for the USA - a bottomless talent pool, so only stars make the 12. */
+  deepPool?: boolean;
+  /** The player's league status tier, used with `deepPool`. */
+  status?: StatusTier;
 }
 
 export interface IntlResult {
@@ -22,7 +27,7 @@ export interface IntlResult {
 type Cycle = 'oly' | null;
 
 /**
- * The Olympics every four years — the only international basketball that moves
+ * The Olympics every four years - the only international basketball that moves
  * the needle. (The World Cup is deliberately not modelled as a trophy.)
  */
 function cycleFor(seasonIndex: number): Cycle {
@@ -32,11 +37,18 @@ function cycleFor(seasonIndex: number): Cycle {
 /**
  * The national-team summer: whether the player was called up, and any medal
  * won. A strong basketball nation contends for gold; a weak one is lucky to
- * medal at all — `countryPedigree` shifts the whole distribution.
+ * medal at all - `countryPedigree` shifts the whole distribution.
  */
 export function maybeInternational(rng: Rng, c: IntlContext): IntlResult {
   const cycle = cycleFor(c.seasonIndex);
   if (!cycle || c.age > 35) return { selected: false, tournamentSummer: false, awards: [] };
+
+  // Team USA: the roster is 12 of the best 30 players alive - you need genuine
+  // star status to be on it. Everyone else: a strong player carries their
+  // country, and a weaker nation leans on whoever it has.
+  if (c.deepPool && statusRank(c.status ?? 'fringe') < statusRank('star')) {
+    return { selected: false, tournamentSummer: true, awards: [] };
+  }
 
   // A star from a small nation still gets called up; a role player from a
   // powerhouse might not make the 12.

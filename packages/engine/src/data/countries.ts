@@ -1,7 +1,7 @@
 import type { CountryRef } from '../types.js';
 
 /**
- * Countries a prospect can be born in. `pedigree` (0..1) is basketball strength —
+ * Countries a prospect can be born in. `pedigree` (0..1) is basketball strength -
  * it weights national-team medal odds and call-up odds in
  * `season/international.ts` and nothing else. Ordered roughly by pedigree so the
  * create screen reads sensibly.

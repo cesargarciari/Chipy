@@ -1,6 +1,9 @@
 import type { CareerSummaryDto } from '@chipy/shared';
 import { useState } from 'react';
+import { awardArt } from '../../lib/art.js';
 import { moneyM, TEAM_RESULT_LABELS } from '../../lib/format.js';
+
+const ALL_STAR_ART = awardArt('all_star');
 
 const RESULT_TONE: Record<string, string> = {
   champion: 'text-amber',
@@ -52,11 +55,27 @@ export function SeasonTable({ seasons }: { seasons: CareerSummaryDto['seasons'] 
                     {TEAM_RESULT_LABELS[s.teamResult]}
                   </td>
                   <td className="text-ink-dim">
-                    {s.midseasonId && <span title={s.midseasonHeadline ?? ''}>◆ </span>}
-                    {s.awards.includes('mvp') && <span className="text-amber">MVP </span>}
-                    {s.awards.includes('champion') && <span className="text-amber">🏆 </span>}
-                    {s.awards.includes('all_star') && !s.awards.includes('mvp') && 'All-Star '}
-                    {s.awards.includes('dpoy') && <span className="text-sky-400">DPOY </span>}
+                    <span className="inline-flex items-center gap-1 align-middle">
+                      {s.midseasonId && <span title={s.midseasonHeadline ?? ''}>◆</span>}
+                      {s.awards.includes('all_star') &&
+                        (ALL_STAR_ART ? (
+                          <img
+                            src={ALL_STAR_ART}
+                            alt="All-Star"
+                            title="All-Star selection"
+                            className="inline-block h-4 w-4 object-contain"
+                          />
+                        ) : (
+                          <span className="text-amber">★</span>
+                        ))}
+                      {s.awards.includes('mvp') && <span className="text-amber">MVP</span>}
+                      {s.awards.includes('champion') && (
+                        <span className="text-amber" title="Champion">
+                          🏆
+                        </span>
+                      )}
+                      {s.awards.includes('dpoy') && <span className="text-sky-400">DPOY</span>}
+                    </span>
                   </td>
                 </tr>
               ))}

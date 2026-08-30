@@ -92,7 +92,7 @@ export function detectSeasonMoments(a: SeasonMomentArgs): CareerMoment[] {
     const def = AWARD_MOMENTS[id];
     if (!def || id === 'champion') continue;
     const count = a.tallyAfter[id] ?? 1;
-    if (!def.everyTime && count > 1) continue; // lesser honour — noted once
+    if (!def.everyTime && count > 1) continue; // lesser honour - noted once
     out.push({
       ...base,
       kind: 'award',

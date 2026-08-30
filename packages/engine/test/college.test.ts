@@ -38,11 +38,13 @@ describe('college years', () => {
           ? p.landing!.offers.map((o) => o.id)
           : p.kind === 'overseas_offer'
             ? p.overseasOffer!.options.map((o) => o.id)
-            : p.kind === 'midseason'
-              ? p.midseason!.decision.options.map((o) => o.id)
-              : p.kind === 'farewell'
-                ? p.farewell!.options.map((o) => o.id)
-                : p.season!.decision.options.map((o) => o.id);
+            : p.kind === 'chemistry'
+              ? p.chemistry!.decision.options.map((o) => o.id)
+              : p.kind === 'midseason'
+                ? p.midseason!.decision.options.map((o) => o.id)
+                : p.kind === 'farewell'
+                  ? p.farewell!.options.map((o) => o.id)
+                  : p.season!.decision.options.map((o) => o.id);
       choices.push({ nodeId: p.nodeId, choiceId: opts.find((o) => o !== 'retire') ?? opts[0]! });
       res = runCareer({ seed: 'c1', profile: SAMPLE_PROFILE, choices });
     }

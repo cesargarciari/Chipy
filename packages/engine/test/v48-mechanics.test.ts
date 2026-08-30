@@ -114,6 +114,7 @@ describe('chemistry + midseason', () => {
       const preview =
         res.pending.season?.preview ??
         res.pending.midseason?.preview ??
+        res.pending.chemistry?.preview ??
         res.pending.overseasOffer?.preview;
       if (preview) {
         expect(preview.chemistry).toBeGreaterThanOrEqual(0);
@@ -146,6 +147,7 @@ function gather(seed: string, count: number) {
       ).id;
     else if (p.kind === 'landing') id = p.landing!.offers[0]!.id;
     else if (p.kind === 'midseason') id = p.midseason!.decision.options[0]!.id;
+    else if (p.kind === 'chemistry') id = p.chemistry!.decision.options[1]!.id;
     else if (p.kind === 'overseas_offer') id = p.overseasOffer!.options[0]!.id;
     else if (p.kind === 'farewell') id = 'quiet_goodbye';
     else {
@@ -188,6 +190,7 @@ describe('quiet goodbye', () => {
           ).id;
         else if (p.kind === 'landing') id = p.landing!.offers[0]!.id;
         else if (p.kind === 'midseason') id = p.midseason!.decision.options[0]!.id;
+        else if (p.kind === 'chemistry') id = p.chemistry!.decision.options[1]!.id;
         else if (p.kind === 'overseas_offer') id = p.overseasOffer!.options[0]!.id;
         else {
           const opts = p.season!.decision.options;

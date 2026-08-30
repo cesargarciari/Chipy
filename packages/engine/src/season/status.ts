@@ -50,7 +50,7 @@ export function statusTier(a: StatusArgs): StatusTier {
 }
 
 export interface TradeChanceArgs {
-  /** 0.05..0.96 — the team's own strength this season. */
+  /** 0.05..0.96 - the team's own strength this season. */
   teamStrength: number;
   role: Role;
   contractYearsLeft: number;
@@ -58,17 +58,17 @@ export interface TradeChanceArgs {
   franchiseProgress: number;
   franchiseTier: FranchiseTier;
   status: StatusTier;
-  /** 0..100 team chemistry — the lower it is, the likelier a move. */
+  /** 0..100 team chemistry - the lower it is, the likelier a move. */
   chemistry: number;
-  /** True the season after a trade — the dust has settled, leave it alone. */
+  /** True the season after a trade - the dust has settled, leave it alone. */
   justTraded: boolean;
 }
 
 /**
- * A rough, RNG-free 0..1 estimate of getting moved this season — shown on the
+ * A rough, RNG-free 0..1 estimate of getting moved this season - shown on the
  * HUD when it climbs, and rolled against once in the sim. A losing team shops
  * everyone; a contract year and a thin bench seat make it worse; real roots
- * (idolatry, a long deal) protect you, and nobody dumps a generational talent —
+ * (idolatry, a long deal) protect you, and nobody dumps a generational talent -
  * but a locker room that can't stand you will move anyone.
  */
 export function tradeChance(a: TradeChanceArgs): number {
@@ -87,7 +87,7 @@ export function tradeChance(a: TradeChanceArgs): number {
   if (a.status === 'generational') base -= 0.12;
   else if (a.status === 'superstar') base -= 0.05;
 
-  // Bad chemistry is a term of its own — it can move anyone, star or not.
+  // Bad chemistry is a term of its own - it can move anyone, star or not.
   const chem = clamp((52 - a.chemistry) / 100, 0, 0.4);
 
   return clamp(clamp(base, 0.01, 0.24) + chem, 0.01, 0.6);

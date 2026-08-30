@@ -50,29 +50,32 @@ export const SCHOOLS: readonly SchoolRef[] = [
     perimeterDefense: 1,
   }),
 
-  // ---- Overseas / G League: pro habits, low hype --------------------
-  S('gleague_ignite', 'G League Ignite', 'overseas', 0.6, 0.72, 0.74, {
-    perimeterDefense: 1,
-    finishing: 1,
-  }),
-  S('real_madrid', 'Real Madrid', 'overseas', 0.82, 0.6, 0.6, {
+  // ---- Overseas: EuroLeague clubs, pro habits, low hype. Ids match the
+  //      crest artwork and the EURO_CLUBS list so a logo always shows. --------
+  S('real_madrid', 'Real Madrid', 'overseas', 0.9, 0.62, 0.58, {
     basketballIQ: 2,
     perimeterDefense: 1,
   }),
-  S('barcelona', 'FC Barcelona', 'overseas', 0.8, 0.58, 0.6, {
+  S('barcelona', 'FC Barcelona', 'overseas', 0.86, 0.58, 0.6, {
     basketballIQ: 2,
     interiorDefense: 1,
   }),
-  S('maccabi', 'Maccabi Tel Aviv', 'overseas', 0.74, 0.54, 0.64, {
+  S('panathinaikos', 'Panathinaikos', 'overseas', 0.82, 0.54, 0.62, {
+    interiorDefense: 1,
+    rebounding: 1,
+  }),
+  S('olympiacos', 'Olympiacos', 'overseas', 0.8, 0.52, 0.62, {
+    interiorDefense: 1,
     basketballIQ: 1,
-    interiorDefense: 1,
   }),
-  S('asvel', 'ASVEL', 'overseas', 0.68, 0.56, 0.66, { perimeterDefense: 1, finishing: 1 }),
-  S('partizan', 'Partizan', 'overseas', 0.72, 0.52, 0.66, { interiorDefense: 1, rebounding: 1 }),
-  S('baskonia', 'Baskonia', 'overseas', 0.68, 0.54, 0.68, { threePoint: 1, basketballIQ: 1 }),
-  S('melbourne', 'Melbourne United', 'overseas', 0.64, 0.58, 0.68, {
+  S('fenerbahce', 'Fenerbahçe', 'overseas', 0.78, 0.56, 0.64, {
     perimeterDefense: 1,
     finishing: 1,
+  }),
+  S('monaco', 'AS Monaco', 'overseas', 0.76, 0.58, 0.66, { finishing: 1, threePoint: 1 }),
+  S('zalgiris', 'Žalgiris Kaunas', 'overseas', 0.72, 0.54, 0.68, {
+    basketballIQ: 1,
+    playmaking: 1,
   }),
 ];
 

@@ -319,7 +319,7 @@ const DEFS: Record<ArchetypeId, ArchetypeDef> = {
     label: 'Rim Protector',
     position: 'C',
     comps: 'Gobert · Turner · Mobley',
-    blurb: 'The defense’s last line — blocks, boards, and rolls to the rim.',
+    blurb: 'The defense’s last line - blocks, boards, and rolls to the rim.',
     ratingBias: {
       interiorDefense: 22,
       rebounding: 16,
@@ -361,7 +361,7 @@ const DEFS: Record<ArchetypeId, ArchetypeDef> = {
     label: 'Back-to-Basket Hub',
     position: 'C',
     comps: 'Jokić · Embiid · Sabonis',
-    blurb: 'The offense runs through him — scoring, passing out of the post, rebounding.',
+    blurb: 'The offense runs through him - scoring, passing out of the post, rebounding.',
     ratingBias: {
       finishing: 18,
       rebounding: 16,

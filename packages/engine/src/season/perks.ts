@@ -25,7 +25,7 @@ export interface AggregatePerkEffect {
 
 /**
  * Everything the player's owned + active-yearly perks add up to, for one season.
- * Perks are an edge, not a cheat code, so the totals are aggressively capped —
+ * Perks are an edge, not a cheat code, so the totals are aggressively capped -
  * stacking the whole shop gets you a fraction more than buying two smart ones.
  */
 export function aggregatePerkEffect(state: CareerState): AggregatePerkEffect {
@@ -101,12 +101,12 @@ const CATEGORY_TAG: Record<PerkCategory, string> = {
   facility: 'Facility',
 };
 
-/** The `GameOption` a perk purchase records — one shape, reused by shop + apply. */
+/** The `GameOption` a perk purchase records - one shape, reused by shop + apply. */
 function perkBuyOption(p: PerkDef): GameOption {
   return {
     id: `buy_${p.id}`,
     label: p.name,
-    blurb: `${p.kind === 'yearly' ? `$${p.cost}M / year` : `$${p.cost}M · permanent`} — ${p.blurb}`,
+    blurb: `${p.kind === 'yearly' ? `$${p.cost}M / year` : `$${p.cost}M · permanent`} - ${p.blurb}`,
     effect: { money: -p.cost },
     stance: { tag: CATEGORY_TAG[p.category] },
     watermark: '$',
@@ -124,14 +124,14 @@ export function perkShopOptions(state: CareerState, seasonNumber: number): GameO
   ).map(perkBuyOption);
 }
 
-/** Stat tiles a perk feeds — its growth-bias keys plus durability. */
+/** Stat tiles a perk feeds - its growth-bias keys plus durability. */
 export function perkHighlightKeys(p: PerkDef): string[] {
   const keys = Object.keys(p.effect.growthBias ?? {});
   if (p.effect.durabilityPerYear || p.effect.injuryResist) keys.push('durability');
   return keys;
 }
 
-/** Short human descriptors of what a perk does — the shop card's chips. */
+/** Short human descriptors of what a perk does - the shop card's chips. */
 export function perkEffectTags(p: PerkDef): string[] {
   const e = p.effect;
   const tags: string[] = [];
@@ -149,29 +149,29 @@ export function perkEffectTags(p: PerkDef): string[] {
   return tags;
 }
 
-/** One row in the perk shop — owned, affordable, or priced out (still shown). */
+/** One row in the perk shop - owned, affordable, or priced out (still shown). */
 export interface PerkShopItem {
-  /** `buy_<perkId>` — the choice recorded against `perks{n}`. */
+  /** `buy_<perkId>` - the choice recorded against `perks{n}`. */
   choiceId: string;
   perkId: string;
   name: string;
   blurb: string;
   category: PerkCategory;
   kind: PerkKind;
-  /** Positive $M — the client shows this in green, never as `-$2M`. */
+  /** Positive $M - the client shows this in green, never as `-$2M`. */
   cost: number;
   owned: boolean;
-  /** `false` when priced out — the client greys the card and blocks the click. */
+  /** `false` when priced out - the client greys the card and blocks the click. */
   affordable: boolean;
   /** Rating / `durability` tiles this perk feeds, for the strip hover. */
   highlight: string[];
-  /** Short descriptors — `+3PT growth`, `injury shield` — for the card's chips. */
+  /** Short descriptors - `+3PT growth`, `injury shield` - for the card's chips. */
   tags: string[];
 }
 
 /** The whole shop for one offseason: the bank plus every visible perk. */
 export interface PerkShop {
-  /** `perks{n}` — the nodeId to record a `buy_<id>` purchase against. */
+  /** `perks{n}` - the nodeId to record a `buy_<id>` purchase against. */
   nodeId: string;
   /** Spendable cash this offseason, in $M. */
   bank: number;

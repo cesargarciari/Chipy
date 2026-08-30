@@ -26,6 +26,7 @@ const TEAM_SUCCESS: Record<TeamResult, number> = {
   conf_finals: 0.28,
   second_round: 0.16,
   first_round: 0.07,
+  play_in: -0.02,
   lottery: -0.15,
   missed_season: -0.5,
 };
@@ -85,7 +86,7 @@ export function resolveAwards(args: AwardArgs): AwardId[] {
   if (leagueBest(rng, stats.spg, 1.9, 0.5, 0.12)) out.push('steals_title');
   if (leagueBest(rng, stats.bpg, 2.3, 0.7, 0.12)) out.push('blocks_title');
 
-  // MVP — the rarest
+  // MVP - the rarest
   const mvpScore =
     impact *
     (0.85 + (TEAM_SUCCESS[teamResult] ?? 0)) *

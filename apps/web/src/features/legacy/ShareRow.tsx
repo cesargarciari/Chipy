@@ -18,8 +18,8 @@ export function ShareRow({
     return (
       <p className="text-center text-sm text-ink-dim">
         {saveError
-          ? `Couldn't save online (${saveError}) — your career still stands.`
-          : 'Playing offline — this career was not saved.'}
+          ? `Couldn't save online (${saveError}) - your career still stands.`
+          : 'Playing offline - this career was not saved.'}
       </p>
     );
   }
@@ -41,7 +41,7 @@ export function ShareRow({
             setCopied(true);
             setTimeout(() => setCopied(false), 1500);
           } catch {
-            /* clipboard blocked — the input is selectable as a fallback */
+            /* clipboard blocked - the input is selectable as a fallback */
           }
         }}
       >

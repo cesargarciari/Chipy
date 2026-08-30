@@ -1,19 +1,31 @@
 import type { CareerMomentDto } from '@chipy/shared';
+import {
+  Ambulance,
+  ArrowLeftRight,
+  Footprints,
+  Heart,
+  Medal,
+  PenLine,
+  TrendingUp,
+  Trophy,
+  Zap,
+  type LucideIcon,
+} from 'lucide-react';
 import { awardArt } from '../lib/art.js';
 import { cn } from '../lib/cn.js';
 import { teamName } from '../lib/format.js';
 
-/** Placeholder glyph per moment kind — real artwork slots in here later. */
-const ICON: Record<CareerMomentDto['kind'], string> = {
-  award: '🏅',
-  ring: '🏆',
-  trade: '🔁',
-  signing: '✍️',
-  franchise: '💛',
-  shoe: '👟',
-  milestone: '📈',
-  midseason: '⚡',
-  injury: '🩼',
+/** Icon per moment kind (lucide) - shown when there's no artwork for the award. */
+const ICON: Record<CareerMomentDto['kind'], LucideIcon> = {
+  award: Medal,
+  ring: Trophy,
+  trade: ArrowLeftRight,
+  signing: PenLine,
+  franchise: Heart,
+  shoe: Footprints,
+  milestone: TrendingUp,
+  midseason: Zap,
+  injury: Ambulance,
 };
 
 const TONE: Record<CareerMomentDto['kind'], string> = {
@@ -29,14 +41,15 @@ const TONE: Record<CareerMomentDto['kind'], string> = {
 };
 
 /**
- * A single recap-banner beat — an award, a franchise milestone, an injury. The
+ * A single recap-banner beat - an award, a franchise milestone, an injury. The
  * glyph box shows award art (`assets/awards/<awardId>.png`) when one exists,
- * otherwise an emoji glyph. Team logos are deliberately *not* shown here — they
+ * otherwise an emoji glyph. Team logos are deliberately *not* shown here - they
  * add clutter to a stack of event notifications (they live on the trade modal
  * and the contract cards instead). See `src/lib/art.ts`.
  */
 export function MomentCard({ moment }: { moment: CareerMomentDto }) {
   const art = awardArt(moment.awardId);
+  const Icon = ICON[moment.kind];
   return (
     <div
       className={cn(
@@ -44,11 +57,11 @@ export function MomentCard({ moment }: { moment: CareerMomentDto }) {
         TONE[moment.kind],
       )}
     >
-      <div className="grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-xl bg-court-900 text-2xl">
+      <div className="grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-xl bg-court-900 text-ink-dim">
         {art ? (
           <img src={art} alt="" className="h-full w-full object-contain p-1" />
         ) : (
-          ICON[moment.kind]
+          <Icon size={22} strokeWidth={1.75} />
         )}
       </div>
       <div className="min-w-0">

@@ -4,7 +4,7 @@ import type { CareerState, DraftResult } from './types.js';
 /**
  * Turn projected draft stock into an actual slot. The night is genuinely
  * random: a flat ±12 spread on top of the projection, plus a ~1-in-6 chance of a
- * real swing — a team reaches for you, or you slide out of the lottery — so the
+ * real swing - a team reaches for you, or you slide out of the lottery - so the
  * same college run can land anywhere from the mid-lottery to the second round.
  */
 export function simulateDraft(rng: Rng, state: CareerState): DraftResult {

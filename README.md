@@ -99,14 +99,16 @@ The API creates the local table on boot. To (re)create it manually:
    **rolled per career**: the options are worth the same card value with one
    getting a small random edge, and which attributes each moves is rerolled
    every playthrough, so there's no permanent "best pick". Then you pick a real
-   **college program** (blue-blood, mid-major, or international club) and play an
+   **college program** (blue-blood, mid-major, or an overseas club) and play an
    **interactive freshman year** — a wildly variable one (monster year or flop).
    A March result and a choice to declare / return / transfer; if scouts aren't
-   sold yet, "declare" isn't on the table — you stay. The **draft** is genuinely
-   random (a flat spread plus the odd big reach or slide → mid-lottery to
-   undrafted on the same run) and sets a hidden **talent** ceiling.
+   sold yet, "declare" isn't on the table — you stay, and **every extra year in
+   school ages you** (a one-and-done reaches the NBA at 19, a two-year prospect
+   at 20). The **draft** is genuinely random (a flat spread plus the odd big
+   reach or slide → mid-lottery to undrafted on the same run) and sets a hidden
+   **talent** ceiling.
 3. **Landing spot** — choose one of three team offers (weighted by draft slot and
-   home market), each with a **dollar figure**. That's your rookie team.
+   a home-market roll), each with a **dollar figure**. That's your rookie team.
 4. **Season loop** — each offseason you first visit the **perks shop** (a modal
    grid showing your bank; every perk stays on the shelf — owned ones flagged in
    orange, ones you can't afford greyed out and unclickable, prices in green as
@@ -115,19 +117,22 @@ The API creates the local table on boot. To (re)create it manually:
    library, or — on a contract year — **free agency**, where a rival's bigger
    offer is a real temptation. Every card shows its exact `+N ATTRIBUTE` / `±$M`
    effects and lights the stat tiles it moves. ~30% of seasons a **bizarre
-   mid-season fork** fires instead of the silent event (fight the star → defer
-   and shrink your role, or force a trade — these cost minutes or front-office
-   goodwill, never ratings). Attributes climb on an **age curve × archetype ×
-   talent²** — a decelerating rise through the early 30s, then a real decline
-   once age catches up at ~34. The season is simulated (role → minutes → stat
-   line → playoff run), pay is banked, and every season rolls its own **injury**
-   check — mostly knocks and strains, but a low durability (or age, or a long
-   injury record) can bring on a hamstring, a stress fracture, or, rarely, a
-   torn ACL / Achilles that costs you a chunk of your athleticism for good. The
-   HUD carries your **status tier** (fringe → role player → star → superstar →
-   generational) and, when your seat gets shaky, a **trade risk %**; a bad team
-   can move you (a modal shows who you were **traded to**), and once you're a
-   star you can **demand a trade** yourself. Your **idolatry** with the club and
+   mid-season fork** fires instead of the silent event, and every branch lands a
+   **concrete consequence** — the front office cools on you and the situation
+   gets tense, the staff fixes the rotation and you go back to shining, a groggy
+   month costs you a couple of overall points. Attributes climb on an **age curve
+   × archetype × talent²** — a decelerating rise through the early 30s, then a
+   real decline once age catches up at ~34. The season is simulated (role →
+   minutes → stat line → playoff run), pay is banked, and every season rolls its
+   own **injury** check — mostly knocks and strains (games missed always adds up
+   to `82 − games played`), but a low durability, age, or a long injury record
+   can bring on a hamstring, a torn meniscus (surgery — often season-ending), or,
+   rarely, a **torn ACL / Achilles** — those end the year and take **2–6 off your
+   overall for good**. The HUD carries your **status tier** (fringe → role player
+   → star → superstar → generational), your **team chemistry**, and — when your
+   seat gets shaky — a **trade risk %**; a bad team or a toxic locker room can
+   move you (a modal shows who you were **traded to**), and once you're a star
+   you can **demand a trade** yourself. Your **idolatry** with the club and
    the national team fills toward _legend_ (a few years and a ring can make you
    their _idol_); a **championship keeps you a contender for ~5 seasons**, so
    repeat rings are a real chance without being a given. **Fame** is not a stat
@@ -196,19 +201,21 @@ owners — ship your own stylised marks if you publish.
   new content), El Idolo–style option cards, role momentum + stat smoothing
 - **M1.7 — economy & life** _(this repo):_ salary + market value + a bank, a
   perks shop (modal — bank shown, owned/locked states, green prices), a
-  per-season **injury system** (named injuries from knocks to ACL/Achilles,
-  durability-driven odds, permanent hits), **honoured contracts** + a
-  pre-retirement **farewell** choice, mid-season branching situations
-  (status-scaled — they cost minutes or goodwill, never ratings), a fame-gated
-  shoe deal, the EuroLeague as a full parallel league with a path back, a
-  per-team **franchise standing** (fan favorite → idol → legend), a **status
-  tier** + **trade probability** with team-forced and player-demanded trades
-  (shown as a "traded to" modal), a **5-season championship window** after a
-  ring, draft-slot-scaled washout odds (late second-rounders bust to the
-  EuroLeague far more often), end-of-season **big-moment** cards (rings, awards,
-  trades, serious injuries) with a full-screen **award modal** for the headline
-  trophies, per-career **randomised prologue** options, performance-driven
-  **fame** (no longer a trainable stat), a slow rating economy where option
+  per-season **injury system** (named injuries from knocks to season-ending
+  ACL/Achilles that take 2–6 off the overall; games missed = `82 − GP`),
+  **honoured contracts** + a pre-retirement **farewell** choice, **team
+  chemistry** (bonding/drama scenarios; low chemistry drives trades), mid-season
+  branching situations with concrete per-branch consequences, a fame-gated shoe
+  deal, the EuroLeague as a full parallel league with a path back, a per-team
+  **franchise standing** (fan favorite → idol → legend), a **status tier** +
+  **trade probability** with team-forced and player-demanded trades (shown as a
+  "traded to" modal), a **5-season championship window** after a ring,
+  draft-slot-scaled washout odds (late second-rounders bust to the EuroLeague far
+  more often), end-of-season **big-moment** cards (rings, awards, trades, serious
+  injuries) with a full-screen **award modal** for the headline trophies,
+  per-career **randomised prologue** options, age that tracks extra college
+  years, performance-driven **fame** (no longer a trainable stat), a slow rating
+  economy where option
   cards show the exact gain after the 99-cap plus a **rare** once-a-career gold
   `+9`, and a persistent stat strip + money bar
 - **M2 — AWS deploy (cheapest):** Terraform modules, remote state, GitHub Actions

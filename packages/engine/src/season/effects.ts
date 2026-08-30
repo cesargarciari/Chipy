@@ -15,7 +15,7 @@ export interface SeasonEffect {
   hype?: number;
   /** Delta to team chemistry (0..100). Negative from drama, positive from bonding. */
   chemistry?: number;
-  /** A flat overall drop — subtracted from every rating so the OVR falls by ~this. */
+  /** A flat overall drop - subtracted from every rating so the OVR falls by ~this. */
   overallHit?: number;
   /** Nudges playing-time role up/down (in role ranks). */
   roleBias?: number;

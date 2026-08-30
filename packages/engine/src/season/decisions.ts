@@ -39,7 +39,7 @@ export const QUIET_GOODBYE_VIEW: OptionView = {
   watermark: 'END',
 };
 
-/** Star-and-up players can force their way out — a new team, at a cost to your
+/** Star-and-up players can force their way out - a new team, at a cost to your
  *  standing with the one you left. */
 export const DEMAND_TRADE_VIEW: OptionView = {
   id: 'demand_trade',
@@ -57,7 +57,7 @@ export function teamOfferView(offer: TeamOffer, resign: boolean): OptionView {
   return {
     id: offer.choiceId,
     label: `${offer.team.city.toUpperCase()} ${offer.team.name.toUpperCase()}`,
-    blurb: `${resign ? 'Run it back — ' : ''}${offer.years}yr · ${money(offer.salary)}/yr. ${offer.pitch}`,
+    blurb: `${resign ? 'Run it back - ' : ''}${offer.years}yr · ${money(offer.salary)}/yr. ${offer.pitch}`,
     effects: [{ key: 'money', label: 'MONEY', short: '$', delta: offer.salary }],
     tag: `${money(offer.salary)}/yr`,
     watermark: resign ? 'STAY' : 'SIGN',

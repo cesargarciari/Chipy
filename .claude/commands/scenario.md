@@ -6,6 +6,7 @@ argument-hint: <theme> "<one-line pitch>"
 Add a new season `Scenario` for: $ARGUMENTS
 
 Context:
+
 - Season content lives in `packages/engine/src/season/scenarios/<theme>.ts`, one
   file per theme (body, breakthrough, legacy, media, mind, money, shoe, team,
   training). Each file exports an array of `Scenario` objects.
@@ -17,6 +18,7 @@ Context:
   malformed one.
 
 Steps:
+
 1. Read the target theme file and `scenario-types.ts`. Match the existing shape
    and value ranges in that file.
 2. Append one `Scenario`: a `gate` that fits the pitch, and 2 to 4 options, each

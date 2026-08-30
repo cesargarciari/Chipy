@@ -12,9 +12,9 @@ interface ChoiceCardProps {
   watermark?: string;
   onClick: () => void;
   tone?: 'default' | 'danger';
-  /** A once-a-career breakthrough — rendered gold. */
+  /** A once-a-career breakthrough - rendered gold. */
   rare?: boolean;
-  /** NBA team id / overseas club id — shows that logo on the card (contracts). */
+  /** NBA team id / overseas club id - shows that logo on the card (contracts). */
   teamId?: string;
   /** Reports the stat-tile keys this option would move (or null on leave). */
   onHoverKeys?: (keys: string[] | null) => void;

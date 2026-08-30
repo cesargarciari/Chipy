@@ -29,7 +29,7 @@ export class ErrorBoundary extends Component<{ children: ReactNode }, State> {
         if (key?.startsWith('chipy.run')) localStorage.removeItem(key);
       }
     } catch {
-      // ignore — private mode / storage disabled
+      // ignore - private mode / storage disabled
     }
     window.location.assign('/');
   };
@@ -43,7 +43,7 @@ export class ErrorBoundary extends Component<{ children: ReactNode }, State> {
           <CardBody className="space-y-4 text-center">
             <h1 className="text-2xl">Something broke</h1>
             <p className="text-sm text-ink-dim">
-              The app hit an error it couldn&apos;t recover from — most likely a saved career from
+              The app hit an error it couldn&apos;t recover from - most likely a saved career from
               an older version. Starting over will clear it.
             </p>
             <Button className="w-full" onClick={this.reset}>

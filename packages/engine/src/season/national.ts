@@ -7,7 +7,7 @@ const MEDAL_REP: Partial<Record<AwardId, number>> = {
   oly_bronze: 15,
 };
 
-/** Rep from one national-team summer — a call-up alone is worth something. */
+/** Rep from one national-team summer - a call-up alone is worth something. */
 export function nationalSummerRep(args: { selected: boolean; awards: readonly AwardId[] }): number {
   if (!args.selected) return 0;
   let pts = 7;

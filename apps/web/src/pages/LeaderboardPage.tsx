@@ -23,7 +23,7 @@ export function LeaderboardPage() {
           </p>
         )}
         {data && data.entries.length === 0 && (
-          <p className="text-sm text-ink-dim">No careers yet this month — be the first.</p>
+          <p className="text-sm text-ink-dim">No careers yet this month - be the first.</p>
         )}
 
         {data && data.entries.length > 0 && (

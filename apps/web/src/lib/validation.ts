@@ -12,7 +12,7 @@ export interface ZodErrorLike {
 const FRIENDLY: Record<string, string> = {
   name: 'Give your player a name (at least 2 characters).',
   'name.too_small': 'Give your player a name (at least 2 characters).',
-  'name.too_big': "That name's a bit long — keep it under 24 characters.",
+  'name.too_big': "That name's a bit long - keep it under 24 characters.",
   jerseyNumber: 'Pick a jersey number between 0 and 99.',
   country: 'Choose where your player was born.',
   position: 'Pick a position.',

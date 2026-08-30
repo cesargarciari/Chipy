@@ -14,7 +14,6 @@ import {
   countryLabel,
   draftLabel,
   moneyM,
-  pctText,
   perkLabel,
   teamName,
 } from '../../lib/format.js';
@@ -25,6 +24,7 @@ import { ShareRow } from './ShareRow.js';
 
 interface LegacyCardProps {
   summary: CareerSummaryDto;
+  /** Kept for call-site compatibility; the "also chose" panel was removed. */
   choiceStats?: ChoiceStat[];
   shareUrl?: string;
   saving?: boolean;
@@ -32,19 +32,12 @@ interface LegacyCardProps {
   onPlayAgain?: () => void;
 }
 
-export function LegacyCard({
-  summary,
-  choiceStats,
-  shareUrl,
-  saving,
-  saveError,
-  onPlayAgain,
-}: LegacyCardProps) {
+export function LegacyCard({ summary, shareUrl, saving, saveError, onPlayAgain }: LegacyCardProps) {
   const { profile, legacy, careerTotals: ct, awards } = summary;
   const trophies = TROPHY_ORDER.filter((id) => (awards[id] ?? 0) > 0);
 
-  // The legacy card shows only the headline beats — rings, MVP-class awards,
-  // franchise idol/legend, big milestones — not every All-Star nod.
+  // The legacy card shows only the headline beats - rings, MVP-class awards,
+  // franchise idol/legend, big milestones - not every All-Star nod.
   const HEADLINE_MOMENT_IDS = new Set([
     'mvp',
     'dpoy',
@@ -123,20 +116,38 @@ export function LegacyCard({
           {summary.college &&
             (() => {
               const intl = summary.college.tier === 'overseas';
-              const years = summary.college.years.length;
+              // Group consecutive years at the same school into stints.
+              const stints: { school: string; from: number; to: number }[] = [];
+              summary.college.years.forEach((y, idx) => {
+                const last = stints.at(-1);
+                if (last && last.school === y.school) last.to = idx + 1;
+                else stints.push({ school: y.school, from: idx + 1, to: idx + 1 });
+              });
+              const y0 = summary.college.years[0];
               return (
                 <div className="rounded-xl border border-court-700 bg-court-800/50 p-3 text-sm">
                   <span className="text-xs uppercase tracking-wide text-ink-dim">
                     {intl ? 'International' : 'College'}
                   </span>
-                  <p className="mt-1">
-                    <span className="font-semibold">{summary.college.finalSchool}</span>
-                    {years > 1 && ` · ${years} ${intl ? 'seasons' : 'years'}`} —{' '}
+                  <ul className="mt-1 space-y-0.5">
+                    {stints.map((st, i) => (
+                      <li key={i}>
+                        <span className="font-semibold">{st.school}</span>
+                        <span className="text-ink-dim">
+                          {' '}
+                          {st.from === st.to
+                            ? intl
+                              ? `· season ${st.from}`
+                              : `· year ${st.from}`
+                            : `· ${intl ? 'seasons' : 'years'} ${st.from}-${st.to}`}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                  <p className="mt-1 text-xs text-ink-dim">
                     {summary.college.years.at(-1)?.result}
-                  </p>
-                  <p className="mt-0.5 text-xs text-ink-dim">
-                    {intl ? 'First season' : 'Freshman year'}: {summary.college.years[0]?.stats.ppg}
-                    /{summary.college.years[0]?.stats.rpg}/{summary.college.years[0]?.stats.apg}
+                    {y0 &&
+                      ` · ${intl ? 'first season' : 'freshman year'} ${y0.stats.ppg}/${y0.stats.rpg}/${y0.stats.apg}`}
                   </p>
                 </div>
               );
@@ -166,7 +177,7 @@ export function LegacyCard({
         <Card>
           <CardBody className="space-y-3">
             <h3 className="font-bold">
-              Overseas — {summary.overseasSeasons.length}{' '}
+              Overseas - {summary.overseasSeasons.length}{' '}
               {summary.overseasSeasons.length === 1 ? 'season' : 'seasons'}
             </h3>
             <div className="overflow-x-auto">
@@ -242,7 +253,7 @@ export function LegacyCard({
                   </ul>
                 ) : (
                   <p className="text-sm text-ink-dim">
-                    Nothing worse than knocks and strains — a durable career.
+                    Nothing worse than knocks and strains - a durable career.
                   </p>
                 )}
               </CardBody>
@@ -281,7 +292,7 @@ export function LegacyCard({
             <Trophy size={16} className="text-amber" /> Trophy case
           </h3>
           {trophies.length === 0 ? (
-            <p className="text-sm text-ink-dim">No hardware — but every legend starts somewhere.</p>
+            <p className="text-sm text-ink-dim">No hardware - but every legend starts somewhere.</p>
           ) : (
             <div className="flex flex-wrap gap-2">
               {trophies.map((id) => (
@@ -301,22 +312,6 @@ export function LegacyCard({
       <Card>
         <CardBody className="space-y-3">
           <SeasonTable seasons={summary.seasons} />
-
-          {choiceStats && choiceStats.length > 0 && (
-            <div className="mt-3 space-y-1.5 border-t border-court-700 pt-3">
-              <div className="text-xs uppercase tracking-wide text-ink-dim">
-                Career-defining calls
-              </div>
-              {choiceStats.map((s) => (
-                <div key={`${s.nodeId}-${s.choiceId}`} className="flex justify-between text-sm">
-                  <span>{s.label}</span>
-                  <span className="text-ink-dim">
-                    {pctText(s.pct)} of players{s.pct === 0 ? ' (you first!)' : ''}
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
         </CardBody>
       </Card>
 

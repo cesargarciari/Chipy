@@ -118,7 +118,7 @@ const RESULT_HEADLINE: Record<EuroResult, string> = {
   euroleague_final_four: 'A EuroLeague Final Four run falls just short.',
   domestic_title: 'You sweep the domestic league and cup.',
   euro_playoffs: 'A solid campaign ends in the EuroLeague playoffs.',
-  euro_missed: 'A quiet year — no silverware this time.',
+  euro_missed: 'A quiet year - no silverware this time.',
 };
 
 /**

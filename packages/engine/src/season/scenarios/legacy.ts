@@ -94,7 +94,7 @@ export const legacyScenarios: Scenario[] = [
     theme: 'legacy',
     gate: { minAge: 30, role: ['franchise'], once: true },
     title: 'STAY OR CHASE?',
-    prompt: 'You could be a lifer here — or go win somewhere else.',
+    prompt: 'You could be a lifer here - or go win somewhere else.',
     options: [
       {
         id: 'stay_lifer',

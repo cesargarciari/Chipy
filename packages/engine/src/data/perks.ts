@@ -3,7 +3,7 @@ import type { PerkDef } from '../types.js';
 /**
  * The perks shop. `yearly` perks cost their `cost` every season they're active
  * (auto-renewed from the bank); `permanent` perks cost `cost` once and never
- * lapse. Effects are deliberately modest — an edge, not a cheat code.
+ * lapse. Effects are deliberately modest - an edge, not a cheat code.
  */
 const P = (
   id: string,

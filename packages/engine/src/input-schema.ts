@@ -18,7 +18,7 @@ export const choiceSelectionSchema = z.object({
   nodeId: z
     .string()
     .regex(
-      /^(highschool|recruiting|college[123]|cy[123]|landing|s\d{1,2}|perks\d{1,2}|ms\d{1,2}|overseas_offer\d{1,2}|farewell\d{1,2})$/,
+      /^(highschool|recruiting|college[123]|cy[123]|landing|s\d{1,2}|perks\d{1,2}|ms\d{1,2}|chem\d{1,2}|overseas_offer\d{1,2}|farewell\d{1,2})$/,
       'invalid node id',
     ),
   choiceId: z

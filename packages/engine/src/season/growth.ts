@@ -5,8 +5,8 @@ import type { SeasonEffect } from './effects.js';
 
 /**
  * Per-rating skill change available at a given age, then scaled by the
- * archetype's growth weight for that rating. A long, decelerating climb — every
- * year adds a little into the early 30s — then a hard flip to decline at 34 as
+ * archetype's growth weight for that rating. A long, decelerating climb - every
+ * year adds a little into the early 30s - then a hard flip to decline at 34 as
  * age catches up. A key rating (weight ~1.4) gains ~12 points across the rise.
  */
 export function ageCurveDelta(age: number): number {
@@ -18,7 +18,7 @@ export function ageCurveDelta(age: number): number {
     23: 0.82,
     24: 0.6,
     25: 0.42,
-    // The "prime plateau" — near-maintenance, a point or two of polish a year.
+    // The "prime plateau" - near-maintenance, a point or two of polish a year.
     26: 0.2,
     27: 0.16,
     28: 0.13,
@@ -38,7 +38,7 @@ export function ageCurveDelta(age: number): number {
   return table[age] ?? 0;
 }
 
-/** Baseline durability lost to age each season — nothing before 31, steepening after. */
+/** Baseline durability lost to age each season - nothing before 31, steepening after. */
 export function durabilityAgeDelta(age: number, rng: Rng): number {
   if (age <= 30) return 0;
   return -(age - 30) * 0.7 * (0.6 + rng() * 0.7);
@@ -76,7 +76,7 @@ export function growSeason(
   const next = { ...ratings };
 
   // Growth splits into a small component everyone gets and a large one only
-  // genuine lottery-caliber talent gets — so role players plateau in the high
+  // genuine lottery-caliber talent gets - so role players plateau in the high
   // 70s / low 80s while stars climb into the 90s.
   const talentEdge = Math.max(0, talent - 0.95);
 

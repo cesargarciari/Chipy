@@ -8,7 +8,7 @@ export interface EventContext {
   teamStrength: number;
   contractYearsLeft: number;
   seasonIndex: number;
-  /** 0..1 from perks — scales bad-luck event weight down. */
+  /** 0..1 from perks - scales bad-luck event weight down. */
   slumpResist: number;
 }
 
@@ -27,7 +27,7 @@ const EVENTS: EventDef[] = [
     id: 'quiet_year',
     weight: () => 3,
     apply: () => ({
-      headline: 'A steady, professional season — nothing to write home about.',
+      headline: 'A steady, professional season - nothing to write home about.',
       effect: {},
     }),
   },
@@ -35,7 +35,7 @@ const EVENTS: EventDef[] = [
     id: 'breakout',
     weight: (c) => (c.age <= 25 ? 2.4 : 1.0),
     apply: () => ({
-      headline: 'Something clicks — you go on a two-month tear the whole league notices.',
+      headline: 'Something clicks - you go on a two-month tear the whole league notices.',
       effect: {
         impactMult: 1.14,
         hype: 6,
@@ -71,7 +71,7 @@ const EVENTS: EventDef[] = [
       (c.contractYearsLeft <= 1 ? 0.8 : 0) +
       (c.role === 'bench' ? 0.4 : 0),
     apply: () => ({
-      headline: 'The phone rings at the trade deadline — you have a new home.',
+      headline: 'The phone rings at the trade deadline - you have a new home.',
       effect: { forceTrade: true },
     }),
   },

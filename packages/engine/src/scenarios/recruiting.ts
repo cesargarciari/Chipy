@@ -4,7 +4,7 @@ import { balancedEffect, PLAYMAKING, rollEdge, SCORING, SLASHING } from './prolo
 
 /**
  * The recruiting choice only picks a *tier*. `college1` then offers real
- * programs from that tier and a freshman year is simulated — so the real
+ * programs from that tier and a freshman year is simulated - so the real
  * draft-stock swing comes from the school + how you play, not from here. The
  * effects on these options are light, equal-value tier flavour, rerolled per
  * career.

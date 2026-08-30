@@ -207,6 +207,37 @@ The web keys its persisted run to `ENGINE_VERSION`, wraps every in-render
 renders the perks shop as a modal, shows the idolatry bars and an injury-record
 card on the legacy screen, and labels the overseas school route "International".
 
+**Team chemistry, honest games-played, surgery-grade injuries (v4.8).**
+`CareerState.chemistry` (0..100, starts 40–70) tracks how you gel with the room.
+`SeasonEffect` gains `chemistry` and `overallHit`; the mid-season resolver was
+rewritten from a five-way `consequence` enum to **per-option resolvers** that
+produce concrete outcomes — a colder front office ("the situation gets tense",
+which is now a real `tradeChance` input), a real overall drop, or a genuine
+spark — and forks where it matters (`msx_pos_resist` coin-flips "the staff fixes
+the rotation, you shine again" vs the tense front office). Two chemistry
+scenarios landed: a teammate's birthday (`msx_bday_out` → +chemistry, −2 OVR;
+`msx_bday_home` → −chemistry) and a burner account (`msx_burner_own` →
+−60 chemistry; `msx_burner_deny` → −3 OVR). Chemistry drifts back toward ~55 each
+season and resets toward neutral on a trade; **low chemistry is the dominant
+`tradeChance` term** (up to +0.4, ceiling raised to 0.6). Games-played is now
+exact: `simulateSeason` returns `gamesMissed = 82 − gp`, and every
+`injuryHistory` entry / `SeasonRecord.injuredGames` uses that — no more a
+"58 games missed" line next to a 40-game season. `INJURY_CATALOG` gained
+`seasonEnding` (`true` for ACL / Achilles / ruptured patellar — always 82 games;
+a 0.55 surgery-or-rehab roll for a torn meniscus) and `ovrHit` (a flat 2–6 OVR
+drop spread across every rating). `OptionView.teamId` also drives a crest next
+to the team name on the season screen; `EURO_CLUBS` is trimmed to the seven with
+crest art (Real Madrid, Barça, Panathinaikos, Olympiacos, Fenerbahçe, Monaco,
+Žalgiris) so every overseas offer shows a badge. `g_league_ignite` left the
+recruiting node (three tiers now). Every extra college year ages the rookie:
+`state.age += collegeYears − 1`, so a two-year prospect reaches the NBA at 20.
+`quiet_goodbye` explicitly locks retirement in (no stray extra season). The web
+`Create` screen drops the Home-market picker — it's rolled with the career now.
+
+`ENGINE_VERSION` → `4.8.0`; packages → `0.4.8`. `injuryEntrySchema.gamesMissed`
+and `seasonRecordSchema.injuredGames` keep the `0..82` bound (the value's meaning
+tightened, the range didn't).
+
 ## Consequences
 
 - The legacy score/grade bands were re-tuned (perks and the mid-season pool lift

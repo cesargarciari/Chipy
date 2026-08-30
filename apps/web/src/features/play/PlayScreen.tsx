@@ -2,6 +2,7 @@ import { useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { runCareerSafe } from '../../lib/runCareerSafe.js';
 import { useCareerRun } from '../../store/career.js';
+import { ChemistryScreen } from './ChemistryScreen.js';
 import { CollegePick } from './CollegePick.js';
 import { CollegeYear } from './CollegeYear.js';
 import { FarewellScreen } from './FarewellScreen.js';
@@ -24,7 +25,7 @@ export function PlayScreen() {
     if (!profile) {
       navigate('/create', { replace: true });
     } else if (result?.status === 'error') {
-      // A saved career that no longer replays — wipe it and start fresh.
+      // A saved career that no longer replays - wipe it and start fresh.
       reset();
       navigate('/create', { replace: true });
     } else if (result?.status === 'complete') {
@@ -38,7 +39,8 @@ export function PlayScreen() {
   const onChoose = (choiceId: string) => choose(p.nodeId, choiceId);
 
   return (
-    <div className="space-y-4">
+    // `key` remounts on every node so the entrance animation re-fires.
+    <div key={p.nodeId} className="space-y-4">
       {p.kind === 'prologue' && <PrologueNodeView node={p.prologue!} onChoose={onChoose} />}
       {p.kind === 'college_pick' && <CollegePick pick={p.collegePick!} onChoose={onChoose} />}
       {p.kind === 'college_year' && <CollegeYear year={p.collegeYear!} onChoose={onChoose} />}
@@ -52,6 +54,7 @@ export function PlayScreen() {
         />
       )}
       {p.kind === 'midseason' && <MidseasonScreen midseason={p.midseason!} onChoose={onChoose} />}
+      {p.kind === 'chemistry' && <ChemistryScreen chemistry={p.chemistry!} onChoose={onChoose} />}
       {p.kind === 'farewell' && <FarewellScreen farewell={p.farewell!} onChoose={onChoose} />}
       {p.kind === 'overseas_offer' && (
         <OverseasOffer

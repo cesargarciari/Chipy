@@ -11,7 +11,7 @@ const C = (id: string, name: string, country: string, prestige: number): ClubRef
 /**
  * The clubs a struggling NBA player can sign with. Kept to the set that has
  * crest artwork in the web (`apps/web/src/assets/clubs/`) so every overseas
- * offer card shows a badge — add a crest, add the club here.
+ * offer card shows a badge - add a crest, add the club here.
  */
 export const EURO_CLUBS: readonly ClubRef[] = [
   C('real_madrid', 'Real Madrid', 'Spain', 0.94),

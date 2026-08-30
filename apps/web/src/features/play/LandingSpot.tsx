@@ -10,7 +10,7 @@ export function LandingSpot({
   onChoose: (choiceId: string) => void;
 }) {
   return (
-    <div className="space-y-4">
+    <div className="decision-enter space-y-4">
       <div className="text-center">
         <div className="text-xs uppercase tracking-wide text-ink-dim">Draft Night</div>
         <h2 className="mt-1 text-2xl">{draftLabel(landing.draft)}</h2>

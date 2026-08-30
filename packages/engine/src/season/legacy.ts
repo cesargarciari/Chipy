@@ -130,7 +130,7 @@ interface LegacyArgs {
   peakOverall: number;
   seasons: SeasonRecord[];
   overseasSeasons: OverseasSeason[];
-  /** Final per-team standings — an idol / legend retires a jersey on its own. */
+  /** Final per-team standings - an idol / legend retires a jersey on its own. */
   franchises: FranchiseStanding[];
 }
 

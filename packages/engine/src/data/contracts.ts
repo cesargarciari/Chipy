@@ -56,7 +56,7 @@ export function offerSalary(
   );
 }
 
-/** Overseas pay (€M ≈ $M here) — a fraction of NBA money. */
+/** Overseas pay (€M ≈ $M here) - a fraction of NBA money. */
 export function euroSalary(rng: Rng, marketValue: number, prestige: number): number {
   const base = clamp(marketValue * 0.5 * (0.7 + prestige * 0.7), 1.4, 11);
   return Math.round((base + jitter(rng, 1) / 2) * 10) / 10;

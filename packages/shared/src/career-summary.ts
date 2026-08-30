@@ -97,6 +97,7 @@ const teamResultSchema = z.enum([
   'conf_finals',
   'second_round',
   'first_round',
+  'play_in',
   'lottery',
   'missed_season',
 ]);

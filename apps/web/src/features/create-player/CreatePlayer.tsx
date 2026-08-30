@@ -37,7 +37,7 @@ export function CreatePlayer() {
 
   function onSubmit(e: FormEvent) {
     e.preventDefault();
-    // Home market is no longer a player choice — it's rolled with the career.
+    // Home market is no longer a player choice - it's rolled with the career.
     const market = MARKETS[Math.floor(randomSeed() % MARKETS.length)]!;
     const parsed = playerProfileSchema.safeParse({
       name,

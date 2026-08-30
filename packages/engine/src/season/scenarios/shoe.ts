@@ -15,14 +15,14 @@ export const shoeScenarios: Scenario[] = [
     options: [
       {
         id: 'shoe_apex',
-        label: 'APEX — THE GIANT',
+        label: 'APEX - THE GIANT',
         blurb: 'Global distribution, a marketing budget the size of a small country.',
         effect: { money: 25, hype: 6 },
         stance: { tag: 'Blue chip' },
       },
       {
         id: 'shoe_stride',
-        label: 'STRIDE — PERFORMANCE',
+        label: 'STRIDE - PERFORMANCE',
         blurb: 'Hoopers’ brand. They build the shoe around your foot.',
         effect: { money: 14, hype: 3 },
         stance: {
@@ -33,8 +33,8 @@ export const shoeScenarios: Scenario[] = [
       },
       {
         id: 'shoe_volt',
-        label: 'VOLT — THE CHALLENGER',
-        blurb: 'Smaller check, but you’re the face — and there’s equity in it.',
+        label: 'VOLT - THE CHALLENGER',
+        blurb: 'Smaller check, but you’re the face - and there’s equity in it.',
         effect: { money: 8, hype: 5 },
         stance: { tag: 'Upside', valueMult: 1.12, valueMultSeasons: 5 },
       },

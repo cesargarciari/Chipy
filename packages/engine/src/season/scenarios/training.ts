@@ -6,7 +6,7 @@ export const trainingScenarios: Scenario[] = [
     theme: 'training',
     gate: { phase: ['rookie', 'rising'], once: true, weight: 2 },
     title: 'WHAT KIND OF PLAYER ARE YOU?',
-    prompt: 'The staff wants you to commit to an identity this offseason. Pick one — it sticks.',
+    prompt: 'The staff wants you to commit to an identity this offseason. Pick one - it sticks.',
     options: [
       {
         id: 'identity_box_killer',
@@ -129,7 +129,7 @@ export const trainingScenarios: Scenario[] = [
       {
         id: 'score_three_level',
         label: 'THREE-LEVEL',
-        blurb: 'Rim, elbow, arc — no wrong answer.',
+        blurb: 'Rim, elbow, arc - no wrong answer.',
         effect: { ratings: { finishing: 4, midRange: 5, threePoint: 5 } },
         stance: { tag: 'Scoring focus', impactMult: 1.05, awardMult: { scoring: 1.15 } },
       },

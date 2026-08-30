@@ -2,7 +2,7 @@ import type { Scenario } from '../scenario-types.js';
 
 /**
  * The one-per-career leap. Every option is `rare` (the client renders it gold)
- * and — because rare options skip the global rating slowdown — actually lands
+ * and - because rare options skip the global rating slowdown - actually lands
  * its full `+9`. Fires at most once, and only for a player who has already
  * carved out a role.
  */
@@ -19,7 +19,7 @@ export const breakthroughScenarios: Scenario[] = [
     },
     title: 'IT ALL CLICKS',
     prompt:
-      'One summer, something changes. The reps, the film, the confidence — it fuses. Where does the leap land?',
+      'One summer, something changes. The reps, the film, the confidence - it fuses. Where does the leap land?',
     options: [
       {
         id: 'brk_finishing',
@@ -48,7 +48,7 @@ export const breakthroughScenarios: Scenario[] = [
       {
         id: 'brk_playmaking',
         label: 'THE GAME SLOWS DOWN',
-        blurb: 'You see the pass a beat before anyone else — the offense runs through you now.',
+        blurb: 'You see the pass a beat before anyone else - the offense runs through you now.',
         effect: { ratings: { playmaking: 9 } },
         rare: true,
         stance: { tag: 'Breakthrough', roleBias: 0.3 },

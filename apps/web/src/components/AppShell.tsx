@@ -27,7 +27,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <main className="flex-1 py-4">{children}</main>
 
       <footer className="py-6 text-center text-xs text-ink-dim">
-        Chipy — a portfolio project. Not affiliated with the NBA.
+        Chipy - a portfolio project. Not affiliated with the NBA.
       </footer>
     </div>
   );

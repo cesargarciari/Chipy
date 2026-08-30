@@ -6,7 +6,7 @@ type Standing = CareerSummaryDto['franchises'][number];
 type National = CareerSummaryDto['nationalTeam'];
 
 /**
- * "Idolatry" — how beloved you are, club by club and with the national team.
+ * "Idolatry" - how beloved you are, club by club and with the national team.
  * Each is a progress bar toward legend.
  */
 export function FranchiseStandings({
@@ -41,7 +41,7 @@ export function FranchiseStandings({
 
       {nationalTeam.tier !== 'none' && (
         <IdolatryBar
-          label={`${countryName(nationalTeam.country)} — national team`}
+          label={`${countryName(nationalTeam.country)} - national team`}
           tier={nationalTeam.tier}
           progress={nationalTeam.progress}
           detail={`${nationalTeam.caps} ${nationalTeam.caps === 1 ? 'call-up' : 'call-ups'}${

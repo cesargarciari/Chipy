@@ -12,7 +12,7 @@ export function phaseFor(age: number, seasonIndex: number): CareerPhase {
   return 'decline';
 }
 
-/** Length of the next contract, in years — capped hard for older players. */
+/** Length of the next contract, in years - capped hard for older players. */
 export function contractLenFor(rng: Rng, role: Role, age = 27): number {
   let years: number;
   if (role === 'franchise') years = int(rng, 3, 5);

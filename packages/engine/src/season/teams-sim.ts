@@ -88,7 +88,7 @@ export function landingOffers({ seed, overall, market, draft }: OfferArgs): Team
   );
 
   const years = draft.undrafted ? 2 : ROOKIE_CONTRACT_YEARS;
-  // Rookie pay is slot-based — every landing spot offers the same scale money.
+  // Rookie pay is slot-based - every landing spot offers the same scale money.
   const salary = roundTo(rookieScale(draft), 1);
   return teams.map((team, i) => {
     const strength = teamStrengthFor(seed, team.id, 0);
@@ -148,7 +148,7 @@ export function freeAgencyOffers({
     const window = windowFromStrength(strength);
     const role = projectRole(overall, strength);
     const years = clamp(contractLenFor(rng, role, age), 1, 5);
-    // Bird rights — the incumbent can always offer a touch more.
+    // Bird rights - the incumbent can always offer a touch more.
     const salary = roundTo(offerSalary(rng, marketValue, strength, years) * (resign ? 1.08 : 1), 1);
     return {
       choiceId: `offer_${i}`,

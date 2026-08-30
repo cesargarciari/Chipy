@@ -16,7 +16,7 @@ type EuroResult = CareerSummaryDto['overseasSeasons'][number]['result'];
 export { FRANCHISE_TIER_LABELS };
 export type { FranchiseTier };
 
-/** How prominent a franchise tier should read — drives colour on the legacy card. */
+/** How prominent a franchise tier should read - drives colour on the legacy card. */
 export const FRANCHISE_TIER_TONE: Record<FranchiseTier, string> = {
   none: 'text-ink-dim',
   known: 'text-ink-dim',
@@ -66,7 +66,7 @@ export function pctText(pct: number): string {
   return `${pct % 1 === 0 ? pct.toFixed(0) : pct.toFixed(1)}%`;
 }
 
-/** `$18M`, `$1.5M`, `$1.2B` — the game's money unit is $M. */
+/** `$18M`, `$1.5M`, `$1.2B` - the game's money unit is $M. */
 export function moneyM(m: number): string {
   if (m >= 1000) return `$${(m / 1000).toFixed(m % 1000 === 0 ? 0 : 1)}B`;
   return `$${m % 1 === 0 ? m.toFixed(0) : m.toFixed(1)}M`;
@@ -131,6 +131,7 @@ export const TEAM_RESULT_LABELS: Record<TeamResult, string> = {
   conf_finals: 'Conf. Finals',
   second_round: 'Round 2',
   first_round: 'Round 1',
+  play_in: 'Play-In',
   lottery: 'Lottery',
   missed_season: 'Missed season',
 };

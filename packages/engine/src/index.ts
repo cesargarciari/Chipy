@@ -1,9 +1,9 @@
 /**
- * `@chipy/engine` — the pure, framework-free NBA career simulation.
+ * `@chipy/engine` - the pure, framework-free NBA career simulation.
  *
  * Nothing here touches the network, the DOM, the filesystem, or the clock
  * (except `randomSeed`). `runCareer` replays an entire career deterministically
- * from `(seed, profile, choices)` — the browser runs it for instant play, the
+ * from `(seed, profile, choices)` - the browser runs it for instant play, the
  * API runs it as the source of truth.
  */
 
@@ -99,6 +99,7 @@ export { describeEffects, optionView } from './options.js';
 export { SCENARIOS, buildScenarioIndex } from './season/scenarios/index.js';
 export { SHOE_BRANDS } from './season/scenarios/shoe.js';
 export { MIDSEASON_SCENARIOS, buildMidseasonIndex } from './season/midseason.js';
+export { CHEMISTRY_SCENARIOS } from './season/chemistry.js';
 export { FRANCHISE_TIER_LABELS, franchiseTier, franchiseProgress } from './season/franchise.js';
 export { buildNationalStanding, nationalProgress } from './season/national.js';
 export { eligibleScenarios } from './season/scenario-select.js';

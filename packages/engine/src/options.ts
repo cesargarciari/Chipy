@@ -16,7 +16,7 @@ const META_KEYS = ['athleticism', 'durability', 'hype', 'draftStock'] as const;
 
 /**
  * How much of an option's *written* rating bump actually lands. Deliberately
- * heavy so ratings climb slowly — a `+8` reads as `+4`, a `+3` as `+2`. Basketball
+ * heavy so ratings climb slowly - a `+8` reads as `+4`, a `+3` as `+2`. Basketball
  * IQ is suppressed hard on top (it barely declines with age, so it used to
  * ratchet straight to 99). `rare` breakthrough options bypass this entirely.
  */
@@ -45,12 +45,12 @@ export function effectiveRatings(option: GameOption): Partial<Ratings> {
  * Turn a flat effect into ordered chips: money first, then ratings (biggest
  * first), then meta. When `current` ratings are passed, each rating chip's
  * `delta` is trimmed to the room actually left under 99 (or above 25) so the
- * card promises exactly what the player will get — `nominal` keeps the original.
+ * card promises exactly what the player will get - `nominal` keeps the original.
  */
 export function describeEffects(effect: OptionEffect, current?: Ratings): EffectChip[] {
   const chips: EffectChip[] = [];
 
-  // Money is the headline for endorsements and perk buys — always pinned first.
+  // Money is the headline for endorsements and perk buys - always pinned first.
   if (effect.money) {
     chips.push({ key: 'money', label: 'MONEY', short: '$', delta: effect.money });
   }

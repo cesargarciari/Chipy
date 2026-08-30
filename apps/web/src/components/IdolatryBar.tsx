@@ -2,7 +2,7 @@ import type { FranchiseTier } from '@chipy/engine';
 import { FRANCHISE_TIER_LABELS } from '../lib/format.js';
 
 /**
- * The "idolatry" progress bar — how beloved you are by a club or the national
+ * The "idolatry" progress bar - how beloved you are by a club or the national
  * team. `progress` is 0..100 toward the top tier; `tier` names where you sit.
  */
 export function IdolatryBar({

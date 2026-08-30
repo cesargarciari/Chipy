@@ -15,6 +15,7 @@ function firstOption(res: ReturnType<typeof runCareer>): string {
   if (p.kind === 'landing') return p.landing!.offers[0]!.id;
   if (p.kind === 'farewell') return 'quiet_goodbye';
   if (p.kind === 'midseason') return p.midseason!.decision.options[0]!.id;
+  if (p.kind === 'chemistry') return p.chemistry!.decision.options[1]!.id;
   if (p.kind === 'overseas_offer') return p.overseasOffer!.options[0]!.id;
   return p.season!.decision.options[0]!.id;
 }

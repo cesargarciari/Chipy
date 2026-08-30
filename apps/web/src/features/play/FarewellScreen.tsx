@@ -18,7 +18,7 @@ export function FarewellScreen({
   const { options, preview } = farewell;
 
   return (
-    <div className="space-y-4">
+    <div className="decision-enter space-y-4">
       <div>
         <div className="inline-flex items-center gap-2 rounded-full bg-court-700 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-ink-dim">
           The end of the road · Age {preview.age}

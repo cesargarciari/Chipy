@@ -31,11 +31,7 @@
       "Bash(docker compose ps:*)",
       "Bash(docker compose logs:*)"
     ],
-    "deny": [
-      "Read(./.env)",
-      "Read(./.env.*)",
-      "Bash(git push:*)"
-    ]
+    "deny": ["Read(./.env)", "Read(./.env.*)", "Bash(git push:*)"]
   },
   "hooks": {
     "PostToolUse": [

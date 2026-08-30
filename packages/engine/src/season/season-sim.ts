@@ -11,7 +11,7 @@ export function derivedRng(seed: number | string, ...parts: Array<string | numbe
 // Team strength
 // ---------------------------------------------------------------------------
 
-/** 0..1 strength for a team in a given season — a fixed base tier plus a per-season wobble. */
+/** 0..1 strength for a team in a given season - a fixed base tier plus a per-season wobble. */
 export function teamStrengthFor(
   seed: number | string,
   teamId: string,
@@ -19,7 +19,9 @@ export function teamStrengthFor(
 ): number {
   const base = derivedRng(seed, 'team-base', teamId)();
   const wobble = derivedRng(seed, 'team-year', teamId, seasonIndex)();
-  return clamp(base * 0.55 + 0.22 + (wobble - 0.5) * 0.5, 0.05, 0.96);
+  // Centred a touch higher so the median team is a play-in / playoff club, not
+  // a lottery one - most rosters around a real player are competitive.
+  return clamp(base * 0.5 + 0.33 + (wobble - 0.5) * 0.44, 0.08, 0.96);
 }
 
 export function windowFromStrength(s: number): TeamWindow {
@@ -57,7 +59,7 @@ export function roleFor(args: {
   teamStrength: number;
   isRookie: boolean;
   effect: SeasonEffect;
-  /** Last season's role — the result can't move more than one rank from it. */
+  /** Last season's role - the result can't move more than one rank from it. */
   previousRole?: Role;
   /** Bypass the momentum clamp (big overall jump, or a lost season). */
   allowJump?: boolean;
@@ -108,14 +110,14 @@ export interface SeasonSimArgs {
   age: number;
   durability: number;
   effect: SeasonEffect;
-  /** Last *played* season's line — the new line is smoothed toward it. */
+  /** Last *played* season's line - the new line is smoothed toward it. */
   previousStats?: SeasonStatLine | null;
   previousRole?: Role;
 }
 
 export interface SeasonSimResult {
   stats: SeasonStatLine;
-  /** Games missed this season — always exactly `82 - stats.gp`. */
+  /** Games missed this season - always exactly `82 - stats.gp`. */
   gamesMissed: number;
   /** Overall on-court value (drives MVP / All-NBA / All-Star). */
   impact: number;
@@ -225,15 +227,27 @@ export function simulatePlayoffs(
   playerImpact: number,
   effect: SeasonEffect,
 ): TeamResult {
-  const boost = clamp(playerImpact / 22, 0, 1.3) * 0.08;
-  const p = clamp(teamStrength * (effect.teamMult ?? 1) + boost + jitter(rng, 1) / 70, 0.02, 0.97);
+  const boost = clamp(playerImpact / 20, 0, 1.4) * 0.1;
+  const p = clamp(teamStrength * (effect.teamMult ?? 1) + boost + jitter(rng, 1) / 60, 0.02, 0.98);
+  const roll = rng();
 
-  if (p < 0.44 || rng() > p + 0.04) return 'lottery';
+  // The bubble: a middling team fights for a play-in spot. Winning it lands a
+  // first-round appearance; losing it is still a "play-in" season, not a
+  // lottery one. Only genuinely poor rosters miss out entirely.
+  if (p < 0.52) {
+    if (p >= 0.4) {
+      if (roll < 0.42) return 'first_round';
+      return roll < 0.86 ? 'play_in' : 'lottery';
+    }
+    if (roll < 0.24) return 'play_in';
+    return 'lottery';
+  }
 
+  // A locked-in playoff team.
   const run = rng();
-  if (p > 0.76 && run < (p - 0.64) * 0.7) return 'champion';
-  if (p > 0.68 && run < (p - 0.54) * 0.72) return 'finals';
-  if (p > 0.58 && run < (p - 0.44) * 0.78) return 'conf_finals';
-  if (p > 0.5 && run < 0.5) return 'second_round';
+  if (p > 0.8 && run < (p - 0.66) * 0.72) return 'champion';
+  if (p > 0.72 && run < (p - 0.56) * 0.74) return 'finals';
+  if (p > 0.62 && run < (p - 0.46) * 0.8) return 'conf_finals';
+  if (p > 0.54 && run < 0.5) return 'second_round';
   return 'first_round';
 }

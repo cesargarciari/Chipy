@@ -3,7 +3,7 @@
  *
  * The whole simulation is a pure function of `(seed, profile, choices)`. That is
  * what lets the API re-run a career from its stored inputs and get a
- * byte-identical result — the basis of the "server never trusts client stats"
+ * byte-identical result - the basis of the "server never trusts client stats"
  * integrity check.
  */
 

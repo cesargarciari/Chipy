@@ -1,10 +1,22 @@
 import type { CareerMomentDto } from '@chipy/shared';
+import {
+  ArrowLeftRight,
+  Crown,
+  Flame,
+  Medal,
+  Shield,
+  Snowflake,
+  Sparkles,
+  TrendingUp,
+  Trophy,
+  type LucideIcon,
+} from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { awardArt, clubCrest, teamLogo } from '../lib/art.js';
 import { teamName } from '../lib/format.js';
 
 /**
- * The "main" awards — each gets a full-screen takeover, backed by artwork in
+ * The "main" awards - each gets a full-screen takeover, backed by artwork in
  * `src/assets/awards/<id>.png` (an emoji glyph shows until the file is added).
  * A moment with `kind: "ring"` always qualifies. Every *other* award still
  * gets noted, but only in the recap banner. Edit this set to change which ones
@@ -26,21 +38,21 @@ const HEADLINE_AWARDS = new Set([
   'euroleague_champion',
 ]);
 
-/** Fallback glyph when no artwork file has been dropped in `assets/awards`. */
-const GLYPH: Record<string, string> = {
-  mvp: '👑',
-  dpoy: '🛡️',
-  finals_mvp: '🏆',
-  roy: '🌟',
-  champion: '🏆',
-  clutch_poy: '❄️',
-  mip: '📈',
-  sixth_man: '🔥',
-  euroleague_mvp: '👑',
-  euroleague_champion: '🏆',
-  oly_gold: '🥇',
-  oly_silver: '🥈',
-  oly_bronze: '🥉',
+/** Fallback icon (lucide) when no artwork file exists for the award. */
+const ICON: Record<string, LucideIcon> = {
+  mvp: Crown,
+  dpoy: Shield,
+  finals_mvp: Trophy,
+  roy: Sparkles,
+  champion: Trophy,
+  clutch_poy: Snowflake,
+  mip: TrendingUp,
+  sixth_man: Flame,
+  euroleague_mvp: Crown,
+  euroleague_champion: Trophy,
+  oly_gold: Medal,
+  oly_silver: Medal,
+  oly_bronze: Medal,
 };
 
 export function isHeadlineMoment(m: CareerMomentDto): boolean {
@@ -50,7 +62,7 @@ export function isHeadlineMoment(m: CareerMomentDto): boolean {
 }
 
 /**
- * Full-screen celebration for the headline beats of a season — MVP, DPOY,
+ * Full-screen celebration for the headline beats of a season - MVP, DPOY,
  * Finals MVP, ROY, a ring. Steps through them one at a time, then unmounts
  * itself. Give it a `key` tied to the season so a new season starts fresh.
  *
@@ -88,7 +100,7 @@ export function MomentModal({
   const logo = teamLogo(m.teamId) ?? clubCrest(m.teamId);
   // For a trade the hero image is the destination team's logo, not award art.
   const art = isTrade ? logo : awardArt(m.awardId);
-  const glyph = isTrade ? '🔁' : ((m.awardId && GLYPH[m.awardId]) ?? '🏆');
+  const Icon = isTrade ? ArrowLeftRight : ((m.awardId && ICON[m.awardId]) ?? Trophy);
   const kicker = isTrade ? 'Traded to' : m.kind === 'ring' ? 'Champions' : 'The hardware';
 
   return (
@@ -109,11 +121,11 @@ export function MomentModal({
 
           {/* ── HERO ART (128×128 box) ──
               awards: src/assets/awards/<awardId>.png · teams: src/assets/teams/<TEAMID>.png */}
-          <div className="mx-auto my-5 flex h-32 w-32 items-center justify-center overflow-hidden rounded-2xl bg-court-950/60">
+          <div className="mx-auto my-5 flex h-32 w-32 items-center justify-center overflow-hidden rounded-2xl bg-court-950/60 text-amber">
             {art ? (
               <img src={art} alt={m.title} className="block max-h-full max-w-full object-contain" />
             ) : (
-              <span className="text-6xl leading-none">{glyph}</span>
+              <Icon size={64} strokeWidth={1.5} />
             )}
           </div>
 

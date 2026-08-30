@@ -16,7 +16,7 @@ anything unless I ask in a follow-up.
    - `pnpm lint`
    - `pnpm typecheck`
    - `DYNAMODB_ENDPOINT=http://localhost:8000 pnpm test`
-   - `pnpm --filter @chipy/engine test:coverage`  (only if the engine changed)
-   - `pnpm e2e`  (only if step 1 flagged it)
+   - `pnpm --filter @chipy/engine test:coverage` (only if the engine changed)
+   - `pnpm e2e` (only if step 1 flagged it)
 4. Summary: a checklist of what passed and what failed, plus the exact command to
    reproduce each failure. No em dashes.

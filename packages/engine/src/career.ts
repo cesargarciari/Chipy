@@ -42,7 +42,7 @@ export function createInitialState(rng: Rng, profile: PlayerProfile): CareerStat
     onFarewellTour: false,
     ringWindowLeft: 0,
     justTraded: false,
-    chemistry: 40 + Math.round(rng() * 30), // 40..70 — earned over a career
+    chemistry: 40 + Math.round(rng() * 30), // 40..70 - earned over a career
     pendingInjury: null,
     peakOverall: overall,
     salary: 0,
@@ -69,6 +69,7 @@ export function createInitialState(rng: Rng, profile: PlayerProfile): CareerStat
     awards: {},
     timeline: [],
     firedScenarioIds: [],
+    firedChemistryIds: [],
     growthBiases: [],
     lastPlayedStats: null,
   };

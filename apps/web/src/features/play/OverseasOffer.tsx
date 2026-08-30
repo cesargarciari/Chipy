@@ -14,12 +14,12 @@ const COPY: Record<OverseasOfferData['reason'], { kicker: string; title: string;
       kicker: 'The NBA goes quiet',
       title: 'A way to keep playing',
       blurb:
-        'No NBA team is calling. But clubs in Europe want you as their centrepiece — a EuroLeague run, real money, and a shot at earning your way back.',
+        'No NBA team is calling. But clubs in Europe want you as their centrepiece - a EuroLeague run, real money, and a shot at earning your way back.',
     },
     contract_up: {
       kicker: 'Your EuroLeague deal is up',
       title: 'Where next?',
-      blurb: 'Re-sign, move to a bigger club, or — if the league is watching again — go home.',
+      blurb: 'Re-sign, move to a bigger club, or - if the league is watching again - go home.',
     },
   };
 

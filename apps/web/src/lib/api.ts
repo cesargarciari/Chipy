@@ -19,7 +19,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
       headers: { 'content-type': 'application/json', ...init?.headers },
     });
   } catch {
-    throw new ApiError(0, 'network error — is the API running?');
+    throw new ApiError(0, 'network error - is the API running?');
   }
 
   const text = await res.text();

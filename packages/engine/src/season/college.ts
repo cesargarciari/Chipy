@@ -15,9 +15,15 @@ const AST_POS: Record<Position, number> = { PG: 1.7, SG: 1.05, SF: 0.85, PF: 0.6
 
 export const MAX_COLLEGE_YEARS = 3;
 
-/** Six programs from the chosen tier, biased toward prestige (more so in a big market). */
-export function sampleSchools(rng: Rng, tier: SchoolTier, market: Market, count = 6): SchoolRef[] {
-  const pool = schoolsForTier(tier);
+/** Programs from the chosen tier, biased toward prestige (more so in a big market). */
+export function sampleSchools(
+  rng: Rng,
+  tier: SchoolTier,
+  market: Market,
+  count = 6,
+  exclude?: ReadonlySet<string>,
+): SchoolRef[] {
+  const pool = schoolsForTier(tier).filter((s) => !exclude?.has(s.id));
   const marketPull = market === 'large' ? 2.2 : market === 'mid' ? 1.3 : 0.8;
   const weighted = pool.map((s) => [s, Math.max(0.05, s.prestige ** marketPull)] as const);
   const picked: SchoolRef[] = [];
@@ -38,7 +44,7 @@ function tournamentResult(rng: Rng, school: SchoolRef, impact: number): string {
   const p = clamp(school.prestige * 0.7 + impact / 42 + (rng() - 0.5) * 0.4, 0.05, 0.99);
   const r = rng();
   if (overseas) {
-    // League-neutral wording — the "overseas" tier spans the G League, the NBL,
+    // League-neutral wording - the "overseas" tier spans the G League, the NBL,
     // and European clubs, so nothing here should name a specific competition.
     if (p > 0.78 && r < p - 0.6) return 'Won the championship';
     if (p > 0.62 && r < p - 0.4) return 'Reached the finals';
@@ -71,7 +77,7 @@ export function simulateCollegeYear(rng: Rng, args: CollegeYearArgs): CollegeYea
   const { ratings: r, athleticism, position, school, yearNumber } = args;
   const usage = school.style.usage;
 
-  // A wide multiplier — the same prospect can have a monster year or flop.
+  // A wide multiplier - the same prospect can have a monster year or flop.
   const form = 0.62 + rng() * 0.72;
   const scoringRate = (r.finishing * 0.4 + r.midRange * 0.3 + r.threePoint * 0.3) / 100;
   const ppg = clamp(roundTo(scoringRate * usage * 33 * form + (yearNumber - 1) * 1.4, 1), 3, 27);
@@ -89,7 +95,7 @@ export function simulateCollegeYear(rng: Rng, args: CollegeYearArgs): CollegeYea
   const impact = ppg * 0.5 + rpg * 0.4 + apg * 0.6;
   const result = tournamentResult(rng, school, impact);
 
-  // A modest development year — the NBA does the heavy lifting later.
+  // A modest development year - the NBA does the heavy lifting later.
   const growth: Partial<Ratings> = {};
   for (const [key, amt] of Object.entries(school.style.dev)) {
     growth[key as keyof Ratings] = (amt ?? 0) * (0.4 + rng() * 0.6);
@@ -114,7 +120,7 @@ export function simulateCollegeYear(rng: Rng, args: CollegeYearArgs): CollegeYea
     `At ${school.name} you averaged ${ppg}/${rpg}/${apg} on ${(fgPct * 100).toFixed(0)}% shooting` +
     `${
       school.nbaPedigree > 0.85
-        ? ` — the program's pipeline has scouts already sold.`
+        ? ` - the program's pipeline has scouts already sold.`
         : draftStockDelta >= 8
           ? ` and jumped up draft boards.`
           : draftStockDelta <= -6
@@ -138,7 +144,7 @@ export function simulateCollegeYear(rng: Rng, args: CollegeYearArgs): CollegeYea
 /**
  * The one decision after each simulated college year. If the year didn't move
  * the needle (draft stock still low) and there's a year of eligibility left, the
- * "declare" option is withheld — nobody's picking you yet, so you stay.
+ * "declare" option is withheld - nobody's picking you yet, so you stay.
  */
 export function collegeYearOptions(yearNumber: number, draftStock: number): GameOption[] {
   const canReturn = yearNumber < MAX_COLLEGE_YEARS;
@@ -158,7 +164,7 @@ export function collegeYearOptions(yearNumber: number, draftStock: number): Game
         id: `cy_return_${yearNumber}`,
         label: 'RETURN TO SCHOOL',
         blurb: draftable
-          ? 'Another year to polish your game — and your draft stock.'
+          ? 'Another year to polish your game - and your draft stock.'
           : 'Scouts want more before draft night. Come back and prove it.',
         effect: {},
         stance: { tag: 'Patience' },

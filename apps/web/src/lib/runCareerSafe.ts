@@ -3,7 +3,7 @@ import { runCareer, type RunCareerArgs, type RunCareerResult } from '@chipy/engi
 export type SafeRunResult = RunCareerResult | { status: 'error'; message: string };
 
 /**
- * `runCareer` throws on an invalid `(seed, profile, choices)` tuple — most
+ * `runCareer` throws on an invalid `(seed, profile, choices)` tuple - most
  * often a career persisted under an older engine whose rules have since
  * changed. Callers render it straight from a restored store, so a throw would
  * blank the whole app. This wraps it: on any failure it returns

@@ -21,8 +21,8 @@ describe('<MomentCard />', () => {
     expect(screen.getByText(/your first ring/)).toBeInTheDocument();
   });
 
-  it('falls back to a kind glyph when no artwork exists for the moment', () => {
-    render(
+  it('falls back to a kind icon when no artwork exists for the moment', () => {
+    const { container } = render(
       <MomentCard
         moment={{
           seasonIndex: 8,
@@ -30,17 +30,16 @@ describe('<MomentCard />', () => {
           id: 'franchise_idol',
           title: 'AN IDOL',
           subtitle: 'the city has adopted you',
-          // no awardId, and a team id with no logo file → emoji glyph
           teamId: 'ZZZ',
         }}
       />,
     );
     expect(screen.getByText('AN IDOL')).toBeInTheDocument();
-    expect(screen.getByText('💛')).toBeInTheDocument();
+    expect(container.querySelector('svg.lucide')).toBeInTheDocument();
   });
 
   it('renders an injury moment', () => {
-    render(
+    const { container } = render(
       <MomentCard
         moment={{
           seasonIndex: 11,
@@ -53,6 +52,6 @@ describe('<MomentCard />', () => {
       />,
     );
     expect(screen.getByText('TORN ACL')).toBeInTheDocument();
-    expect(screen.getByText('🩼')).toBeInTheDocument();
+    expect(container.querySelector('svg.lucide')).toBeInTheDocument();
   });
 });

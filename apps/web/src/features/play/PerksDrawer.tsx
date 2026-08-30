@@ -66,7 +66,7 @@ export function PerksDrawer({
               <div>
                 <h3 className="font-display text-xl tracking-wide">Perks shop</h3>
                 <p className="text-xs text-ink-dim">
-                  Spend from the bank — yearly perks re-bill every offseason.
+                  Spend from the bank - yearly perks re-bill every offseason.
                 </p>
               </div>
               <div className="flex items-center gap-3">
@@ -90,7 +90,7 @@ export function PerksDrawer({
 
             {shop.items.length === 0 ? (
               <p className="text-sm text-ink-dim">
-                Nothing on the shelves yet — check back next season.
+                Nothing on the shelves yet - check back next season.
               </p>
             ) : (
               <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3">

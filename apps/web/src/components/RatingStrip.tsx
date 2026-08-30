@@ -6,9 +6,9 @@ interface RatingStripProps {
   ratings: Ratings;
   athleticism: number;
   durability: number;
-  /** Tile keys to light up gold — e.g. the stats an option under the cursor would move. */
+  /** Tile keys to light up gold - e.g. the stats an option under the cursor would move. */
   highlight?: readonly string[];
-  /** Tile keys the last decision just raised — tinted orange for a beat. */
+  /** Tile keys the last decision just raised - tinted orange for a beat. */
   raised?: readonly string[];
 }
 

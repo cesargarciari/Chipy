@@ -34,12 +34,12 @@ export function SeasonScreen({
       ? (preview.club?.name ?? 'overseas')
       : preview.team
         ? teamName(preview.team.id)
-        : '—';
+        : '-';
   const crest =
     preview.league === 'overseas' ? clubCrest(preview.club?.id) : teamLogo(preview.team?.id);
 
   return (
-    <div className="space-y-4">
+    <div className="decision-enter space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
         <div className="font-semibold">
           Season {preview.seasonNumber} · Age {preview.age}
@@ -67,7 +67,7 @@ export function SeasonScreen({
         <Card>
           <CardBody className="space-y-3">
             <div className="flex items-center justify-between">
-              <h3 className="font-bold">Last season — {teamName(last.teamId)}</h3>
+              <h3 className="font-bold">Last season - {teamName(last.teamId)}</h3>
               <span className="text-xs uppercase tracking-wide text-ink-dim">
                 {TEAM_RESULT_LABELS[last.teamResult]}
               </span>
@@ -88,7 +88,7 @@ export function SeasonScreen({
         </Card>
       )}
 
-      <div className="space-y-3">
+      <div key={decision.nodeId} className="decision-enter space-y-3">
         <div>
           <div className="text-xs uppercase tracking-wide text-ink-dim">{decision.theme}</div>
           <h3 className="text-2xl">{decision.title}</h3>
