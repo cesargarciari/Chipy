@@ -48,7 +48,7 @@ describe('<MomentModal />', () => {
     await userEvent.click(screen.getByRole('button', { name: /next/i }));
     expect(screen.getByRole('dialog', { name: 'CHAMPION' })).toBeInTheDocument();
 
-    await userEvent.click(screen.getByRole('button', { name: /continue/i }));
+    await userEvent.click(screen.getByRole('button', { name: /follow the career/i }));
     expect(onDone).toHaveBeenCalled();
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });

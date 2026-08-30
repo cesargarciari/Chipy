@@ -156,6 +156,29 @@ describe('draft randomness', () => {
     // Not clustered on two or three slots.
     expect(slots.size).toBeGreaterThan(15);
   });
+
+  it('is not top-heavy — the lottery is the exception, with a real 2nd-round and undrafted tail', () => {
+    let lottery = 0;
+    let secondRoundOrWorse = 0;
+    const n = 240;
+    for (let i = 0; i < n; i += 1) {
+      const s = autoPlay(`draft-spread-${i}`, {
+        name: 'Spread',
+        position: (['PG', 'SG', 'SF', 'PF', 'C'] as const)[i % 5]!,
+        archetype: ARCHETYPE_DEFS[i % ARCHETYPE_DEFS.length]!.id,
+        market: (['small', 'mid', 'large'] as const)[i % 3]!,
+        jerseyNumber: i % 100,
+        country: 'USA',
+        handedness: 'right',
+      });
+      if (!s.draft.undrafted && s.draft.pick! <= 14) lottery += 1;
+      if (s.draft.undrafted || (!s.draft.undrafted && s.draft.pick! > 30)) secondRoundOrWorse += 1;
+    }
+    // Most players do NOT go in the lottery, and a solid slice fall to the
+    // second round or out of the draft entirely.
+    expect(lottery / n).toBeLessThan(0.3);
+    expect(secondRoundOrWorse / n).toBeGreaterThan(0.2);
+  });
 });
 
 describe('franchise standing + career moments', () => {

@@ -104,9 +104,10 @@ The API creates the local table on boot. To (re)create it manually:
    A March result and a choice to declare / return / transfer; if scouts aren't
    sold yet, "declare" isn't on the table — you stay, and **every extra year in
    school ages you** (a one-and-done reaches the NBA at 19, a two-year prospect
-   at 20). The **draft** is genuinely random (a flat spread plus the odd big
-   reach or slide → mid-lottery to undrafted on the same run) and sets a hidden
-   **talent** ceiling.
+   at 20). The **draft** is genuinely random and rarely kind: only a true
+   blue-chip run projects into the lottery, and a wide spread plus the odd reach
+   or slide sends most players to the mid-first, the second round, or out of the
+   draft entirely. It sets a hidden **talent** ceiling.
 3. **Landing spot** — choose one of three team offers (weighted by draft slot and
    a home-market roll), each with a **dollar figure**. That's your rookie team.
 4. **Season loop** — each offseason you first visit the **perks shop** (a modal
@@ -123,16 +124,23 @@ The API creates the local table on boot. To (re)create it manually:
    month costs you a couple of overall points. Attributes climb on an **age curve
    × archetype × talent²** — a decelerating rise through the early 30s, then a
    real decline once age catches up at ~34. The season is simulated (role →
-   minutes → stat line → playoff run), pay is banked, and every season rolls its
-   own **injury** check — mostly knocks and strains (games missed always adds up
-   to `82 − games played`), but a low durability, age, or a long injury record
-   can bring on a hamstring, a torn meniscus (surgery — often season-ending), or,
-   rarely, a **torn ACL / Achilles** — those end the year and take **2–6 off your
-   overall for good**. The HUD carries your **status tier** (fringe → role player
-   → star → superstar → generational), your **team chemistry**, and — when your
-   seat gets shaky — a **trade risk %**; a bad team or a toxic locker room can
-   move you (a modal shows who you were **traded to**), and once you're a star
-   you can **demand a trade** yourself. Your **idolatry** with the club and
+   minutes → stat line → playoff run), and most teams around a real player are
+   competitive: the **play-in** and a first-round trip are the norm, the lottery
+   the exception. Pay is banked, and every season rolls its own **injury** check
+   — mostly knocks and strains (games missed always adds up to `82 − games
+played`), but a low durability, age, or a long injury record can bring on a
+   hamstring, a torn meniscus (surgery — often season-ending), or, rarely, a
+   **torn ACL / Achilles** — those end the year and take **2–6 off your overall
+   for good**. A separate **locker-room question** turns up every 2–3 seasons (it
+   can land the same year as a fame one): being one of the guys lifts **team
+   chemistry** for a small cost (a point off your overall); staying strictly
+   professional keeps you sharp and a little distant — and low chemistry gets you
+   traded. Chemistry also builds on its own the longer you stay with one team
+   (and resets on a trade). The HUD carries your **status tier** (fringe → role player → star →
+   superstar → generational), your **team chemistry**, and — when your seat gets
+   shaky — a **trade risk %**; a bad team or a toxic locker room can move you (a
+   modal shows who you were **traded to**), and once you're a star you can
+   **demand a trade** yourself. Your **idolatry** with the club and
    the national team fills toward _legend_ (a few years and a ring can make you
    their _idol_); a **championship keeps you a contender for ~5 seasons**, so
    repeat rings are a real chance without being a given. **Fame** is not a stat
@@ -140,10 +148,14 @@ The API creates the local table on boot. To (re)create it manually:
    the off-court scenes (the mid-season forks, the shoe deal). Big beats — a
    ring, an MVP, a trade, a serious injury — pop their own card on the next
    screen, and the headline trophies (**MVP, DPOY, Finals MVP, ROY, MIP, Sixth
-   Man, a championship, Olympic medals**) take over the screen as a full **award
-   modal**; every other honour is still noted in the recap banner. Every fourth
+   Man, a championship, Olympic medals**) take over the screen as a full **gala
+   award reveal** — gold rail, the trophy under a glow, a line of flavour, a
+   "follow the career" button; every other honour is still noted in the recap
+   banner. Every fourth
    summer brings an **Olympic** call-up (gold/silver/bronze by your country's
-   pedigree); fame 80+ triggers a one-time **shoe deal** (pick the brand).
+   pedigree) — for Team USA you need genuine star status to make the 12; smaller
+   nations lean on whoever they have. Fame 80+ triggers a one-time **shoe deal**
+   (pick the brand).
 5. **Overseas** — if the NBA stops calling while you can still play, sign in the
    **EuroLeague** instead of retiring: the same loop, its own clubs, trophies
    (EuroLeague MVP / title), and free agency, plus a path back to the NBA once
@@ -153,7 +165,9 @@ The API creates the local table on boot. To (re)create it manually:
    You can retire by choice from ~32; when age finally decides it for you,
    you pick your exit: a **farewell tour** (one more ceremonial season) or a
    **quiet goodbye**.
-7. A **legacy screen**: trophy case, career totals, **career earnings**, a
+7. A **legacy screen**: a **horizontal trophy case** (each award a stack of that
+   many trophies, clumped at rest and spreading apart on hover), career totals,
+   **career earnings**, a
    season-by-season table (with salary), any overseas years, an **injury
    record**, the perks you ran and shoe brand you signed, **where you're
    remembered** (per-team standing), a **career-moments** strip, final-ratings
@@ -203,16 +217,21 @@ owners — ship your own stylised marks if you publish.
   perks shop (modal — bank shown, owned/locked states, green prices), a
   per-season **injury system** (named injuries from knocks to season-ending
   ACL/Achilles that take 2–6 off the overall; games missed = `82 − GP`),
-  **honoured contracts** + a pre-retirement **farewell** choice, **team
-  chemistry** (bonding/drama scenarios; low chemistry drives trades), mid-season
-  branching situations with concrete per-branch consequences, a fame-gated shoe
-  deal, the EuroLeague as a full parallel league with a path back, a per-team
-  **franchise standing** (fan favorite → idol → legend), a **status tier** +
-  **trade probability** with team-forced and player-demanded trades (shown as a
-  "traded to" modal), a **5-season championship window** after a ring,
-  draft-slot-scaled washout odds (late second-rounders bust to the EuroLeague far
-  more often), end-of-season **big-moment** cards (rings, awards, trades, serious
-  injuries) with a full-screen **award modal** for the headline trophies,
+  **honoured contracts** + a pre-retirement **farewell** choice, an independent
+  **team-chemistry** question channel (bonding costs overall, distance costs
+  chemistry, low chemistry drives trades), a real postseason with a **play-in**
+  tier (most teams make it; the lottery is the exception), Olympics gated to
+  stars for Team USA, mid-season branching situations with concrete per-branch
+  consequences, a fame-gated shoe deal, the EuroLeague as a full parallel league
+  with a path back, a per-team **franchise standing** (fan favorite → idol →
+  legend), a **status tier** + **trade probability** with team-forced and
+  player-demanded trades (shown as a "traded to" modal), a **5-season
+  championship window** after a ring, a **draft** where the lottery is the
+  exception (most players go mid-first, second round, or undrafted) and
+  draft-slot-scaled washout odds (late second-rounders bust to the EuroLeague
+  far more often), end-of-season **big-moment** cards (rings, awards, trades,
+  serious injuries) with a full-screen **gala award reveal** for the headline
+  trophies and a **horizontal hover-spread trophy case** on the legacy screen,
   per-career **randomised prologue** options, age that tracks extra college
   years, performance-driven **fame** (no longer a trainable stat), a slow rating
   economy where option

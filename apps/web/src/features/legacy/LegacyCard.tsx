@@ -1,15 +1,12 @@
-import type { AwardId } from '@chipy/engine';
 import type { CareerSummaryDto, ChoiceStat } from '@chipy/shared';
 import { Award, Trophy } from 'lucide-react';
 import { RatingRadar } from '../../components/RatingRadar.js';
 import { Button } from '../../components/ui/button.js';
 import { Card, CardBody } from '../../components/ui/card.js';
 import {
-  AWARD_LABELS,
   EURO_RESULT_LABELS,
   GRADE_TONE,
   LEGACY_TIER_LABELS,
-  TROPHY_ORDER,
   archetypeLabel,
   countryLabel,
   draftLabel,
@@ -21,6 +18,7 @@ import { MomentCard } from '../../components/MomentCard.js';
 import { FranchiseStandings } from './FranchiseStandings.js';
 import { SeasonTable } from './SeasonTable.js';
 import { ShareRow } from './ShareRow.js';
+import { TrophyShelf } from './TrophyShelf.js';
 
 interface LegacyCardProps {
   summary: CareerSummaryDto;
@@ -34,7 +32,6 @@ interface LegacyCardProps {
 
 export function LegacyCard({ summary, shareUrl, saving, saveError, onPlayAgain }: LegacyCardProps) {
   const { profile, legacy, careerTotals: ct, awards } = summary;
-  const trophies = TROPHY_ORDER.filter((id) => (awards[id] ?? 0) > 0);
 
   // The legacy card shows only the headline beats - rings, MVP-class awards,
   // franchise idol/legend, big milestones - not every All-Star nod.
@@ -291,21 +288,7 @@ export function LegacyCard({ summary, shareUrl, saving, saveError, onPlayAgain }
           <h3 className="flex items-center gap-2 font-bold">
             <Trophy size={16} className="text-amber" /> Trophy case
           </h3>
-          {trophies.length === 0 ? (
-            <p className="text-sm text-ink-dim">No hardware - but every legend starts somewhere.</p>
-          ) : (
-            <div className="flex flex-wrap gap-2">
-              {trophies.map((id) => (
-                <span
-                  key={id}
-                  className="rounded-lg border border-court-600 bg-court-800 px-2.5 py-1 text-xs"
-                >
-                  <span className="font-mono font-bold text-amber">{awards[id]}&times;</span>{' '}
-                  {AWARD_LABELS[id as AwardId]}
-                </span>
-              ))}
-            </div>
-          )}
+          <TrophyShelf awards={awards} />
         </CardBody>
       </Card>
 

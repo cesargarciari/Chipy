@@ -70,6 +70,7 @@ export function createInitialState(rng: Rng, profile: PlayerProfile): CareerStat
     timeline: [],
     firedScenarioIds: [],
     firedChemistryIds: [],
+    lastChemistrySeason: 0,
     growthBiases: [],
     lastPlayedStats: null,
   };

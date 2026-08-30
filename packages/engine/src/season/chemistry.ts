@@ -1,4 +1,4 @@
-import { int, weightedPick, type Rng } from '../rng.js';
+import { weightedPick, type Rng } from '../rng.js';
 import type { GameOption } from '../types.js';
 import type { SeasonEffect } from './effects.js';
 
@@ -101,24 +101,24 @@ export interface ChemResolution {
 }
 
 const CHEM_NOTE: Record<string, string> = {
-  chm_dinner_join: 'The room warms to you, but the short night costs you a step this year.',
+  chm_dinner_join: 'The room warms to you; the short night takes a small edge off your game.',
   chm_dinner_skip: 'Professional to a fault. The guys stop inviting you.',
-  chm_camp_go: 'You come into camp tight with the group - and a little worn down.',
+  chm_camp_go: 'You come into camp tight with the group, a touch worn down.',
   chm_camp_solo: 'You show up in great shape and a step removed from the room.',
-  chm_rookie_yes: 'The locker room respects it; your own game plateaus for a year.',
-  chm_rookie_no: 'Fair enough - but the young guys notice who helped and who did not.',
-  chm_night_roll: 'One of the guys now. The tired legs show up on the second night.',
+  chm_rookie_yes: 'The locker room respects it; the extra hours cost you a little of your own.',
+  chm_rookie_no: 'Fair enough, but the young guys notice who helped and who did not.',
+  chm_night_roll: 'One of the guys now. A little heavy-legged on the second night.',
   chm_night_rest: 'You feel fresh. You also feel like an outsider.',
-  chm_feud_broker: 'You patch it up. Playing counsellor all month wears on your game.',
+  chm_feud_broker: 'You patch it up; playing counsellor for a month nicks your focus.',
   chm_feud_stayout: 'The tension lingers and a few teammates hold the distance against you.',
-  chm_gala_speak: 'He will not forget it. Neither will your legs the next morning.',
+  chm_gala_speak: 'He will not forget it. A late night, but only a slight one.',
   chm_gala_donate: 'Generous, but he wanted you there, not your money.',
 };
 
 /**
- * Resolve a chemistry choice. The sociable option (`[0]`) always trades a
- * concrete 2-3 overall for a chemistry gain; the professional option (`[1]`)
- * trades chemistry away.
+ * Resolve a chemistry choice. The sociable option (`[0]`) trades a *small*
+ * overall dip (1, occasionally 2) for a chemistry gain; the professional option
+ * (`[1]`) trades chemistry away.
  */
 export function resolveChemistry(rng: Rng, scenarioId: string, optionId: string): ChemResolution {
   const scenario = CHEMISTRY_SCENARIOS.find((s) => s.id === scenarioId);
@@ -126,8 +126,9 @@ export function resolveChemistry(rng: Rng, scenarioId: string, optionId: string)
   const m = 0.7 + rng() * 0.6; // 0.7 .. 1.3
 
   if (isSocial) {
+    const hit = rng() < 0.75 ? 1 : 2;
     return {
-      effect: { overallHit: int(rng, 2, 3), chemistry: Math.round(12 + 8 * m) },
+      effect: { overallHit: hit, chemistry: Math.round(12 + 8 * m) },
       chemistryDelta: Math.round(12 + 8 * m),
       note: CHEM_NOTE[optionId] ?? 'The room warms to you.',
     };

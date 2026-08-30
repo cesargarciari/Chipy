@@ -860,10 +860,16 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
       }
     }
 
-    // ===== 3b. Chemistry question - its own ~33% roll, so it can share a
-    // season with the mid-season one (they're about different things). NBA only.
+    // ===== 3b. Chemistry question - its own roll, so it can share a season
+    // with the mid-season one (they're about different things). NBA only, and
+    // kept to roughly one every 2-3 seasons via the cooldown.
     let chemHeadline: string | null = null;
-    if (state.league === 'nba' && state.team && seasonNumber >= 2 && rng() < 0.33) {
+    const chemEligible =
+      state.league === 'nba' &&
+      state.team !== null &&
+      seasonNumber - state.lastChemistrySeason >= 2;
+    if (chemEligible && rng() < 0.6) {
+      state.lastChemistrySeason = seasonNumber;
       const chm = pickChemistryScenario(rng, new Set(state.firedChemistryIds));
       const chNodeId = `chem${seasonNumber}`;
       const chDecision: SeasonDecisionNode = {
@@ -1007,11 +1013,21 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
       effect.ratings = r;
     }
 
-    // Team chemistry eases back toward a middling baseline each year (a room
-    // repairs itself), plus this season's scenario / event swing.
-    const chemDrift = state.chemistry < 50 ? 4 : state.chemistry > 60 ? -2 : 0;
+    // Team chemistry drifts toward a baseline that RISES the longer you've been
+    // with the team - you learn the room. A fresh trade resets that tenure.
+    const tenure = state.league === 'nba' ? Math.min(state.seasonsWithTeam, 8) : 0;
+    const chemTarget = 42 + tenure * 4; // 42 fresh ... 74 after 8 years together
+    const chemDrift =
+      state.chemistry < chemTarget
+        ? Math.min(6, chemTarget - state.chemistry)
+        : state.chemistry > chemTarget + 6
+          ? -2
+          : 0;
+    // Bonding pays off more when you already know the team; drama still hurts full.
+    const familiarity = 1 + Math.min(state.seasonsWithTeam, 6) * 0.08; // up to 1.48x
+    const swing = effect.chemistry ?? 0;
     state.chemistry = clamp(
-      Math.round(state.chemistry + chemDrift + (effect.chemistry ?? 0)),
+      Math.round(state.chemistry + chemDrift + (swing > 0 ? swing * familiarity : swing)),
       0,
       100,
     );

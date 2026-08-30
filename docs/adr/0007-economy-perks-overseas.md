@@ -238,6 +238,61 @@ recruiting node (three tiers now). Every extra college year ages the rookie:
 and `seasonRecordSchema.injuredGames` keep the `0..82` bound (the value's meaning
 tightened, the range didn't).
 
+**A dedicated chemistry channel, a real postseason, tidied recap (v4.9).**
+Chemistry questions get their own `chem{n}` pending node (`kind: "chemistry"`,
+`season/chemistry.ts`), so a fame / mid-season question and a locker-room one can
+both land in a season. It's on a cooldown (`CareerState.lastChemistrySeason`, a
+minimum two-season gap plus a 0.6 roll) so it fires roughly every 2-3 seasons,
+not back-to-back. Every chemistry scenario is the same fork: the sociable pick
+lifts chemistry but costs a small overall dip (1, occasionally 2, via
+`SeasonEffect.overallHit`); the professional pick trades chemistry away.
+Chemistry also drifts toward a baseline that **rises with `seasonsWithTeam`**
+(42 fresh … 74 after eight years together, reset by a trade), and positive
+chemistry swings from choices are multiplied by a familiarity factor
+(1 → ~1.48× at six years) — you learn the room the longer you're in it.
+`TeamResult` gains `play_in`; `teamStrengthFor` is centred higher
+and `simulatePlayoffs` was rebuilt around a play-in bubble, so the median team
+makes the postseason (lottery ~11% of seasons, down from ~40%) and champions are
+rarer (~2.5%/season). Team USA now needs `statusRank >= star` to be picked for
+the Olympics (`maybeInternational` gains `deepPool` / `status`); smaller nations
+keep the lenient gate. `buildSummary` collapses the career-points milestones to
+just the highest one. `sampleSchools` takes an `exclude` set so a transfer can't
+re-pick the school you just left, and the summary lists each college / overseas
+stint (school + year range) instead of one final name. The `g_league_ignite`
+school is gone; the overseas school ids are the seven with crest art
+(`real_madrid` … `zalgiris`) so a logo shows on the pick and the season screen.
+Farewell hardening: the tour season is force-flagged non-FA, and the node only
+fires from age 33+. The web replaces the emoji glyph maps in `MomentCard` /
+`MomentModal` with lucide icons, adds an opacity fade-in on every decision
+screen, shows the team crest by the name on the season screen, marks All-Star
+seasons in the season-by-season table with `all_star.png`, and drops the
+"career-defining calls" panel. Every em dash was stripped from user-facing
+strings.
+
+`ENGINE_VERSION` → `4.9.0` then `4.10.0` (v4.10 re-paces the chemistry channel,
+softens its overall cost, and adds the tenure baseline); packages → `0.4.10`.
+`teamResultSchema` and `TEAM_RESULT_LABELS` gain `play_in`; `SeasonDecisionNode.kind`
+and `PendingDecision.kind` gain `chemistry`; the nodeId regex learns `chem\d{1,2}`;
+`CareerState` gains `firedChemistryIds` and `lastChemistrySeason`.
+
+**Spread the draft, a gala award reveal, a hover trophy case (v4.11).**
+`simulateDraft` was too kind: most careers landed in the top half of the first
+round. The stock→slot slope steepened (`(100 − stock) * 0.92 + 2`, was `* 0.62 + 1`),
+the flat spread widened to ±16, the swing roll went to ~1-in-4 biased toward a
+slide, and the undrafted gate rose. The lottery is now the exception (~10% of
+autoplayed careers, was ~33%), with ~36% mid-first, ~36% early second round, and
+a real ~10% undrafted tail that feeds the overseas path. `MomentModal` becomes a
+proper gala reveal — a gold top rail over a dark radial gradient, a wide-tracked
+kicker, a big italic gold-gradient badge (`.text-gold-gradient`), a `SEASON n`
+line, the trophy under a soft glow, a white headline, a line of italic flavour
+per award, and a solid-gold "Follow the career" button. The legacy screen's
+trophy case is now `TrophyShelf`: each image-backed award (mvp/dpoy/champion/…)
+is a stack of that many trophies, overlapping at rest and easing apart on hover
+or focus (`.trophy-group` margin transition, opacity untouched); non-image
+honours stay a text row below.
+
+`ENGINE_VERSION` → `4.11.0`; packages → `0.4.11`. No schema changes.
+
 ## Consequences
 
 - The legacy score/grade bands were re-tuned (perks and the mid-season pool lift

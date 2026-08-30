@@ -16,11 +16,9 @@ import { awardArt, clubCrest, teamLogo } from '../lib/art.js';
 import { teamName } from '../lib/format.js';
 
 /**
- * The "main" awards - each gets a full-screen takeover, backed by artwork in
- * `src/assets/awards/<id>.png` (an emoji glyph shows until the file is added).
- * A moment with `kind: "ring"` always qualifies. Every *other* award still
- * gets noted, but only in the recap banner. Edit this set to change which ones
- * get the modal.
+ * The "main" awards - each gets a full-screen gala takeover, backed by artwork
+ * in `src/assets/awards/<id>.png` (a lucide icon shows until the file is added).
+ * A moment with `kind: "ring"` or `kind: "trade"` also qualifies.
  */
 const HEADLINE_AWARDS = new Set([
   'mvp',
@@ -38,7 +36,7 @@ const HEADLINE_AWARDS = new Set([
   'euroleague_champion',
 ]);
 
-/** Fallback icon (lucide) when no artwork file exists for the award. */
+/** Fallback icon when no artwork file exists for the award. */
 const ICON: Record<string, LucideIcon> = {
   mvp: Crown,
   dpoy: Shield,
@@ -55,6 +53,59 @@ const ICON: Record<string, LucideIcon> = {
   oly_bronze: Medal,
 };
 
+/** Short badge shown big and italic at the top of the card. */
+const BADGE: Record<string, string> = {
+  mvp: 'MVP',
+  dpoy: 'DPOY',
+  roy: 'ROY',
+  finals_mvp: 'FINALS MVP',
+  clutch_poy: 'CLUTCH POY',
+  mip: 'MIP',
+  sixth_man: 'SIXTH MAN',
+  champion: 'CHAMPIONS',
+  oly_gold: 'OLYMPIC GOLD',
+  oly_silver: 'OLYMPIC SILVER',
+  oly_bronze: 'OLYMPIC BRONZE',
+  euroleague_mvp: 'EUROLEAGUE MVP',
+  euroleague_champion: 'EUROLEAGUE',
+};
+
+/** The white headline line - the "you are …" beat. */
+const HEADLINE: Record<string, string> = {
+  mvp: 'THE BEST IN THE WORLD',
+  dpoy: 'NOBODY GETS PAST YOU',
+  roy: 'THE ARRIVAL',
+  finals_mvp: 'WHEN IT MATTERED MOST',
+  clutch_poy: 'ICE IN YOUR VEINS',
+  mip: 'A DIFFERENT PLAYER',
+  sixth_man: 'THE SPARK OFF THE BENCH',
+  champion: 'ON TOP OF THE WORLD',
+  oly_gold: 'GOLD FOR YOUR COUNTRY',
+  oly_silver: 'SILVER FOR YOUR COUNTRY',
+  oly_bronze: 'BRONZE FOR YOUR COUNTRY',
+  euroleague_mvp: 'THE BEST IN EUROPE',
+  euroleague_champion: 'KINGS OF EUROPE',
+};
+
+const FLAVOR: Record<string, string> = {
+  mvp: 'No individual prize is bigger than this. Tonight the whole league looks your way - you are the face of your generation.',
+  dpoy: 'They build the whole scouting report around stopping everyone else. Then they get to you.',
+  roy: 'Every legend has a first chapter. This is yours.',
+  finals_mvp:
+    'The lights were brightest, the season was on the line, and the ball kept finding you.',
+  clutch_poy:
+    'Down two, ten on the clock, everyone in the building knows where it is going. It still goes in.',
+  mip: 'Same gym, same hours, a completely different player. The work shows.',
+  sixth_man: 'The game is on the line when you check in. That is not an accident.',
+  champion: 'A summer of work, a war of a spring, and the one trophy that gets its own parade.',
+  oly_gold:
+    'You stood on the top step with your flag rising. Nothing in the club game feels like it.',
+  oly_silver: 'One game short of gold, but a medal around your neck and a country on its feet.',
+  oly_bronze: 'A medal is a medal. Your country will take it, and so will you.',
+  euroleague_mvp: 'A continent full of pros, and you were the one nobody had an answer for.',
+  euroleague_champion: 'The hardest trophy in Europe, and it is coming home with you.',
+};
+
 export function isHeadlineMoment(m: CareerMomentDto): boolean {
   return (
     m.kind === 'ring' || m.kind === 'trade' || (m.awardId != null && HEADLINE_AWARDS.has(m.awardId))
@@ -62,13 +113,10 @@ export function isHeadlineMoment(m: CareerMomentDto): boolean {
 }
 
 /**
- * Full-screen celebration for the headline beats of a season - MVP, DPOY,
- * Finals MVP, ROY, a ring. Steps through them one at a time, then unmounts
- * itself. Give it a `key` tied to the season so a new season starts fresh.
- *
- * The 128×128 box is the artwork drop point: add
- * `src/assets/awards/<awardId>.png` (see `src/lib/art.ts`) and it replaces the
- * emoji automatically.
+ * Full-screen gala celebration for the headline beats of a season - a gold
+ * top rail, a big italic badge, the trophy under a soft glow, a white headline
+ * and a line of flavour, then a solid-gold button. Steps through the season's
+ * headline moments one at a time, then unmounts itself.
  */
 export function MomentModal({
   moments,
@@ -98,53 +146,95 @@ export function MomentModal({
   const m = moments[i]!;
   const isTrade = m.kind === 'trade';
   const logo = teamLogo(m.teamId) ?? clubCrest(m.teamId);
-  // For a trade the hero image is the destination team's logo, not award art.
   const art = isTrade ? logo : awardArt(m.awardId);
   const Icon = isTrade ? ArrowLeftRight : ((m.awardId && ICON[m.awardId]) ?? Trophy);
-  const kicker = isTrade ? 'Traded to' : m.kind === 'ring' ? 'Champions' : 'The hardware';
+
+  const kicker = isTrade
+    ? 'The window · Deadline day'
+    : m.kind === 'ring'
+      ? 'The gala · Champions'
+      : 'The gala · The hardware';
+  const badge = isTrade ? 'TRADED' : ((m.awardId && BADGE[m.awardId]) ?? m.title);
+  const headline = isTrade
+    ? m.title
+    : ((m.awardId && HEADLINE[m.awardId]) ?? m.title.toUpperCase());
+  const flavor = isTrade
+    ? 'New city, new locker, a fresh number on the wall. The story keeps moving.'
+    : ((m.awardId && FLAVOR[m.awardId]) ?? 'One more line for the trophy case.');
+  const last = i + 1 >= moments.length;
 
   return (
     <div
-      className="fixed inset-0 z-[60] flex items-center justify-center bg-court-950/85 p-4"
+      className="fixed inset-0 z-[60] flex items-center justify-center bg-court-950/90 p-4 backdrop-blur-sm"
       onClick={() => setI((n) => n + 1)}
     >
       <div
         role="dialog"
         aria-label={m.title}
-        className="w-full max-w-md overflow-hidden rounded-3xl border border-amber bg-court-900 text-center shadow-[0_0_60px_-12px_rgba(249,115,22,0.55)]"
+        className="w-full max-w-md overflow-hidden rounded-2xl bg-court-950 text-center shadow-[0_0_80px_-16px_rgba(249,115,22,0.5)] ring-1 ring-amber/40"
         onClick={(e) => e.stopPropagation()}
+        style={{
+          backgroundImage:
+            'radial-gradient(120% 60% at 50% 0%, rgba(120,80,20,0.35), transparent 60%), linear-gradient(180deg, #1a130a 0%, #0a0a0b 55%)',
+        }}
       >
-        <div className="bg-gradient-to-b from-amber/25 to-transparent px-6 pb-6 pt-8">
-          <div className="text-[11px] font-bold uppercase tracking-[0.3em] text-amber">
+        {/* the gold top rail */}
+        <div className="h-1 w-full bg-gradient-to-r from-transparent via-amber to-transparent" />
+
+        <div className="px-7 pb-6 pt-8">
+          <div className="text-[10px] font-bold uppercase tracking-[0.35em] text-amber/90">
             {kicker}
           </div>
 
-          {/* ── HERO ART (128×128 box) ──
-              awards: src/assets/awards/<awardId>.png · teams: src/assets/teams/<TEAMID>.png */}
-          <div className="mx-auto my-5 flex h-32 w-32 items-center justify-center overflow-hidden rounded-2xl bg-court-950/60 text-amber">
+          <div className="mt-2 font-display text-4xl italic leading-none tracking-wide text-gold-gradient">
+            {badge}
+          </div>
+          <div className="mt-2 text-[11px] font-semibold uppercase tracking-[0.35em] text-amber/60">
+            Season {m.seasonIndex}
+          </div>
+
+          {/* trophy under a soft glow */}
+          <div className="relative mx-auto my-6 flex h-40 w-40 items-center justify-center">
+            <div
+              aria-hidden
+              className="absolute inset-0 rounded-full"
+              style={{
+                background:
+                  'radial-gradient(circle, rgba(249,180,80,0.35) 0%, rgba(249,180,80,0.08) 45%, transparent 70%)',
+              }}
+            />
             {art ? (
-              <img src={art} alt={m.title} className="block max-h-full max-w-full object-contain" />
+              <img
+                src={art}
+                alt={m.title}
+                className="relative block max-h-full max-w-full object-contain drop-shadow-[0_10px_24px_rgba(0,0,0,0.6)]"
+              />
             ) : (
-              <Icon size={64} strokeWidth={1.5} />
+              <Icon size={72} strokeWidth={1.5} className="relative text-amber" />
             )}
           </div>
 
-          <h2 className="font-display text-3xl leading-none tracking-wide text-ink">{m.title}</h2>
+          <h2 className="font-display text-2xl leading-tight tracking-wide text-ink">{headline}</h2>
+
           <p className="mt-2 text-sm text-ink-dim">{m.subtitle}</p>
 
           {!isTrade && m.teamId && (
-            <div className="mt-3 inline-flex items-center gap-2 text-xs text-ink-dim">
-              {logo && <img src={logo} alt="" className="h-5 w-5 object-contain" />}
+            <div className="mt-2 inline-flex items-center gap-2 text-xs font-semibold text-amber/80">
+              {logo && <img src={logo} alt="" className="h-4 w-4 object-contain" />}
               {teamName(m.teamId)}
             </div>
           )}
+
+          <p className="mx-auto mt-4 max-w-[30ch] text-[13px] italic leading-relaxed text-ink-dim">
+            {flavor}
+          </p>
         </div>
 
         <button
           onClick={() => setI((n) => n + 1)}
-          className="w-full border-t border-court-700 bg-court-900 px-6 py-3 font-display text-sm uppercase tracking-widest text-amber hover:bg-amber/10"
+          className="w-full bg-gradient-to-r from-amber to-amber-soft px-6 py-3.5 font-display text-sm uppercase tracking-[0.2em] text-court-950 transition-[filter] hover:brightness-110"
         >
-          {i + 1 < moments.length ? `Next · ${i + 1}/${moments.length}` : 'Continue'}
+          {last ? 'Follow the career →' : `Next (${i + 1}/${moments.length}) →`}
         </button>
       </div>
     </div>

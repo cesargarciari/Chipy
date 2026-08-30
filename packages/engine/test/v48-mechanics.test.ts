@@ -128,6 +128,47 @@ describe('chemistry + midseason', () => {
     expect(ids).toContain('msx_burner_account');
     expect(ids).toContain('msx_teammate_birthday');
   });
+
+  it('chemistry questions come no more than once every two seasons', () => {
+    let totalChem = 0;
+    for (let i = 0; i < 50; i += 1) {
+      const seed = `chem-cadence-${i}`;
+      const profile = profileFor(i);
+      const choices: Array<{ nodeId: string; choiceId: string }> = [];
+      const chemSeasons: number[] = [];
+      for (let step = 0; step < 400; step += 1) {
+        const res = runCareer({ seed, profile, choices });
+        if (res.status === 'complete') break;
+        const p = res.pending;
+        let id: string;
+        if (p.kind === 'chemistry') {
+          chemSeasons.push(Number(p.nodeId.replace('chem', '')));
+          id = p.chemistry!.decision.options[0]!.id;
+        } else if (p.kind === 'prologue') id = p.prologue!.options[0]!.id;
+        else if (p.kind === 'college_pick') id = p.collegePick!.schools[0]!.id;
+        else if (p.kind === 'college_year')
+          id = (
+            p.collegeYear!.options.find((o) => o.id.startsWith('cy_declare')) ??
+            p.collegeYear!.options[0]!
+          ).id;
+        else if (p.kind === 'landing') id = p.landing!.offers[0]!.id;
+        else if (p.kind === 'midseason') id = p.midseason!.decision.options[0]!.id;
+        else if (p.kind === 'overseas_offer') id = p.overseasOffer!.options[0]!.id;
+        else if (p.kind === 'farewell') id = 'quiet_goodbye';
+        else {
+          const opts = p.season!.decision.options;
+          id = (opts.find((o) => o.id !== 'retire' && o.id !== 'demand_trade') ?? opts[0]!).id;
+        }
+        choices.push({ nodeId: p.nodeId, choiceId: id });
+      }
+      totalChem += chemSeasons.length;
+      for (let k = 1; k < chemSeasons.length; k += 1) {
+        expect(chemSeasons[k]! - chemSeasons[k - 1]!).toBeGreaterThanOrEqual(2);
+      }
+    }
+    // They still fire regularly (just not back-to-back).
+    expect(totalChem).toBeGreaterThan(50);
+  });
 });
 
 /** Walk `count` steps into a career always taking option 0, for preview probing. */

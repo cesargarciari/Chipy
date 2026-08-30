@@ -3,7 +3,7 @@
  * existing `(seed, profile, choices)` tuple. Stored on every `CareerSummary` so
  * the API can tell whether a persisted career predates the current rules.
  */
-export const ENGINE_VERSION = '4.9.0';
+export const ENGINE_VERSION = '4.11.0';
 
 export const POSITIONS = ['PG', 'SG', 'SF', 'PF', 'C'] as const;
 export type Position = (typeof POSITIONS)[number];
@@ -695,6 +695,8 @@ export interface CareerState {
   timeline: TimelineEntry[];
   firedScenarioIds: string[];
   firedChemistryIds: string[];
+  /** Season number the last chemistry question fired - keeps them 2-3 apart. */
+  lastChemistrySeason: number;
   growthBiases: GrowthBias[];
   lastPlayedStats: SeasonStatLine | null;
 }

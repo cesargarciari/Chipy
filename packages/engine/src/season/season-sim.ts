@@ -245,9 +245,9 @@ export function simulatePlayoffs(
 
   // A locked-in playoff team.
   const run = rng();
-  if (p > 0.8 && run < (p - 0.66) * 0.72) return 'champion';
-  if (p > 0.72 && run < (p - 0.56) * 0.74) return 'finals';
-  if (p > 0.62 && run < (p - 0.46) * 0.8) return 'conf_finals';
-  if (p > 0.54 && run < 0.5) return 'second_round';
+  if (p > 0.83 && run < (p - 0.7) * 0.62) return 'champion';
+  if (p > 0.74 && run < (p - 0.58) * 0.68) return 'finals';
+  if (p > 0.63 && run < (p - 0.47) * 0.78) return 'conf_finals';
+  if (p > 0.55 && run < 0.5) return 'second_round';
   return 'first_round';
 }
