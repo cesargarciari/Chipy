@@ -147,7 +147,7 @@ export function freeAgencyOffers({
     const strength = teamStrengthFor(seed, team.id, seasonIndex);
     const window = windowFromStrength(strength);
     const role = projectRole(overall, strength);
-    const years = clamp(contractLenFor(rng, role, age), 1, 5);
+    const years = clamp(contractLenFor(rng, role, age, overall), 1, 5);
     // Bird rights - the incumbent can always offer a touch more.
     const salary = roundTo(offerSalary(rng, marketValue, strength, years) * (resign ? 1.08 : 1), 1);
     return {

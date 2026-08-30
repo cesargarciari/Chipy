@@ -29,13 +29,13 @@ export interface StatusArgs {
  */
 export function statusTier(a: StatusArgs): StatusTier {
   let tier: StatusTier =
-    a.overall >= 93
+    a.overall >= 92
       ? 'generational'
-      : a.overall >= 88
+      : a.overall >= 87
         ? 'superstar'
-        : a.overall >= 82
+        : a.overall >= 81
           ? 'star'
-          : a.overall >= 74
+          : a.overall >= 73
             ? 'role_player'
             : 'fringe';
 
@@ -43,9 +43,9 @@ export function statusTier(a: StatusArgs): StatusTier {
     if (RANK[tier] < RANK[to]) tier = to;
   };
 
-  if (a.allStars >= 1 || a.hype >= 82) lift('star');
-  if (a.mvps >= 1 || a.allNba >= 3) lift('superstar');
-  if (a.mvps >= 2 && a.peakOverall >= 92) lift('generational');
+  if (a.allStars >= 1 || a.hype >= 80) lift('star');
+  if (a.mvps >= 1 || a.allNba >= 2) lift('superstar');
+  if ((a.mvps >= 2 && a.peakOverall >= 91) || a.mvps >= 3) lift('generational');
   return tier;
 }
 

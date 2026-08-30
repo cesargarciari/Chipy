@@ -23,7 +23,7 @@ describe('POST /api/careers', () => {
     if (replay.status === 'complete') {
       expect(json.summary).toEqual(JSON.parse(JSON.stringify(replay.summary)));
     }
-    expect(json.summary.engineVersion).toBe('4.11.0');
+    expect(json.summary.engineVersion).toBe('4.12.0');
     expect(json.summary.seasons.length).toBeGreaterThan(0);
     expect(json.summary.careerEarnings).toBeGreaterThan(0);
   });

@@ -111,6 +111,7 @@ export {
   type RolledInjury,
 } from './season/injuries.js';
 export { statusTier, statusRank, tradeChance } from './season/status.js';
+export { seasonRecap } from './season/recap.js';
 export {
   buildPerkShop,
   perkHighlightKeys,

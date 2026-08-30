@@ -107,7 +107,9 @@ The API creates the local table on boot. To (re)create it manually:
    at 20). The **draft** is genuinely random and rarely kind: only a true
    blue-chip run projects into the lottery, and a wide spread plus the odd reach
    or slide sends most players to the mid-first, the second round, or out of the
-   draft entirely. It sets a hidden **talent** ceiling.
+   draft entirely. **Where you actually land sets your talent ceiling** — a high
+   pick almost always gets real growth headroom, a late pick usually doesn't, but
+   a few second-rounders still climb into stardom.
 3. **Landing spot** — choose one of three team offers (weighted by draft slot and
    a home-market roll), each with a **dollar figure**. That's your rookie team.
 4. **Season loop** — each offseason you first visit the **perks shop** (a modal
@@ -116,8 +118,11 @@ The API creates the local table on boot. To (re)create it manually:
    a plain cost; yearly perks auto-renew from the bank, permanent ones unlock
    mid-career), then make the year's call: a **scenario** from a themed content
    library, or — on a contract year — **free agency**, where a rival's bigger
-   offer is a real temptation. Every card shows its exact `+N ATTRIBUTE` / `±$M`
-   effects and lights the stat tiles it moves. ~30% of seasons a **bizarre
+   offer is a real temptation (modest-overall veterans get short, 1-2 year
+   journeyman deals; stars get the long ones). Every question sits in a framed
+   card — a coloured strand up top, the prompt, then the options right beneath it
+   (they ease in as the screen loads) — and each card shows its exact
+   `+N ATTRIBUTE` / `±$M` effects and lights the stat tiles it moves. ~30% of seasons a **bizarre
    mid-season fork** fires instead of the silent event, and every branch lands a
    **concrete consequence** — the front office cools on you and the situation
    gets tense, the staff fixes the rotation and you go back to shining, a groggy
@@ -227,12 +232,18 @@ owners — ship your own stylised marks if you publish.
   legend), a **status tier** + **trade probability** with team-forced and
   player-demanded trades (shown as a "traded to" modal), a **5-season
   championship window** after a ring, a **draft** where the lottery is the
-  exception (most players go mid-first, second round, or undrafted) and
-  draft-slot-scaled washout odds (late second-rounders bust to the EuroLeague
-  far more often), end-of-season **big-moment** cards (rings, awards, trades,
-  serious injuries) with a full-screen **gala award reveal** for the headline
-  trophies and a **horizontal hover-spread trophy case** on the legacy screen,
-  per-career **randomised prologue** options, age that tracks extra college
+  exception (most players go mid-first, second round, or undrafted), **draft slot
+  as the talent ceiling** (high picks develop, most late picks don't, a few
+  second-round steals still do) with draft-slot-scaled washout odds (late
+  second-rounders bust to the EuroLeague far more often), **position-weighted
+  DPOY** (bigs and wings, most of all a superstar defender with 85+ D) and a
+  higher MVP rate for bona-fide superstars, **overall-scaled contract lengths**
+  (journeymen sign 1-2 years), end-of-season **big-moment** cards (rings, awards,
+  trades, serious injuries) with a full-screen **gala award reveal** for the
+  headline trophies and a **horizontal hover-spread trophy case** on the legacy
+  screen, in-career questions in a **framed scenario card** (colour strand,
+  prompt above the options, options fading in), per-career **randomised prologue**
+  options, age that tracks extra college
   years, performance-driven **fame** (no longer a trainable stat), a slow rating
   economy where option
   cards show the exact gain after the 99-cap plus a **rare** once-a-career gold

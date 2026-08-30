@@ -1,4 +1,12 @@
-import type { ArchetypeDef, AwardId, Role, SeasonStatLine, TeamResult } from '../types.js';
+import type {
+  ArchetypeDef,
+  AwardId,
+  Position,
+  Role,
+  SeasonStatLine,
+  StatusTier,
+  TeamResult,
+} from '../types.js';
 import type { Rng } from '../rng.js';
 import type { SeasonEffect } from './effects.js';
 
@@ -42,16 +50,35 @@ export interface AwardArgs {
   teamResult: TeamResult;
   archetype: ArchetypeDef;
   effect: SeasonEffect;
+  /** The player's listed position - bigs and wings win DPOY far more often. */
+  position: Position;
+  /** Merged defensive rating (mean of the two D's), 25..99. */
+  defenseRating: number;
+  /** League pecking order this season - superstars clear the MVP bar more often. */
+  status: StatusTier;
 }
 
 export function resolveAwards(args: AwardArgs): AwardId[] {
-  const { rng, seasonIndex, stats, role, impact, defImpact, prevImpact, teamResult, archetype } =
-    args;
+  const {
+    rng,
+    seasonIndex,
+    stats,
+    role,
+    impact,
+    defImpact,
+    prevImpact,
+    teamResult,
+    archetype,
+    position,
+    defenseRating,
+    status,
+  } = args;
   const out: AwardId[] = [];
   if (stats.gp === 0) return out;
 
   const aff = archetype.awardAffinity;
   const defScore = defImpact * (0.7 + aff.defense * 0.4) * (args.effect.awardMult?.defense ?? 1);
+  const elite = status === 'superstar' || status === 'generational';
 
   // Rookie honours
   if (seasonIndex === 0) {
@@ -69,15 +96,30 @@ export function resolveAwards(args: AwardArgs): AwardId[] {
     else if (impact >= 20.5 + rng() * 2) out.push('all_nba_3');
   }
 
-  // All-Defense + DPOY
+  // All-Defense + DPOY. A big or a wing is the prototype - guards win it rarely -
+  // and a superstar-level defender with elite tools (85+) is the front-runner.
+  const dpoyPosBonus =
+    position === 'C'
+      ? 2
+      : position === 'PF'
+        ? 1.5
+        : position === 'SF'
+          ? 1.1
+          : position === 'SG'
+            ? 0.2
+            : 0;
+  const eliteDefender = defenseRating >= 85;
+  const dpoyScore = defScore + dpoyPosBonus + (elite && eliteDefender ? 1.5 : 0);
   let allDef1 = false;
-  if (defScore >= 11 + rng() * 2 && rng() < 0.5) {
+  if (dpoyScore >= 11 + rng() * 2 && rng() < 0.5) {
     out.push('all_defense_1');
     allDef1 = true;
-  } else if (defScore >= 9 + rng() * 2) {
+  } else if (dpoyScore >= 9 + rng() * 2) {
     out.push('all_defense_2');
   }
-  if (allDef1 && defScore >= 13.5 + rng() * 1.5 && rng() < 0.3) out.push('dpoy');
+  if (allDef1 && dpoyScore >= 13.5 + rng() * 1.5 && rng() < (eliteDefender ? 0.42 : 0.3)) {
+    out.push('dpoy');
+  }
 
   // Stat titles
   if (leagueBest(rng, stats.ppg, 23.5, 5, 0.1)) out.push('scoring_title');
@@ -86,12 +128,14 @@ export function resolveAwards(args: AwardArgs): AwardId[] {
   if (leagueBest(rng, stats.spg, 1.9, 0.5, 0.12)) out.push('steals_title');
   if (leagueBest(rng, stats.bpg, 2.3, 0.7, 0.12)) out.push('blocks_title');
 
-  // MVP - the rarest
+  // MVP - the rarest, but a bona fide superstar clears the bar a good deal more
+  // often than a one-year All-Star.
   const mvpScore =
     impact *
     (0.85 + (TEAM_SUCCESS[teamResult] ?? 0)) *
     (0.8 + aff.scoring * 0.18 + aff.playmaking * 0.14);
-  if (isAllStar && leagueBest(rng, mvpScore, 24, 6, 0.04)) out.push('mvp');
+  const mvpBase = 0.055 + (status === 'generational' ? 0.05 : status === 'superstar' ? 0.03 : 0);
+  if (isAllStar && leagueBest(rng, mvpScore, 22.5, 6, mvpBase)) out.push('mvp');
 
   // Most Improved
   if (

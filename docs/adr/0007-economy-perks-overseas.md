@@ -282,7 +282,7 @@ the flat spread widened to ±16, the swing roll went to ~1-in-4 biased toward a
 slide, and the undrafted gate rose. The lottery is now the exception (~10% of
 autoplayed careers, was ~33%), with ~36% mid-first, ~36% early second round, and
 a real ~10% undrafted tail that feeds the overseas path. `MomentModal` becomes a
-proper gala reveal — a gold top rail over a dark radial gradient, a wide-tracked
+proper gala reveal - a gold top rail over a dark radial gradient, a wide-tracked
 kicker, a big italic gold-gradient badge (`.text-gold-gradient`), a `SEASON n`
 line, the trophy under a soft glow, a white headline, a line of italic flavour
 per award, and a solid-gold "Follow the career" button. The legacy screen's
@@ -292,6 +292,33 @@ or focus (`.trophy-group` margin transition, opacity untouched); non-image
 honours stay a text row below.
 
 `ENGINE_VERSION` → `4.11.0`; packages → `0.4.11`. No schema changes.
+
+**Draft slot drives talent, DPOY by position, journeyman deals, scenario framing
+(v4.12).** The talent ceiling now keys off the _actual_ draft slot, not the
+pre-draft scouting grade: `slotCeiling = clamp(1.19 − pick * 0.0135, …)` plus a
+small "second-round steal" roll (a ~15% shot at a real bump for picks 31+, ~3%
+for the lottery). Peak overall by slot comes out roughly top-5 ~94, lottery ~91,
+mid-first ~84, early second ~79, late/undrafted ~73 - and ~20% of the second-
+round group still peaks star-level, so a few steals happen without it being the
+norm. The early-washout → EuroLeague path got harsher for the deep picks
+(`draftRisk` up to 0.30 for pick 46+ / undrafted, roll `< 0.32 + risk`, euro-
+interest floor 67 → 64), so more of the tail actually goes overseas. `statusTier`
+thresholds eased a notch (superstar 88 → 87, `allNba >= 2` lifts) and `resolveAwards`
+now takes `position` / `defenseRating` / `status`: the MVP base rate rose
+(`0.055` + a superstar/generational bump, floor 24 → 22.5) and DPOY leans hard on
+size - a `dpoyPosBonus` of +2 (C) / +1.5 (PF) / +1.1 (SF) / +0.2 (SG) / 0 (PG),
+an extra bump and a higher final gate for a superstar defender with a merged
+defense rating of 85+. `contractLenFor` takes `overall`: a sub-77 player past 23
+is a journeyman, capped to 1-2 years (young players and stars untouched). Web:
+`ScenarioFrame` wraps every in-career question - a coloured top strand (amber
+season / sky locker-room / emerald mid-season), the kicker/title/prompt, then the
+options directly beneath it with an `option-enter` opacity fade; the ratings +
+money HUD moves to a `footer` below the options instead of between the question
+and the answer. `ChoiceCard` gains an `accent` (left strand + matching hover
+border). The trophy shelf hover is now per-award: `.trophy-group:hover` /
+`:focus-visible` spreads just that stack.
+
+`ENGINE_VERSION` → `4.12.0`; packages → `0.4.12`. No schema changes.
 
 ## Consequences
 

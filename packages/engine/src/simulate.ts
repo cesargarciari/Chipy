@@ -4,7 +4,7 @@ import { getCountry } from './data/countries.js';
 import { getPerk, perkExists } from './data/perks.js';
 import { getTeam, teamLabel, TEAMS } from './data/teams.js';
 import { simulateDraft } from './draft.js';
-import { applyOption, effectiveRatings, optionView } from './options.js';
+import { applyOption, optionView } from './options.js';
 import { overallFor } from './ratings.js';
 import { clamp, mulberry32, normalizeSeed, weightedPick } from './rng.js';
 import {
@@ -52,6 +52,7 @@ import {
 } from './season/chemistry.js';
 import { findMidseasonOption, pickMidseason, resolveMidseason } from './season/midseason.js';
 import { detectSeasonMoments } from './season/moments.js';
+import { seasonRecap } from './season/recap.js';
 import {
   aggregatePerkEffect,
   buildPerkShop,
@@ -150,8 +151,6 @@ export interface SeasonPreview {
   ringWindow: number;
   /** 0..100 team chemistry - low chemistry drives trades. */
   chemistry: number;
-  /** Rating keys the last decision bumped - the client tints these. */
-  raisedKeys: string[];
   /** Big beats from the season that just finished. */
   moments: CareerMoment[];
   lastSeason: SeasonRecord | null;
@@ -349,7 +348,19 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
 
   // ---- Draft ------------------------------------------------------------
   state.draft = simulateDraft(rng, state);
-  state.talent = clamp(0.46 + (state.draftStock / 100) * 0.5 + rng() ** 2 * 0.32, 0.46, 1.33);
+  // Talent ceiling is set mostly by where you actually landed: a high pick
+  // almost always gets real growth headroom, a late pick usually does not - but
+  // a few still pop (the "second-round steal"), and the odds of that rise the
+  // deeper you went. A prospect who genuinely slid keeps some credit for the
+  // pre-draft scouting grade.
+  const draftSlot = state.draft.undrafted ? 62 : state.draft.pick!;
+  const slotCeiling = clamp(1.19 - draftSlot * 0.0135, 0.52, 1.19);
+  const stockNudge = ((state.draftStock - 55) / 100) * 0.12;
+  const stealRoll = rng();
+  const stealMag = rng();
+  const stealChance = draftSlot >= 31 ? 0.15 : draftSlot >= 15 ? 0.08 : 0.03;
+  const steal = stealRoll < stealChance ? 0.14 + stealMag * 0.3 : 0;
+  state.talent = clamp(slotCeiling + stockNudge + steal + rng() ** 2 * 0.1, 0.46, 1.38);
   state.timeline.push({
     nodeId: 'draft',
     choiceId: '-',
@@ -399,8 +410,6 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
 
   // ---- Season loop --------------------------------------------------
   let prevImpact = 0;
-  // Rating keys the most recent decision bumped - the client tints these orange.
-  let raisedKeys: string[] = [];
   // HUD-only reads, refreshed at the top of each season before any preview.
   let hudStatus: StatusTier = 'fringe';
   let hudTradeChance = 0;
@@ -459,7 +468,6 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
     tradeChance: hudTradeChance,
     ringWindow: state.ringWindowLeft,
     chemistry: state.chemistry,
-    raisedKeys: [...raisedKeys],
     // The big beats of the season just finished - the web pops these as cards.
     moments: state.moments.filter((m) => m.seasonIndex === sn - 1),
     lastSeason: state.seasons.at(-1) ?? null,
@@ -768,9 +776,6 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
           throw new Error(`Unknown scenario option "${pick.choiceId}" for "${scenarioId}"`);
         }
         const option = found.scenario.options.find((o) => o.id === pick.choiceId)!;
-        raisedKeys = Object.entries(effectiveRatings(option))
-          .filter(([, v]) => (v ?? 0) > 0)
-          .map(([k]) => k);
         Object.assign(state, applyOption(state, option));
         effect = stanceToEffect(option.stance);
         decisionHeadline = `${decision.title}: ${option.label}.`;
@@ -1154,6 +1159,23 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
       // Open (or refresh) the 5-season championship window on a title.
       if (teamResult === 'champion') state.ringWindowLeft = 5;
 
+      // Fresh league status off this season's finished overall + tally - the
+      // MVP / DPOY bars read it.
+      const seasonStatus = statusTier({
+        overall: overallAfter,
+        peakOverall: state.peakOverall,
+        mvps: state.awards.mvp ?? 0,
+        allNba:
+          (state.awards.all_nba_1 ?? 0) +
+          (state.awards.all_nba_2 ?? 0) +
+          (state.awards.all_nba_3 ?? 0),
+        allStars: state.awards.all_star ?? 0,
+        hype: state.hype,
+      });
+      const defenseRating = Math.round(
+        (state.ratings.interiorDefense + state.ratings.perimeterDefense) / 2,
+      );
+
       const seasonAwards = [
         ...resolveAwards({
           rng,
@@ -1166,6 +1188,9 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
           teamResult,
           archetype,
           effect,
+          position: profile.position,
+          defenseRating,
+          status: seasonStatus,
         }),
         ...runNationalSummer(overallAfter, sim.impact),
       ];
@@ -1197,6 +1222,13 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
       const tierUp = tierRank(provTier) > seenRank ? provTier : null;
       if (tierUp) state.franchiseTierSeen[teamId] = tierUp;
 
+      // A creative, seeded one-liner for how the year ended - its own derived
+      // stream, so it never shifts the main simulation.
+      const recap = seasonRecap(derivedRng(seed, 'recap', seasonNumber), {
+        result: teamResult,
+        missedGames: sim.gamesMissed,
+      });
+
       // ---- Big-moment detection -------------------------------------
       const pointsBefore = state.seasons.reduce((n, s) => n + s.stats.gp * s.stats.ppg, 0);
       state.seasons.push({
@@ -1220,6 +1252,7 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
         ratingsAfter: { ...state.ratings },
         injuredGames: sim.gamesMissed,
         salary: state.salary,
+        recap,
       });
       const pointsAfter = pointsBefore + sim.stats.gp * sim.stats.ppg;
       for (const m of detectSeasonMoments({
@@ -1336,17 +1369,19 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
       // overall still isn't safe).
       const draftPick = state.draft?.pick ?? null;
       const draftRisk = state.draft?.undrafted
-        ? 0.24
+        ? 0.32
         : draftPick === null
           ? 0
           : draftPick >= 46
-            ? 0.22
+            ? 0.3
             : draftPick >= 31
-              ? 0.14
+              ? 0.2
               : draftPick >= 21
-                ? 0.04
-                : 0;
-      const washCeil = draftRisk >= 0.14 ? 77 : 73;
+                ? 0.08
+                : draftPick >= 15
+                  ? 0.03
+                  : 0;
+      const washCeil = draftRisk >= 0.14 ? 78 : 73;
       const earlyWashout =
         !state.forcedRetire &&
         !underContract &&
@@ -1357,10 +1392,10 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
           (draftRisk >= 0.14 && lastRole === 'rotation')) &&
         overallAfter < washCeil &&
         state.talent < 1.0 &&
-        rng() < 0.3 + draftRisk;
+        rng() < 0.32 + draftRisk;
       // A washed-out player who can still hoop gets real EuroLeague interest; the
       // rest are simply out of the game (→ a short, low-grade career).
-      const euroInterest = overallAfter >= 67 && state.age <= 33;
+      const euroInterest = overallAfter >= 64 && state.age <= 33;
 
       // Age-out cascade - the decline is all after ~34. Only fires at a contract
       // boundary; layered with real rng so careers end anywhere from the mid-30s

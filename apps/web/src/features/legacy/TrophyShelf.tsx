@@ -58,17 +58,20 @@ export function TrophyShelf({ awards }: TrophyShelfProps) {
   return (
     <div className="space-y-4">
       {shelf.length > 0 && (
-        <div
-          className="trophy-shelf flex flex-wrap items-end gap-5 rounded-xl border border-court-700 bg-gradient-to-b from-court-800/70 to-court-900 px-4 pb-3 pt-5"
-          tabIndex={0}
-        >
+        <div className="trophy-shelf flex flex-wrap items-end gap-5 rounded-xl border border-court-700 bg-gradient-to-b from-court-800/70 to-court-900 px-4 pb-3 pt-5">
           {shelf.map((id) => {
             const count = awards[id] ?? 0;
             const src = awardArt(id)!;
             const label = `${count}x ${AWARD_LABELS[id as AwardId]}`;
             return (
-              <div key={id} className="flex flex-col items-center" title={label}>
-                <div className="trophy-group flex items-end" aria-label={label}>
+              <div
+                key={id}
+                className="trophy-group flex flex-col items-center rounded-lg outline-none focus-visible:ring-1 focus-visible:ring-amber/60"
+                title={label}
+                aria-label={label}
+                tabIndex={0}
+              >
+                <div className="trophy-group-stack flex items-end">
                   {Array.from({ length: Math.min(count, MAX_IN_STACK) }).map((_, k) => (
                     <img
                       key={k}

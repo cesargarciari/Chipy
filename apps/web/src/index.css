@@ -73,20 +73,43 @@
   color: transparent;
 }
 
-/* Horizontal trophy case on the legacy screen. Within an award, the copies
- * overlap at rest and ease apart when the shelf is hovered or focused. Opacity
- * is untouched, so every trophy stays visible the whole time. */
-.trophy-group > * + * {
+/* Horizontal trophy case on the legacy screen. Within one award, the copies
+ * overlap at rest and ease apart when you hover (or focus) that award alone -
+ * the rest of the shelf stays put. Opacity is untouched, so every trophy is
+ * visible the whole time. */
+.trophy-group-stack > * + * {
   margin-left: -1.4rem;
   transition: margin-left 0.28s cubic-bezier(0.22, 1, 0.36, 1);
 }
-.trophy-shelf:hover .trophy-group > * + *,
-.trophy-shelf:focus-within .trophy-group > * + * {
+.trophy-group:hover .trophy-group-stack > * + *,
+.trophy-group:focus-visible .trophy-group-stack > * + * {
   margin-left: 0.3rem;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .trophy-group > * + * {
+  .trophy-group-stack > * + * {
     transition: none;
+  }
+}
+
+/* Option cards easing in under a freshly posed scenario question. Opacity only:
+ * a transform here makes Playwright wait on per-click "stability" and flakes the
+ * e2e (see .decision-enter). */
+.option-enter {
+  animation: chipy-fade 0.34s ease-out both;
+}
+.option-enter:nth-child(2) {
+  animation-delay: 0.05s;
+}
+.option-enter:nth-child(3) {
+  animation-delay: 0.1s;
+}
+.option-enter:nth-child(4) {
+  animation-delay: 0.15s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .option-enter {
+    animation: none;
   }
 }

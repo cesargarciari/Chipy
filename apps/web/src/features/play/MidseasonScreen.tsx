@@ -2,6 +2,7 @@ import type { PendingDecision } from '@chipy/engine';
 import { useState } from 'react';
 import { ChoiceCard } from '../../components/ChoiceCard.js';
 import { CareerHud } from './CareerHud.js';
+import { ScenarioFrame } from './ScenarioFrame.js';
 
 type Midseason = NonNullable<PendingDecision['midseason']>;
 
@@ -17,21 +18,19 @@ export function MidseasonScreen({
   const { decision, preview } = midseason;
 
   return (
-    <div className="decision-enter space-y-4">
-      <div>
-        <div className="inline-flex items-center gap-2 rounded-full bg-amber/15 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-amber">
-          Mid-season · Age {preview.age}
-        </div>
-        <h2 className="mt-2 text-2xl">{decision.title}</h2>
-        <p className="text-sm text-ink-dim">{decision.prompt}</p>
-      </div>
-
-      <CareerHud preview={preview} highlight={highlight} />
-
+    <ScenarioFrame
+      accent="emerald"
+      kicker={`Mid-season · Age ${preview.age}`}
+      title={decision.title}
+      prompt={decision.prompt}
+      footer={<CareerHud preview={preview} highlight={highlight} />}
+    >
       <div className="grid gap-3 sm:grid-cols-2">
         {decision.options.map((o) => (
           <ChoiceCard
             key={o.id}
+            className="option-enter"
+            accent="emerald"
             title={o.label}
             description={o.blurb}
             effects={o.effects}
@@ -43,6 +42,6 @@ export function MidseasonScreen({
           />
         ))}
       </div>
-    </div>
+    </ScenarioFrame>
   );
 }

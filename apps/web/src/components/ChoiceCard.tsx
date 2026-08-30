@@ -4,6 +4,8 @@ import { cn } from '../lib/cn.js';
 import { moneyM } from '../lib/format.js';
 import { mergeDefenseChips, toDisplayKey } from '../lib/ratings.js';
 
+type ChoiceAccent = 'amber' | 'sky' | 'emerald';
+
 interface ChoiceCardProps {
   title: string;
   description: string;
@@ -16,9 +18,25 @@ interface ChoiceCardProps {
   rare?: boolean;
   /** NBA team id / overseas club id - shows that logo on the card (contracts). */
   teamId?: string;
+  /** Coloured left strand + matching hover border, keyed to the scenario type. */
+  accent?: ChoiceAccent;
+  /** Extra classes on the button (e.g. the `option-enter` fade-in). */
+  className?: string;
   /** Reports the stat-tile keys this option would move (or null on leave). */
   onHoverKeys?: (keys: string[] | null) => void;
 }
+
+const ACCENT_BORDER: Record<ChoiceAccent, string> = {
+  amber: 'hover:border-amber hover:bg-amber/[0.04]',
+  sky: 'hover:border-sky-400 hover:bg-sky-400/[0.05]',
+  emerald: 'hover:border-emerald-400 hover:bg-emerald-400/[0.05]',
+};
+
+const ACCENT_STRAND: Record<ChoiceAccent, string> = {
+  amber: 'bg-amber/40 group-hover:bg-amber',
+  sky: 'bg-sky-400/40 group-hover:bg-sky-400',
+  emerald: 'bg-emerald-400/40 group-hover:bg-emerald-400',
+};
 
 /** El Idolo–style option card: condensed title, blurb, effect chips, faint watermark. */
 export function ChoiceCard({
@@ -31,6 +49,8 @@ export function ChoiceCard({
   tone = 'default',
   rare = false,
   teamId,
+  accent,
+  className,
   onHoverKeys,
 }: ChoiceCardProps) {
   const logo = teamId ? (teamLogo(teamId) ?? clubCrest(teamId)) : undefined;
@@ -38,6 +58,9 @@ export function ChoiceCard({
   const statKeys = effects.filter((e) => e.key !== 'money').map((e) => toDisplayKey(e.key));
   const hoverOn = onHoverKeys ? () => onHoverKeys(statKeys) : undefined;
   const hoverOff = onHoverKeys ? () => onHoverKeys(null) : undefined;
+  // The strand + accent border are a plain-scenario dressing; gold and danger
+  // options keep their own stronger treatment.
+  const strand = accent && !rare && tone !== 'danger' ? accent : null;
 
   return (
     <button
@@ -52,9 +75,21 @@ export function ChoiceCard({
           ? 'border-amber bg-amber/[0.06] shadow-[0_0_0_1px_rgba(249,115,22,0.35)] hover:bg-amber/10'
           : tone === 'danger'
             ? 'border-court-700 hover:border-rose-500'
-            : 'border-court-700 bg-court-900 hover:border-amber hover:bg-amber/[0.04]',
+            : strand
+              ? cn('border-court-700 bg-court-900', ACCENT_BORDER[strand])
+              : 'border-court-700 bg-court-900 hover:border-amber hover:bg-amber/[0.04]',
+        className,
       )}
     >
+      {strand && (
+        <span
+          aria-hidden
+          className={cn(
+            'pointer-events-none absolute inset-y-0 left-0 w-[3px] transition-colors',
+            ACCENT_STRAND[strand],
+          )}
+        />
+      )}
       {watermark && (
         <span
           aria-hidden

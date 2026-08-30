@@ -9,6 +9,7 @@ import { AwardChips } from './AwardChips.js';
 import { CareerHud } from './CareerHud.js';
 import { MomentsBanner } from './MomentsBanner.js';
 import { PerksDrawer } from './PerksDrawer.js';
+import { ScenarioFrame } from './ScenarioFrame.js';
 import { StatLine } from './StatLine.js';
 
 type Season = NonNullable<PendingDecision['season']>;
@@ -88,16 +89,19 @@ export function SeasonScreen({
         </Card>
       )}
 
-      <div key={decision.nodeId} className="decision-enter space-y-3">
-        <div>
-          <div className="text-xs uppercase tracking-wide text-ink-dim">{decision.theme}</div>
-          <h3 className="text-2xl">{decision.title}</h3>
-          <p className="text-sm text-ink-dim">{decision.prompt}</p>
-        </div>
+      <ScenarioFrame
+        key={decision.nodeId}
+        accent="amber"
+        kicker={decision.theme}
+        title={decision.title}
+        prompt={decision.prompt}
+      >
         <div className="grid gap-3 sm:grid-cols-2">
           {decision.options.map((o) => (
             <ChoiceCard
               key={o.id}
+              className="option-enter"
+              accent="amber"
               title={o.label}
               description={o.blurb}
               effects={o.effects}
@@ -111,7 +115,7 @@ export function SeasonScreen({
             />
           ))}
         </div>
-      </div>
+      </ScenarioFrame>
     </div>
   );
 }

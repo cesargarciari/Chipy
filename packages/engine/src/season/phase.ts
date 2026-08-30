@@ -13,12 +13,18 @@ export function phaseFor(age: number, seasonIndex: number): CareerPhase {
 }
 
 /** Length of the next contract, in years - capped hard for older players. */
-export function contractLenFor(rng: Rng, role: Role, age = 27): number {
+export function contractLenFor(rng: Rng, role: Role, age = 27, overall = 82): number {
   let years: number;
   if (role === 'franchise') years = int(rng, 3, 5);
   else if (role === 'starter') years = int(rng, 3, 4);
   else if (role === 'rotation') years = int(rng, 2, 3);
   else years = int(rng, 1, 2);
+
+  // A modest-overall player past his development years is a journeyman: signed
+  // a year or two at a time, not a pillar you build around. (Young players still
+  // get room, and this never lengthens a deal.)
+  const journeymanYears = int(rng, 1, 2);
+  if (overall < 77 && age >= 24) years = Math.min(years, journeymanYears);
 
   // Nobody hands a 36-year-old a four-year deal. The cap tightens with age so
   // late-career contracts don't outrun the age-out cascade (which only fires at
