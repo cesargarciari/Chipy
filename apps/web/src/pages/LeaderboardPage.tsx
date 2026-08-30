@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { Card, CardBody, CardTitle } from '../components/ui/card.js';
 import { api } from '../lib/api.js';
-import { GRADE_TONE, LEGACY_TIER_LABELS, archetypeLabel } from '../lib/format.js';
+import { GRADE_TONE, LEGACY_TIER_LABELS, archetypeLabel, moneyM } from '../lib/format.js';
 
 export function LeaderboardPage() {
   const { data, isLoading, isError } = useQuery({
@@ -44,6 +44,9 @@ export function LeaderboardPage() {
                   {LEGACY_TIER_LABELS[entry.legacyTier]}
                 </span>
                 {entry.rings > 0 && <span className="text-xs text-amber">{entry.rings}× 🏆</span>}
+                <span className="hidden w-16 text-right font-mono text-xs text-ink-dim sm:inline">
+                  {moneyM(entry.earnings)}
+                </span>
                 <span className={`w-5 text-center font-black ${GRADE_TONE[entry.legacyGrade]}`}>
                   {entry.legacyGrade}
                 </span>

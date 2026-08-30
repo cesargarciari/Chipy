@@ -1,16 +1,20 @@
-import { clamp, jitter, type Rng } from './rng.js';
+import { clamp, int, type Rng } from './rng.js';
 import type { CareerState, DraftResult } from './types.js';
 
 /**
- * Turn projected draft stock into an actual slot. Stock ~100 lands near pick 1;
- * stock in the teens slides toward the second round; low stock goes undrafted.
- * The landing-spot step (`season/teams-sim.ts`) turns the slot into a team.
+ * Turn projected draft stock into an actual slot. The night is genuinely
+ * random: a flat ±12 spread on top of the projection, plus a ~1-in-6 chance of a
+ * real swing — a team reaches for you, or you slide out of the lottery — so the
+ * same college run can land anywhere from the mid-lottery to the second round.
  */
 export function simulateDraft(rng: Rng, state: CareerState): DraftResult {
-  const stock = clamp(state.draftStock + jitter(rng, 8), 0, 100);
-  const projected = Math.round((100 - stock) * 0.62) + 1;
+  const stock = clamp(state.draftStock, 0, 100);
+  let projected = Math.round((100 - stock) * 0.62) + 1;
 
-  if (projected > 60) {
+  projected += int(rng, -13, 13);
+  if (rng() < 0.18) projected += int(rng, -22, 22); // a reach or a slide
+
+  if (projected > 58 || (projected > 42 && rng() < 0.42)) {
     return { undrafted: true, pick: null, round: null };
   }
 

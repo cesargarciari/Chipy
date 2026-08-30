@@ -1,5 +1,6 @@
+import { offerSalary, rookieScale } from '../data/contracts.js';
 import { getTeam, TEAMS } from '../data/teams.js';
-import { clamp, weightedPick, type Rng } from '../rng.js';
+import { clamp, roundTo, weightedPick, type Rng } from '../rng.js';
 import type { DraftResult, Market, Role, TeamOffer, TeamRef, TeamWindow } from '../types.js';
 import { contractLenFor, ROOKIE_CONTRACT_YEARS } from './phase.js';
 import { derivedRng, teamStrengthFor, windowFromStrength } from './season-sim.js';
@@ -87,6 +88,8 @@ export function landingOffers({ seed, overall, market, draft }: OfferArgs): Team
   );
 
   const years = draft.undrafted ? 2 : ROOKIE_CONTRACT_YEARS;
+  // Rookie pay is slot-based — every landing spot offers the same scale money.
+  const salary = roundTo(rookieScale(draft), 1);
   return teams.map((team, i) => {
     const strength = teamStrengthFor(seed, team.id, 0);
     const window = windowFromStrength(strength);
@@ -98,6 +101,7 @@ export function landingOffers({ seed, overall, market, draft }: OfferArgs): Team
       projectedRole: role,
       projectedMpg: MPG_BY_ROLE[role],
       years,
+      salary,
       pitch: windowPitch(window, team, role),
     };
   });
@@ -107,8 +111,11 @@ export interface FreeAgencyArgs {
   seed: number | string;
   seasonIndex: number;
   overall: number;
+  age: number;
   market: Market;
   currentTeamId: string;
+  /** Drives the dollar figure on each offer. */
+  marketValue: number;
 }
 
 /** Three free-agency offers; the first is always re-signing with the current team. */
@@ -116,8 +123,10 @@ export function freeAgencyOffers({
   seed,
   seasonIndex,
   overall,
+  age,
   market,
   currentTeamId,
+  marketValue,
 }: FreeAgencyArgs): TeamOffer[] {
   const rng = derivedRng(seed, 'fa', seasonIndex);
   const star = overall >= 84;
@@ -138,13 +147,17 @@ export function freeAgencyOffers({
     const strength = teamStrengthFor(seed, team.id, seasonIndex);
     const window = windowFromStrength(strength);
     const role = projectRole(overall, strength);
+    const years = clamp(contractLenFor(rng, role, age), 1, 5);
+    // Bird rights — the incumbent can always offer a touch more.
+    const salary = roundTo(offerSalary(rng, marketValue, strength, years) * (resign ? 1.08 : 1), 1);
     return {
       choiceId: `offer_${i}`,
       team,
       window,
       projectedRole: role,
       projectedMpg: MPG_BY_ROLE[role],
-      years: clamp(contractLenFor(rng, role), 1, 5),
+      years,
+      salary,
       pitch: resign
         ? `Run it back in ${team.city}. ${windowPitch(window, team, role).split('. ')[1] ?? ''}`.trim()
         : windowPitch(window, team, role),

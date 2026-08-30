@@ -1,7 +1,7 @@
-import { runCareer } from '@chipy/engine';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/button.js';
 import { Card, CardBody } from '../components/ui/card.js';
+import { runCareerSafe } from '../lib/runCareerSafe.js';
 import { useCareerRun } from '../store/career.js';
 
 export function Home() {
@@ -9,7 +9,7 @@ export function Home() {
   const { seed, profile, choices } = useCareerRun();
 
   const inProgress =
-    profile !== null && runCareer({ seed, profile, choices }).status === 'awaiting_choice';
+    profile !== null && runCareerSafe({ seed, profile, choices }).status === 'awaiting_choice';
 
   return (
     <div className="space-y-8">

@@ -1,14 +1,15 @@
-import { int, weightedPick, type Rng } from '../rng.js';
+import { weightedPick, type Rng } from '../rng.js';
 import type { Role } from '../types.js';
 import type { SeasonEffect } from './effects.js';
 
 export interface EventContext {
   age: number;
-  durability: number;
   role: Role;
   teamStrength: number;
   contractYearsLeft: number;
   seasonIndex: number;
+  /** 0..1 from perks — scales bad-luck event weight down. */
+  slumpResist: number;
 }
 
 interface EventDef {
@@ -17,8 +18,10 @@ interface EventDef {
   apply: (rng: Rng, c: EventContext) => { headline: string; effect: SeasonEffect };
 }
 
-const frail = (d: number) => Math.max(0.2, (100 - d) / 45);
+const resist = (r: number) => Math.max(0.15, 1 - r);
 
+// Injuries are their own per-season system now (`season/injuries.ts`), rolled
+// independently of this single "flavour event" so a career can't dodge them all.
 const EVENTS: EventDef[] = [
   {
     id: 'quiet_year',
@@ -26,35 +29,6 @@ const EVENTS: EventDef[] = [
     apply: () => ({
       headline: 'A steady, professional season — nothing to write home about.',
       effect: {},
-    }),
-  },
-  {
-    id: 'ankle_sprain',
-    weight: (c) => 2.2 * frail(c.durability),
-    apply: (rng) => ({
-      headline: 'You roll an ankle in February and miss a few weeks.',
-      effect: { injuredGames: int(rng, 8, 18), durability: -1 },
-    }),
-  },
-  {
-    id: 'knee_injury',
-    weight: (c) => (c.age >= 27 ? 1.1 : 0.5) * frail(c.durability),
-    apply: (rng, c) => ({
-      headline: 'A knee injury wipes out most of your season.',
-      effect: {
-        injuredGames: int(rng, 38, 60),
-        athleticism: -int(rng, 3, 6),
-        durability: -int(rng, 2, 4),
-        retirementEligible: c.age >= 30,
-      },
-    }),
-  },
-  {
-    id: 'career_ending_injury',
-    weight: (c) => (c.age >= 31 && c.durability < 78 ? 0.35 + (c.age - 31) * 0.06 : 0),
-    apply: () => ({
-      headline: 'A catastrophic leg injury ends your career where you stand.',
-      effect: { injuredGames: 82, careerEnding: true },
     }),
   },
   {
@@ -71,7 +45,7 @@ const EVENTS: EventDef[] = [
   },
   {
     id: 'slump',
-    weight: () => 1.4,
+    weight: (c) => 1.4 * resist(c.slumpResist),
     apply: () => ({
       headline: "You can't buy a bucket for six weeks and the bench eats your minutes.",
       effect: { impactMult: 0.9, hype: -3, roleBias: -0.4 },
@@ -111,7 +85,7 @@ const EVENTS: EventDef[] = [
   },
   {
     id: 'teammate_feud',
-    weight: () => 0.9,
+    weight: (c) => 0.9 * resist(c.slumpResist),
     apply: () => ({
       headline: 'A public spat with a teammate drags on for weeks.',
       effect: { impactMult: 0.94, teamMult: 0.95, hype: 1 },

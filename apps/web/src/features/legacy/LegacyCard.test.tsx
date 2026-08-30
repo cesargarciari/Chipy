@@ -7,17 +7,29 @@ import { LegacyCard } from './LegacyCard.js';
 
 function autoPlay(seed: string, profile: PlayerProfile): CareerSummary {
   const choices: Array<{ nodeId: string; choiceId: string }> = [];
-  for (let i = 0; i < 120; i += 1) {
+  for (let i = 0; i < 500; i += 1) {
     const res = runCareer({ seed, profile, choices });
     if (res.status === 'complete') return res.summary;
     const p = res.pending;
     const opts =
       p.kind === 'prologue'
-        ? p.prologue!.choices.map((c) => c.id)
-        : p.kind === 'landing'
-          ? p.landing!.offers.map((o) => o.choiceId)
-          : p.season!.decision.options.map((o) => o.id);
-    choices.push({ nodeId: p.nodeId, choiceId: opts.find((o) => o !== 'retire') ?? opts[0]! });
+        ? p.prologue!.options.map((o) => o.id)
+        : p.kind === 'college_pick'
+          ? p.collegePick!.schools.map((s) => s.id)
+          : p.kind === 'college_year'
+            ? p.collegeYear!.options.map((o) => o.id)
+            : p.kind === 'landing'
+              ? p.landing!.offers.map((o) => o.id)
+              : p.kind === 'midseason'
+                ? p.midseason!.decision.options.map((o) => o.id)
+                : p.kind === 'overseas_offer'
+                  ? p.overseasOffer!.options.map((o) => o.id)
+                  : p.kind === 'farewell'
+                    ? p.farewell!.options.map((o) => o.id)
+                    : p.season!.decision.options.map((o) => o.id);
+    let id = opts.find((o) => o !== 'retire') ?? opts[0]!;
+    if (p.kind === 'college_year') id = opts.find((o) => o.startsWith('cy_declare')) ?? id;
+    choices.push({ nodeId: p.nodeId, choiceId: id });
   }
   throw new Error('no finish');
 }
@@ -28,16 +40,28 @@ const summary = careerSummarySchema.parse(
     position: 'C',
     archetype: 'back_to_basket_hub',
     market: 'large',
+    jerseyNumber: 21,
+    country: 'USA',
+    handedness: 'right',
   }),
 );
 
 describe('<LegacyCard />', () => {
   it('shows the player, legacy grade, and trophy case', () => {
     render(<LegacyCard summary={summary} />);
-    expect(screen.getByRole('heading', { name: 'Jordan Reyes' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /Jordan Reyes/ })).toBeInTheDocument();
     expect(screen.getByText(`${summary.legacy.score} legacy`)).toBeInTheDocument();
     expect(screen.getByText('Trophy case')).toBeInTheDocument();
     expect(screen.getByText(/Season by season \(\d+\)/)).toBeInTheDocument();
+  });
+
+  it('shows a franchise standing for teams the player marked', () => {
+    // The autoplayed career always logs seasons with its rookie team.
+    expect(summary.franchises.length).toBeGreaterThan(0);
+    render(<LegacyCard summary={summary} />);
+    if (summary.franchises.some((f) => f.tier !== 'none') || summary.nationalTeam.tier !== 'none') {
+      expect(screen.getByRole('heading', { name: 'Idolatry' })).toBeInTheDocument();
+    }
   });
 
   it('renders career calls only when choiceStats are provided', () => {

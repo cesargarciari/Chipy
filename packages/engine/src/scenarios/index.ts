@@ -1,32 +1,54 @@
-import type { PrologueNode, PrologueNodeView } from '../types.js';
-import { highSchoolNode } from './highschool.js';
-import { recruitingNode } from './recruiting.js';
+import { mulberry32, type Rng } from '../rng.js';
+import { optionView } from '../options.js';
+import type { GameOption, PrologueNode, PrologueNodeView, Ratings } from '../types.js';
+import { buildHighSchoolNode, HIGH_SCHOOL_TEMPLATE } from './highschool.js';
+import { buildRecruitingNode, RECRUITING_TEMPLATE } from './recruiting.js';
 
-/** The two pre-draft scenario nodes, in order. */
-export const PROLOGUE_NODES: readonly PrologueNode[] = [highSchoolNode, recruitingNode];
+export const PROLOGUE_NODE_IDS = ['highschool', 'recruiting'] as const;
 
-const BY_ID = new Map<string, PrologueNode>(PROLOGUE_NODES.map((n) => [n.id, n]));
-
-export function getPrologueNode(id: string): PrologueNode | undefined {
-  return BY_ID.get(id);
+/**
+ * Build the two pre-draft nodes for one career. Ids / labels / blurbs are
+ * fixed; the attribute numbers are rolled from `rng` so no summer-circuit
+ * option is a permanent best pick.
+ */
+export function buildPrologueNodes(rng: Rng): PrologueNode[] {
+  return [buildHighSchoolNode(rng), buildRecruitingNode(rng)];
 }
 
-export function getPrologueChoice(nodeId: string, choiceId: string) {
-  const node = BY_ID.get(nodeId);
-  const choice = node?.choices.find((c) => c.id === choiceId);
-  if (!choice) {
-    throw new Error(`Unknown prologue choice "${choiceId}" for node "${nodeId}"`);
-  }
-  return choice;
+/** Labels only — used by `describeChoice` for the "N% also chose" rollup. */
+const LABELS: Record<string, Record<string, string>> = {
+  highschool: Object.fromEntries(HIGH_SCHOOL_TEMPLATE.options.map((o) => [o.id, o.label])),
+  recruiting: Object.fromEntries(RECRUITING_TEMPLATE.options.map((o) => [o.id, o.label])),
+};
+
+export function prologueOptionLabel(nodeId: string, optionId: string): string | null {
+  return LABELS[nodeId]?.[optionId] ?? null;
 }
 
-/** Serialisable view for the client. */
-export function prologueViews(): PrologueNodeView[] {
-  return PROLOGUE_NODES.map((node) => ({
+export function getPrologueOption(node: PrologueNode, optionId: string): GameOption {
+  const opt = node.options.find((o) => o.id === optionId);
+  if (!opt) throw new Error(`Unknown prologue option "${optionId}" for node "${node.id}"`);
+  return opt;
+}
+
+/** The chosen recruiting option maps to a school tier for the `college1` node. */
+export function recruitingTier(optionId: string): 'blue_blood' | 'mid_major' | 'overseas' {
+  if (optionId === 'blue_blood') return 'blue_blood';
+  if (optionId === 'mid_major_hub') return 'mid_major';
+  return 'overseas'; // g_league_ignite, overseas_pro
+}
+
+export function prologueView(node: PrologueNode, current?: Ratings): PrologueNodeView {
+  return {
     id: node.id,
     stage: node.stage,
     title: node.title,
     prompt: node.prompt,
-    choices: node.choices.map((c) => ({ id: c.id, label: c.label, blurb: c.blurb })),
-  }));
+    options: node.options.map((o) => optionView(o, current)),
+  };
+}
+
+/** A stable preview of the prologue for menus (fixed seed). */
+export function prologueViews(): PrologueNodeView[] {
+  return buildPrologueNodes(mulberry32(1)).map((n) => prologueView(n));
 }

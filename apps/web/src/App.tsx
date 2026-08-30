@@ -1,6 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { AppShell } from './components/AppShell.js';
+import { ErrorBoundary } from './components/ErrorBoundary.js';
 import { CreatePlayer } from './features/create-player/CreatePlayer.js';
 import { PlayScreen } from './features/play/PlayScreen.js';
 import { Home } from './pages/Home.js';
@@ -17,15 +18,17 @@ export function App() {
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <AppShell>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/create" element={<CreatePlayer />} />
-            <Route path="/play" element={<PlayScreen />} />
-            <Route path="/legacy" element={<LegacyPage />} />
-            <Route path="/c/:id" element={<SharePage />} />
-            <Route path="/leaderboard" element={<LeaderboardPage />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
+          <ErrorBoundary>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/create" element={<CreatePlayer />} />
+              <Route path="/play" element={<PlayScreen />} />
+              <Route path="/legacy" element={<LegacyPage />} />
+              <Route path="/c/:id" element={<SharePage />} />
+              <Route path="/leaderboard" element={<LeaderboardPage />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </ErrorBoundary>
         </AppShell>
       </BrowserRouter>
     </QueryClientProvider>

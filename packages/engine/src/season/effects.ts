@@ -1,4 +1,4 @@
-import type { AwardAffinity, RatingKey, Ratings, Role } from '../types.js';
+import type { AwardAffinity, OptionStance, RatingKey, Ratings, Role } from '../types.js';
 
 /**
  * The knobs an offseason decision or an in-season event turns for one season.
@@ -65,5 +65,18 @@ export function mergeEffects(a: SeasonEffect, b: SeasonEffect): SeasonEffect {
 }
 
 export const EMPTY_EFFECT: SeasonEffect = {};
+
+/** An option's strategy knobs → a one-season `SeasonEffect` (growth bias is handled elsewhere). */
+export function stanceToEffect(stance: OptionStance | undefined): SeasonEffect {
+  if (!stance) return {};
+  return {
+    roleBias: stance.roleBias,
+    impactMult: stance.impactMult,
+    teamMult: stance.teamMult,
+    awardMult: stance.awardMult,
+    forceTrade: stance.forceTrade,
+    injuredGames: stance.injuredGames,
+  };
+}
 
 export type { Role };

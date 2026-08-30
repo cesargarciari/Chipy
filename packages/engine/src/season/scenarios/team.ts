@@ -1,0 +1,151 @@
+import type { Scenario } from '../scenario-types.js';
+
+export const teamScenarios: Scenario[] = [
+  {
+    id: 'team_coach_friction',
+    theme: 'team',
+    gate: { minSeason: 2, weight: 1.1 },
+    title: 'FRICTION WITH THE STAFF',
+    prompt: 'You and the coach see your role differently.',
+    options: [
+      {
+        id: 'coach_buy_in',
+        label: 'BUY IN',
+        blurb: 'Play the role. Win the room.',
+        effect: { ratings: { basketballIQ: 5, perimeterDefense: 3 } },
+        stance: { tag: 'Team-first', teamMult: 1.05 },
+      },
+      {
+        id: 'coach_push_back',
+        label: 'DEMAND MORE',
+        blurb: 'Tell them what you need to be great.',
+        effect: { ratings: { finishing: 4 } },
+        stance: { impactMult: 1.06, roleBias: 0.4, teamMult: 0.97 },
+      },
+      {
+        id: 'coach_trade_request',
+        label: 'ASK OUT',
+        blurb: 'Quietly, through your agent. For now.',
+        effect: { ratings: { finishing: 2 } },
+        stance: { tag: 'Trade request', teamMult: 0.95, impactMult: 1.03 },
+      },
+    ],
+  },
+  {
+    id: 'team_locker_room',
+    theme: 'team',
+    gate: { minAge: 25 },
+    title: 'WHO ARE YOU IN THIS ROOM?',
+    prompt: 'The team is looking for a voice.',
+    options: [
+      {
+        id: 'lr_vocal',
+        label: 'THE VOCAL LEADER',
+        blurb: 'Set the standard out loud, every day.',
+        effect: { ratings: { basketballIQ: 4, perimeterDefense: 2 } },
+        stance: { tag: 'Leader', teamMult: 1.06 },
+      },
+      {
+        id: 'lr_example',
+        label: 'LEAD BY EXAMPLE',
+        blurb: 'First one in, last one out. No speeches.',
+        effect: { ratings: { perimeterDefense: 3 }, durability: 3 },
+        stance: { teamMult: 1.03 },
+      },
+      {
+        id: 'lr_hoop',
+        label: 'JUST HOOP',
+        blurb: 'Leadership is a stat sheet.',
+        effect: { ratings: { finishing: 4 } },
+      },
+    ],
+  },
+  {
+    id: 'team_young_core',
+    theme: 'team',
+    gate: { minSeason: 5, role: ['starter', 'franchise'] },
+    title: 'MENTOR OR COMPETE?',
+    prompt: 'The front office drafted your eventual replacement.',
+    options: [
+      {
+        id: 'core_mentor',
+        label: 'BRING THEM ALONG',
+        blurb: 'Their leap is your legacy.',
+        effect: { ratings: { basketballIQ: 5 } },
+        stance: { tag: 'Mentor', teamMult: 1.08, roleBias: -0.2 },
+      },
+      {
+        id: 'core_push',
+        label: 'PUSH THEM IN PRACTICE',
+        blurb: 'Make them earn every minute against you.',
+        effect: { ratings: { perimeterDefense: 4 }, athleticism: 2 },
+      },
+      {
+        id: 'core_compete',
+        label: 'TAKE EVERY REP',
+        blurb: 'The job is yours until they take it.',
+        effect: { ratings: { finishing: 5 } },
+        stance: { impactMult: 1.04 },
+      },
+    ],
+  },
+  {
+    id: 'team_feud',
+    theme: 'team',
+    gate: { minSeason: 3, once: true },
+    title: 'BEEF WITH A TEAMMATE',
+    prompt: 'Something boiled over in the film room.',
+    options: [
+      {
+        id: 'feud_squash',
+        label: 'SQUASH IT',
+        blurb: 'Dinner, honesty, move on.',
+        effect: { ratings: { basketballIQ: 3 } },
+        stance: { teamMult: 1.04 },
+      },
+      {
+        id: 'feud_answer',
+        label: 'LET YOUR GAME ANSWER',
+        blurb: 'Outplay the noise.',
+        effect: { ratings: { finishing: 5, threePoint: 3 } },
+        stance: { impactMult: 1.05 },
+      },
+      {
+        id: 'feud_linger',
+        label: 'IT LINGERS',
+        blurb: 'You are professionals. Barely.',
+        effect: { ratings: { finishing: 2 } },
+        stance: { teamMult: 0.95, impactMult: 1.02 },
+      },
+    ],
+  },
+  {
+    id: 'team_new_system',
+    theme: 'team',
+    gate: { minSeason: 2 },
+    title: 'A NEW SYSTEM',
+    prompt: 'The staff installed a whole new offense.',
+    options: [
+      {
+        id: 'sys_pace_space',
+        label: 'PACE AND SPACE',
+        blurb: 'Fly up the floor, let it fly from deep.',
+        effect: { ratings: { threePoint: 6, playmaking: 3 } },
+      },
+      {
+        id: 'sys_hub',
+        label: 'POST-UP HUB',
+        blurb: 'Everything through you on the block.',
+        effect: { ratings: { finishing: 5, rebounding: 3 } },
+        stance: { roleBias: 0.3 },
+      },
+      {
+        id: 'sys_3d',
+        label: 'A 3-AND-D ROLE',
+        blurb: 'Space the floor, guard the star.',
+        effect: { ratings: { perimeterDefense: 5, threePoint: 4 } },
+        stance: { tag: '3-and-D', roleBias: -0.2 },
+      },
+    ],
+  },
+];

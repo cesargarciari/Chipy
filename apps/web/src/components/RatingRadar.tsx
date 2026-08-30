@@ -1,12 +1,14 @@
-import { RATING_KEYS, RATING_LABELS, type Ratings } from '@chipy/engine';
+import type { Ratings } from '@chipy/engine';
+import { DISPLAY_AXES, displayRatingValue } from '../lib/ratings.js';
 
 const SIZE = 240;
 const CENTER = SIZE / 2;
 const RADIUS = 84;
 const RING_STEPS = [0.25, 0.5, 0.75, 1];
+const AXES = DISPLAY_AXES;
 
 function point(index: number, magnitude: number): [number, number] {
-  const angle = (Math.PI * 2 * index) / RATING_KEYS.length - Math.PI / 2;
+  const angle = (Math.PI * 2 * index) / AXES.length - Math.PI / 2;
   return [
     CENTER + Math.cos(angle) * RADIUS * magnitude,
     CENTER + Math.sin(angle) * RADIUS * magnitude,
@@ -17,9 +19,11 @@ function polygon(magnitudes: number[]): string {
   return magnitudes.map((m, i) => point(i, m).join(',')).join(' ');
 }
 
-/** Radar of the player's ratings, 25–99 mapped to 0–1. */
+/** Radar of the player's ratings (interior + perimeter D merged), 25–99 → 0–1. */
 export function RatingRadar({ ratings }: { ratings: Ratings }) {
-  const magnitudes = RATING_KEYS.map((k) => Math.max(0, Math.min(1, (ratings[k] - 25) / 74)));
+  const magnitudes = AXES.map((a) =>
+    Math.max(0, Math.min(1, (displayRatingValue(ratings, a.key) - 25) / 74)),
+  );
 
   return (
     <svg
@@ -31,13 +35,13 @@ export function RatingRadar({ ratings }: { ratings: Ratings }) {
       {RING_STEPS.map((step) => (
         <polygon
           key={step}
-          points={polygon(RATING_KEYS.map(() => step))}
+          points={polygon(AXES.map(() => step))}
           fill="none"
           stroke="var(--color-court-700)"
           strokeWidth={1}
         />
       ))}
-      {RATING_KEYS.map((_, i) => {
+      {AXES.map((_, i) => {
         const [x, y] = point(i, 1);
         return (
           <line
@@ -59,18 +63,18 @@ export function RatingRadar({ ratings }: { ratings: Ratings }) {
         strokeWidth={2}
       />
 
-      {RATING_KEYS.map((key, i) => {
+      {AXES.map((axis, i) => {
         const [x, y] = point(i, 1.18);
         return (
           <text
-            key={key}
+            key={axis.key}
             x={x}
             y={y}
             textAnchor="middle"
             dominantBaseline="middle"
             className="fill-ink-dim text-[9px] font-semibold"
           >
-            {RATING_LABELS[key]}
+            {axis.short}
           </text>
         );
       })}

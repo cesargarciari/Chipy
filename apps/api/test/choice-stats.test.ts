@@ -16,6 +16,9 @@ const PROFILE: PlayerProfile = {
   position: 'SF',
   archetype: 'point_forward',
   market: 'mid',
+  jerseyNumber: 14,
+  country: 'USA',
+  handedness: 'right',
 };
 
 describe('choice stats', () => {

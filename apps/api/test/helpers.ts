@@ -71,6 +71,9 @@ const PROFILE: PlayerProfile = {
   position: 'SG',
   archetype: 'shot_creator',
   market: 'mid',
+  jerseyNumber: 8,
+  country: 'USA',
+  handedness: 'right',
 };
 
 /** A full, finished career's request body — plays the engine to build `choices`. */
@@ -86,18 +89,32 @@ export function createCareerBody(
   const profile = overrides.profile ?? PROFILE;
   const choices: CreateCareerRequest['choices'] = [];
 
-  for (let i = 0; i < 120; i += 1) {
+  for (let i = 0; i < 500; i += 1) {
     const res = runCareer({ seed, profile, choices });
     if (res.status === 'complete') return { seed, profile, choices };
     const p = res.pending;
     const opts =
       p.kind === 'prologue'
-        ? p.prologue!.choices.map((c) => c.id)
-        : p.kind === 'landing'
-          ? p.landing!.offers.map((o) => o.choiceId)
-          : p.season!.decision.options.map((o) => o.id);
+        ? p.prologue!.options.map((o) => o.id)
+        : p.kind === 'college_pick'
+          ? p.collegePick!.schools.map((s) => s.id)
+          : p.kind === 'college_year'
+            ? p.collegeYear!.options.map((o) => o.id)
+            : p.kind === 'landing'
+              ? p.landing!.offers.map((o) => o.id)
+              : p.kind === 'midseason'
+                ? p.midseason!.decision.options.map((o) => o.id)
+                : p.kind === 'overseas_offer'
+                  ? p.overseasOffer!.options.map((o) => o.id)
+                  : p.kind === 'farewell'
+                    ? p.farewell!.options.map((o) => o.id)
+                    : p.season!.decision.options.map((o) => o.id);
     let idx = overrides.strategy === 'last' ? opts.length - 1 : 0;
     if (opts[idx] === 'retire' && opts.length > 1) idx = (idx + 1) % opts.length;
+    if (p.kind === 'college_year') {
+      const dc = opts.findIndex((o) => o.startsWith('cy_declare'));
+      if (dc >= 0) idx = dc;
+    }
     choices.push({ nodeId: p.nodeId, choiceId: opts[idx]! });
   }
   throw new Error('helper: career did not finish');

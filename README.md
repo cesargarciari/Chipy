@@ -1,13 +1,23 @@
 # Chipy
 
-An NBA career simulator. Build a prospect at one of five positions with a
-**position-locked archetype**, get drafted, pick your landing spot from three
-teams, then steer a **full career** — one decision every offseason — from the
-summer circuit to a jersey in the rafters. Attributes grow on an age curve,
-seasons play out with awards (All-NBA, DPOY, MVP, scoring titles), playoff runs,
-rings, and Olympic / World Cup medals, and it all ends on a **legacy screen**
-with a trophy case and a Hall-of-Fame verdict. Inspired by narrative "career
-simulator" games like Copero's _simulador-carrera_ and Potrero's _El Idolo_.
+An NBA career simulator. Build a prospect — position, **position-locked
+archetype**, jersey number, birth country — then steer a **full career** from the
+summer circuit to a jersey in the rafters: pick a college program and play an
+**interactive freshman year**, get drafted, choose your landing spot, and make
+**one decision every offseason** from a library of varied, one-off scenarios
+(each shown El Idolo–style: a bold card with explicit `+8 FINISHING` effect
+chips). A persistent **stat strip + money bar** sits above every call, lighting
+up the tiles an option would move. Run a **career economy** — salary, market
+value, a bank — and spend it in a **browsable perks shop** (private chef,
+shooting trainer, personal court, analytics group…). Field bigger free-agency
+offers, weather **injuries** and **bizarre mid-season forks** (fight the star →
+defer, or force a trade), sign a **shoe deal** at fame 80+, and when the NBA
+stops calling, rebuild your career as a **EuroLeague** centrepiece and earn your
+way back. Attributes grow on an age curve gated by hidden talent; seasons play
+out with awards (All-NBA, DPOY, MVP, scoring titles), playoff runs, rings, and
+Olympic / World Cup medals weighted by your country's pedigree. It ends on a
+**legacy screen** — trophy case, career totals, career earnings, a Hall-of-Fame
+verdict. Inspired by Copero's _simulador-carrera_ and Potrero's _El Idolo_.
 
 Built as an AWS Solutions Architect practice project and a portfolio piece —
 local-first now, deployed to AWS at near-zero cost later.
@@ -41,7 +51,7 @@ and the [ADRs](docs/adr/).
 
 ## Quickstart
 
-### Option A — everything in Docker (production-like)
+### Option A — everything in Docker
 
 ```bash
 cp .env.example .env
@@ -80,29 +90,67 @@ The API creates the local table on boot. To (re)create it manually:
 
 ## How it plays
 
-1. **Create** a prospect: name, position, and one of **4 position-locked
-   archetypes** (a PG picks from Floor General / Scoring PG / Two-Way PG / Combo
-   Guard, a C from Rim Protector / Stretch Five / Back-to-Basket Hub / Lob
-   Threat, etc.), plus a home market. A seeded RNG rolls starting ratings.
-2. **Prologue** — high-school and recruiting decisions shape your ratings, hype,
-   and draft stock. The engine then simulates a **draft slot** (1–60 / undrafted)
-   and derives a hidden **talent** ceiling from it.
+1. **Create** a prospect: name, jersey number, birth country (~120), **shooting
+   hand** (lefty / righty), position, and one of **4 position-locked archetypes**
+   (a PG picks from Floor General / Scoring PG / Two-Way PG / Combo Guard; a C
+   from Rim Protector / Stretch Five / Back-to-Basket Hub / Lob Threat). A seeded
+   RNG rolls starting ratings.
+2. **Prologue** — a high-school and a recruiting decision. Both nodes are
+   **rolled per career**: the options are worth the same card value with one
+   getting a small random edge, and which attributes each moves is rerolled
+   every playthrough, so there's no permanent "best pick". Then you pick a real
+   **college program** (blue-blood, mid-major, or international club) and play an
+   **interactive freshman year** — a wildly variable one (monster year or flop).
+   A March result and a choice to declare / return / transfer; if scouts aren't
+   sold yet, "declare" isn't on the table — you stay. The **draft** is genuinely
+   random (a flat spread plus the odd big reach or slide → mid-lottery to
+   undrafted on the same run) and sets a hidden **talent** ceiling.
 3. **Landing spot** — choose one of three team offers (weighted by draft slot and
-   home market). That's your rookie team.
-4. **Season loop** — every offseason you make **one decision** (training focus,
-   role, or in a contract year, a free-agency choice of three teams). Then an
-   automatic in-season **event** fires (injury, breakout, trade, coaching change,
-   feud, clutch moment…), attributes grow on an **age curve × archetype × talent**,
-   the season is simulated (role → minutes → stat line → playoff run), and
-   **awards** resolve. Odd summers add a **World Cup / Olympics** call-up.
-5. Careers run ~10–20 seasons and end when you choose to retire (offered once
-   you're 32+ or after a major injury) or the game forces it (age, decline, or a
-   career-ending injury).
-6. A **legacy screen**: trophy case, career totals, a season-by-season table,
-   final-ratings radar, a legacy **tier** (Journeyman → Inner-Circle All-Timer)
-   and **grade**, and a Hall-of-Fame verdict. If the API is up the career is
-   saved — you get a `/c/<id>` share link and "N% of players also chose X"; if
-   not, the screen still stands (offline).
+   home market), each with a **dollar figure**. That's your rookie team.
+4. **Season loop** — each offseason you first visit the **perks shop** (a modal
+   grid showing your bank; every perk stays on the shelf — owned ones flagged in
+   orange, ones you can't afford greyed out and unclickable, prices in green as
+   a plain cost; yearly perks auto-renew from the bank, permanent ones unlock
+   mid-career), then make the year's call: a **scenario** from a themed content
+   library, or — on a contract year — **free agency**, where a rival's bigger
+   offer is a real temptation. Every card shows its exact `+N ATTRIBUTE` / `±$M`
+   effects and lights the stat tiles it moves. ~30% of seasons a **bizarre
+   mid-season fork** fires instead of the silent event (fight the star → defer
+   and shrink your role, or force a trade — these cost minutes or front-office
+   goodwill, never ratings). Attributes climb on an **age curve × archetype ×
+   talent²** — a decelerating rise through the early 30s, then a real decline
+   once age catches up at ~34. The season is simulated (role → minutes → stat
+   line → playoff run), pay is banked, and every season rolls its own **injury**
+   check — mostly knocks and strains, but a low durability (or age, or a long
+   injury record) can bring on a hamstring, a stress fracture, or, rarely, a
+   torn ACL / Achilles that costs you a chunk of your athleticism for good.
+   Your **idolatry** with the club and the national team fills toward _legend_
+   (a few years and a ring can make you their _idol_), and **awards** resolve.
+   **Fame** is not a stat you train — it tracks what happens on the floor
+   (impact, awards, rings) and the off-court scenes (the mid-season forks, the
+   shoe deal). Big beats — a ring, an MVP, a deadline trade, a serious injury —
+   pop their own card on the next screen, and the headline trophies (**MVP,
+   DPOY, Finals MVP, ROY, MIP, Sixth Man, a championship, Olympic / World Cup
+   medals**) take over the screen as a full **award modal**; every other honour
+   is still noted in the recap banner. Odd summers add a **World Cup / Olympics**
+   call-up; fame 80+ triggers a one-time **shoe deal** (pick the brand).
+5. **Overseas** — if the NBA stops calling while you can still play, sign in the
+   **EuroLeague** instead of retiring: the same loop, its own clubs, trophies
+   (EuroLeague MVP / title), and free agency, plus a path back to the NBA once
+   your market value recovers.
+6. Contracts are honoured — a multi-year deal is always played out (a
+   career-ending injury aside), and older players are only offered short ones.
+   You can retire by choice from ~32; when age finally decides it for you,
+   you pick your exit: a **farewell tour** (one more ceremonial season) or a
+   **quiet goodbye**.
+7. A **legacy screen**: trophy case, career totals, **career earnings**, a
+   season-by-season table (with salary), any overseas years, an **injury
+   record**, the perks you ran and shoe brand you signed, **where you're
+   remembered** (per-team standing), a **career-moments** strip, final-ratings
+   radar, a legacy **tier**
+   (Journeyman → Inner-Circle All-Timer) and **grade**, and a Hall-of-Fame
+   verdict. If the API is up the career is saved — you get a `/c/<id>` share link
+   and "N% of players also chose X"; if not, the screen still stands (offline).
 
 ## Testing notes
 
@@ -115,16 +163,49 @@ The API creates the local table on boot. To (re)create it manually:
 - The Playwright test plays a **whole career** with **no backend** — the engine
   ships client-side.
 
+## Adding artwork (awards, team logos, club crests)
+
+The UI runs on emoji glyphs out of the box. To swap in real art, drop image
+files (`.png` / `.jpg` / `.webp` / `.svg`) into:
+
+| Folder                        | Filename (case-sensitive)         | Example           |
+| ----------------------------- | --------------------------------- | ----------------- |
+| `apps/web/src/assets/awards/` | `<awardId>.<ext>` (`AWARD_IDS`)   | `mvp.png`         |
+| `apps/web/src/assets/teams/`  | `<TEAMID>.<ext>` (3-letter, caps) | `LAL.svg`         |
+| `apps/web/src/assets/clubs/`  | `<clubId>.<ext>` (`EURO_CLUBS`)   | `real_madrid.png` |
+
+They're picked up automatically (`src/lib/art.ts`, via `import.meta.glob`) — no
+import to wire. Award art shows in the **award modal** (128×128) and the
+season-recap **moment cards** (48×48); logos/crests show next to team names.
+Each folder's `README.md` lists the full id set. Trademarks belong to their
+owners — ship your own stylised marks if you publish.
+
 ## Roadmap
 
 - **M1 — vertical slice** _(shipped)_
-- **M1.5 — career mode** _(this repo):_ multi-season careers, position-locked
+- **M1.5 — career mode** _(shipped):_ multi-season careers, position-locked
   archetypes, real NBA teams, draft + landing spot, awards & trophies,
   international play, legacy screen
+- **M1.6 — content & depth** _(shipped):_ jersey + country, interactive
+  college years with real programs, a data-driven scenario library (add a file →
+  new content), El Idolo–style option cards, role momentum + stat smoothing
+- **M1.7 — economy & life** _(this repo):_ salary + market value + a bank, a
+  perks shop (modal — bank shown, owned/locked states, green prices), a
+  per-season **injury system** (named injuries from knocks to ACL/Achilles,
+  durability-driven odds, permanent hits), **honoured contracts** + a
+  pre-retirement **farewell** choice, mid-season branching situations
+  (status-scaled — they cost minutes or goodwill, never ratings), a fame-gated
+  shoe deal, the EuroLeague as a full parallel league with a path back, a
+  per-team **franchise standing** (fan favorite → idol → legend), end-of-season
+  **big-moment** cards (rings, awards, serious injuries) with a full-screen
+  **award modal** for the headline trophies, per-career **randomised prologue**
+  options, performance-driven **fame** (no longer a trainable stat), a slow
+  rating economy where option cards show the exact gain after the 99-cap plus a
+  **rare** once-a-career gold `+9`, and a persistent stat strip + money bar
 - **M2 — AWS deploy (cheapest):** Terraform modules, remote state, GitHub Actions
   deploy via AWS OIDC, CloudWatch dashboard + Budgets alarm
-- **M3 — depth:** contracts & salary, multi-player trades, named teammates,
-  in-season tournament
+- **M3 — depth:** salary-cap rules & sign-and-trades, multi-player trades, named
+  teammates, in-season tournament
 - **M4 — accounts & polish:** Cognito, OG share images, SQS aggregate pipeline,
   OpenTelemetry
 

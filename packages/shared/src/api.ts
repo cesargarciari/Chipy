@@ -55,6 +55,8 @@ export const leaderboardEntrySchema = z.object({
   seasons: z.number().int(),
   rings: z.number().int(),
   mvps: z.number().int(),
+  /** Career earnings in $M — denormalised for the board. */
+  earnings: z.number().nonnegative(),
   createdAt: z.iso.datetime(),
 });
 export type LeaderboardEntry = z.infer<typeof leaderboardEntrySchema>;

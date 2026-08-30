@@ -83,6 +83,7 @@ export class CareerRepo {
       seasons: summary.careerTotals.seasons,
       rings: summary.awards.champion ?? 0,
       mvps: summary.awards.mvp ?? 0,
+      earnings: Math.round(summary.careerEarnings),
       summary,
     };
 
@@ -206,6 +207,7 @@ export class CareerRepo {
       seasons: item.seasons,
       rings: item.rings,
       mvps: item.mvps,
+      earnings: item.earnings ?? Math.round(item.summary.careerEarnings ?? 0),
       createdAt: item.createdAt,
     }));
   }

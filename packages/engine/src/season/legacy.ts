@@ -2,9 +2,11 @@ import { mulberry32, normalizeSeed, roundTo } from '../rng.js';
 import type {
   AwardTally,
   CareerTotals,
+  FranchiseStanding,
   GradeLetter,
   Legacy,
   LegacyTier,
+  OverseasSeason,
   SeasonRecord,
 } from '../types.js';
 
@@ -64,24 +66,27 @@ const AWARD_POINTS: Partial<Record<keyof AwardTally, number>> = {
   wc_gold: 20,
   wc_silver: 8,
   wc_bronze: 5,
+  euroleague_champion: 24,
+  euroleague_mvp: 20,
+  euro_domestic_title: 8,
 };
 
 function tierFor(score: number): LegacyTier {
-  if (score >= 980) return 'inner_circle';
-  if (score >= 760) return 'all_timer';
-  if (score >= 540) return 'hall_of_famer';
-  if (score >= 360) return 'franchise_great';
-  if (score >= 210) return 'quality_starter';
-  if (score >= 95) return 'solid_pro';
-  if (score >= 35) return 'journeyman';
+  if (score >= 1000) return 'inner_circle';
+  if (score >= 820) return 'all_timer';
+  if (score >= 660) return 'hall_of_famer';
+  if (score >= 460) return 'franchise_great';
+  if (score >= 320) return 'quality_starter';
+  if (score >= 200) return 'solid_pro';
+  if (score >= 90) return 'journeyman';
   return 'cup_of_coffee';
 }
 
 function gradeFor(score: number): GradeLetter {
-  if (score >= 800) return 'S';
-  if (score >= 580) return 'A';
-  if (score >= 375) return 'B';
-  if (score >= 190) return 'C';
+  if (score >= 940) return 'S';
+  if (score >= 650) return 'A';
+  if (score >= 400) return 'B';
+  if (score >= 300) return 'C';
   return 'D';
 }
 
@@ -94,6 +99,17 @@ const VERDICTS: Record<LegacyTier, string> = {
   solid_pro: 'A dependable pro who carved out a real NBA career.',
   journeyman: 'A journeyman who hung around the league on effort.',
   cup_of_coffee: 'A brief cup of coffee in the association.',
+};
+
+const EURO_VERDICTS: Record<LegacyTier, string> = {
+  inner_circle: 'An all-time great who conquered the NBA and Europe both.',
+  all_timer: 'A legend on two continents.',
+  hall_of_famer: 'A Hall of Fame career that found a second act in the EuroLeague.',
+  franchise_great: 'A star in the NBA, then a giant of the European game.',
+  quality_starter: 'A solid NBA run, reborn as a EuroLeague centrepiece.',
+  solid_pro: 'A pro who rebuilt his career overseas and made it count.',
+  journeyman: 'A journeyman on both sides of the Atlantic.',
+  cup_of_coffee: 'A short NBA stay, then a longer road through Europe.',
 };
 
 function mostPlayedTeam(seasons: SeasonRecord[]): string | null {
@@ -116,13 +132,26 @@ interface LegacyArgs {
   totals: CareerTotals;
   peakOverall: number;
   seasons: SeasonRecord[];
+  overseasSeasons: OverseasSeason[];
+  /** Final per-team standings — an idol / legend retires a jersey on its own. */
+  franchises: FranchiseStanding[];
 }
 
-export function buildLegacy({ seed, awards, totals, peakOverall, seasons }: LegacyArgs): Legacy {
+export function buildLegacy({
+  seed,
+  awards,
+  totals,
+  peakOverall,
+  seasons,
+  overseasSeasons,
+  franchises,
+}: LegacyArgs): Legacy {
   let score = 0;
 
   score += Math.max(0, Math.min(1, (peakOverall - 55) / 44)) * 240;
-  score += Math.min(seasons.length, 20) * 9;
+  // Overseas years count for longevity too, at a discount.
+  const longevity = seasons.length + overseasSeasons.length * 0.6;
+  score += Math.min(longevity, 20) * 9;
 
   for (const [id, count] of Object.entries(awards)) {
     score += (AWARD_POINTS[id as keyof AwardTally] ?? 0) * (count ?? 0);
@@ -148,9 +177,19 @@ export function buildLegacy({ seed, awards, totals, peakOverall, seasons }: Lega
   const allNba = (awards.all_nba_1 ?? 0) + (awards.all_nba_2 ?? 0) + (awards.all_nba_3 ?? 0);
 
   const hofRng = mulberry32(normalizeSeed(`${seed}::hof`));
-  const hallOfFame = score >= 540 || (score >= 450 && hofRng() < 0.5);
-  const jerseyRetired = hallOfFame && (rings >= 1 || allNba >= 2 || score >= 800);
+  const hallOfFame = score >= 660 || (score >= 560 && hofRng() < 0.5);
   const tier = tierFor(score);
+
+  // An idol / legend gets his jersey raised by that team; otherwise the old
+  // Hall-of-Fame bar with the team he played the most for.
+  const iconFranchise = franchises.find((f) => f.tier === 'legend' || f.tier === 'idol');
+  const jerseyRetired =
+    Boolean(iconFranchise) || (hallOfFame && (rings >= 1 || allNba >= 2 || score >= 900));
+  const jerseyRetiredBy = jerseyRetired ? (iconFranchise?.teamId ?? mostPlayedTeam(seasons)) : null;
+
+  // A career that spent a real chunk of its length in Europe gets its own verdict.
+  const europeHeavy =
+    overseasSeasons.length >= 3 && overseasSeasons.length >= seasons.length * 0.35;
 
   return {
     score,
@@ -158,7 +197,7 @@ export function buildLegacy({ seed, awards, totals, peakOverall, seasons }: Lega
     tier,
     hallOfFame,
     jerseyRetired,
-    jerseyRetiredBy: jerseyRetired ? mostPlayedTeam(seasons) : null,
-    verdict: VERDICTS[tier],
+    jerseyRetiredBy,
+    verdict: (europeHeavy ? EURO_VERDICTS : VERDICTS)[tier],
   };
 }

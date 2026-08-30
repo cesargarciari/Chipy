@@ -1,6 +1,6 @@
 import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
-import { ARCHETYPE_DEFS, runCareer, type Position } from '../src/index.js';
+import { ARCHETYPE_DEFS, COUNTRIES, runCareer, type Position } from '../src/index.js';
 import { autoPlay } from './helpers.js';
 
 const profileArb = fc
@@ -8,10 +8,21 @@ const profileArb = fc
     idx: fc.integer({ min: 0, max: ARCHETYPE_DEFS.length - 1 }),
     name: fc.string({ minLength: 2, maxLength: 20 }),
     market: fc.constantFrom('small', 'mid', 'large'),
+    jerseyNumber: fc.integer({ min: 0, max: 99 }),
+    countryIdx: fc.integer({ min: 0, max: COUNTRIES.length - 1 }),
+    handedness: fc.constantFrom('left' as const, 'right' as const),
   })
-  .map(({ idx, name, market }) => {
+  .map(({ idx, name, market, jerseyNumber, countryIdx, handedness }) => {
     const a = ARCHETYPE_DEFS[idx]!;
-    return { name, position: a.position as Position, archetype: a.id, market };
+    return {
+      name,
+      position: a.position as Position,
+      archetype: a.id,
+      market,
+      jerseyNumber,
+      country: COUNTRIES[countryIdx]!.id,
+      handedness,
+    };
   });
 
 describe('simulation determinism', () => {
@@ -44,6 +55,9 @@ describe('simulation determinism', () => {
       position: 'SF' as const,
       archetype: 'point_forward' as const,
       market: 'mid' as const,
+      jerseyNumber: 3,
+      country: 'USA',
+      handedness: 'right' as const,
     };
     const a = autoPlay('fork-seed', profile, 'first');
     const b = autoPlay('fork-seed', profile, 'last');

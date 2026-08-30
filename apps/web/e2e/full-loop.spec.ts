@@ -10,22 +10,26 @@ test('play a full career from create to legacy', async ({ page }) => {
 
   await expect(page).toHaveURL(/\/create$/);
   await page.getByLabel('Name').fill('E2E Tester');
-  // default position PG + first archetype are pre-selected
+  // position, archetype, jersey #, and country are pre-filled
   await page.getByRole('button', { name: 'Enter the summer circuit' }).click();
 
   await expect(page).toHaveURL(/\/play$/);
 
-  // Click the first choice on each node until the career ends (nav is links, not buttons).
-  for (let step = 0; step < 60; step += 1) {
+  // Advance by clicking the first choice each node. The only non-decision button
+  // on a play screen is the collapsible "Perks shop" toggle — skip it. Moment
+  // cards are presentational (no buttons), so they never stall the walk.
+  for (let step = 0; step < 220; step += 1) {
     if (/\/legacy$/.test(page.url())) break;
-    await page.getByRole('button').first().click();
-    await page.waitForTimeout(30);
+    await page.getByRole('button').filter({ hasNotText: 'Perks shop' }).first().click();
+    await page.waitForTimeout(15);
   }
 
   await expect(page).toHaveURL(/\/legacy$/);
-  await expect(page.getByRole('heading', { name: 'E2E Tester' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: /E2E Tester/ })).toBeVisible();
   await expect(page.getByText('Trophy case')).toBeVisible();
-  await expect(page.getByText(/legacy$/)).toBeVisible();
+  await expect(page.getByText(/\d+ legacy$/)).toBeVisible();
+  await expect(page.getByText('College')).toBeVisible();
+  await expect(page.getByText('Career earnings')).toBeVisible();
 });
 
 test('unknown share id shows a friendly fallback', async ({ page }) => {

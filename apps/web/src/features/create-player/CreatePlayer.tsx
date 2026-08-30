@@ -1,8 +1,10 @@
 import {
+  COUNTRIES,
   MARKETS,
   POSITIONS,
   archetypesFor,
   playerProfileSchema,
+  randomSeed,
   type ArchetypeId,
   type Market,
   type Position,
@@ -10,6 +12,7 @@ import {
 import { useMemo, useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '../../lib/cn.js';
+import { firstFriendlyError } from '../../lib/validation.js';
 import { Button } from '../../components/ui/button.js';
 import { Card, CardBody, CardTitle } from '../../components/ui/card.js';
 import { useCareerRun } from '../../store/career.js';
@@ -28,20 +31,31 @@ export function CreatePlayer() {
   const [position, setPosition] = useState<Position>('PG');
   const [archetype, setArchetype] = useState<ArchetypeId>(archetypesFor('PG')[0]!.id);
   const [market, setMarket] = useState<Market>('mid');
-  const [error, setError] = useState<string | null>(null);
+  const [jerseyNumber, setJerseyNumber] = useState(() => 1 + Math.floor(randomSeed() % 30));
+  const [country, setCountry] = useState('USA');
+  const [handedness, setHandedness] = useState<'left' | 'right'>('right');
+  const [error, setError] = useState<{ field: string; message: string } | null>(null);
 
   const archetypes = useMemo(() => archetypesFor(position), [position]);
 
   function pickPosition(p: Position) {
     setPosition(p);
-    setArchetype(archetypesFor(p)[0]!.id); // reset — archetypes are position-locked
+    setArchetype(archetypesFor(p)[0]!.id); // archetypes are position-locked
   }
 
   function onSubmit(e: FormEvent) {
     e.preventDefault();
-    const parsed = playerProfileSchema.safeParse({ name, position, archetype, market });
+    const parsed = playerProfileSchema.safeParse({
+      name,
+      position,
+      archetype,
+      market,
+      jerseyNumber,
+      country,
+      handedness,
+    });
     if (!parsed.success) {
-      setError(parsed.error.issues[0]?.message ?? 'Check your inputs');
+      setError(firstFriendlyError(parsed.error));
       return;
     }
     start(parsed.data);
@@ -52,18 +66,81 @@ export function CreatePlayer() {
     <Card>
       <CardBody>
         <CardTitle>Create your prospect</CardTitle>
-        <form className="mt-6 space-y-6" onSubmit={onSubmit}>
-          <label className="block space-y-1.5">
-            <span className="text-xs uppercase tracking-wide text-ink-dim">Name</span>
-            <input
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="e.g. Marcus Vale"
-              className="w-full rounded-lg border border-court-600 bg-court-800 px-3 py-2.5 text-ink outline-none focus:border-amber"
-              maxLength={24}
-              aria-label="Name"
-            />
-          </label>
+        <form className="mt-6 space-y-6" onSubmit={onSubmit} noValidate>
+          <div className="grid gap-4 sm:grid-cols-[1fr_auto]">
+            <label className="block space-y-1.5">
+              <span className="text-xs uppercase tracking-wide text-ink-dim">Name</span>
+              <input
+                value={name}
+                onChange={(e) => {
+                  setName(e.target.value);
+                  if (error?.field === 'name') setError(null);
+                }}
+                placeholder="e.g. Marcus Vale"
+                className={cn(
+                  'w-full rounded-lg border bg-court-800 px-3 py-2.5 text-ink outline-none focus:border-amber',
+                  error?.field === 'name' ? 'border-rose-500' : 'border-court-600',
+                )}
+                maxLength={24}
+                aria-label="Name"
+              />
+              {error?.field === 'name' && (
+                <span className="text-xs text-rose-400">{error.message}</span>
+              )}
+            </label>
+
+            <label className="block space-y-1.5">
+              <span className="text-xs uppercase tracking-wide text-ink-dim">Jersey #</span>
+              <input
+                type="number"
+                min={0}
+                max={99}
+                value={jerseyNumber}
+                onChange={(e) => setJerseyNumber(Math.max(0, Math.min(99, Number(e.target.value))))}
+                className="w-20 rounded-lg border border-court-600 bg-court-800 px-3 py-2.5 text-center text-ink outline-none focus:border-amber"
+                aria-label="Jersey number"
+              />
+            </label>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-[1fr_auto]">
+            <label className="block space-y-1.5">
+              <span className="text-xs uppercase tracking-wide text-ink-dim">Born in</span>
+              <select
+                value={country}
+                onChange={(e) => setCountry(e.target.value)}
+                className="w-full rounded-lg border border-court-600 bg-court-800 px-3 py-2.5 text-ink outline-none focus:border-amber"
+                aria-label="Country"
+              >
+                {COUNTRIES.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.flag} {c.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <div className="space-y-1.5">
+              <span className="text-xs uppercase tracking-wide text-ink-dim">Shooting hand</span>
+              <div className="flex gap-2">
+                {(['left', 'right'] as const).map((h) => (
+                  <button
+                    key={h}
+                    type="button"
+                    onClick={() => setHandedness(h)}
+                    className={cn(
+                      'rounded-lg border px-4 py-2.5 text-sm font-semibold capitalize transition-colors',
+                      h === handedness
+                        ? 'border-amber bg-amber/10 text-ink'
+                        : 'border-court-600 text-ink-dim hover:text-ink',
+                    )}
+                  >
+                    {h === 'left' ? 'Lefty' : 'Righty'}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
 
           <div className="space-y-1.5">
             <span className="text-xs uppercase tracking-wide text-ink-dim">Position</span>
@@ -132,7 +209,9 @@ export function CreatePlayer() {
             </div>
           </div>
 
-          {error && <p className="text-sm text-rose-400">{error}</p>}
+          {error && error.field !== 'name' && (
+            <p className="text-sm text-rose-400">{error.message}</p>
+          )}
 
           <Button type="submit" size="lg" className="w-full">
             Enter the summer circuit

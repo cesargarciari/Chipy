@@ -1,5 +1,4 @@
 import {
-  clampRatings,
   overallFor,
   rollStartingAthleticism,
   rollStartingDraftStock,
@@ -7,17 +6,8 @@ import {
   rollStartingHype,
   rollStartingRatings,
 } from './ratings.js';
-import { clamp, type Rng } from './rng.js';
-import {
-  RATING_KEYS,
-  type AwardId,
-  type AwardTally,
-  type CareerState,
-  type ChoiceOutcome,
-  type PlayerProfile,
-  type Ratings,
-  type TimelineEntry,
-} from './types.js';
+import type { Rng } from './rng.js';
+import type { AwardId, AwardTally, CareerState, PlayerProfile } from './types.js';
 
 export const START_AGE = 19;
 
@@ -40,46 +30,47 @@ export function createInitialState(rng: Rng, profile: PlayerProfile): CareerStat
     hype,
     draftStock,
     draft: null,
+    college: null,
+    league: 'nba',
     team: null,
+    club: null,
     contractYearsLeft: 0,
     retirementEligible: false,
     forcedRetire: false,
     careerEndingInjury: false,
+    farewellChosen: false,
+    onFarewellTour: false,
+    pendingInjury: null,
     peakOverall: overall,
+    salary: 0,
+    bank: 0,
+    marketValue: 0,
+    careerEarnings: 0,
+    peakSalary: 0,
+    ownedPerks: [],
+    yearlyPerks: [],
+    valueMods: [],
+    shoeDeal: null,
+    injuryHistory: [],
+    overseasSeasons: [],
+    franchiseScore: {},
+    franchiseSeasons: {},
+    franchiseRings: {},
+    franchiseTierSeen: {},
+    seasonsWithTeam: 0,
+    nationalRep: 0,
+    nationalCaps: 0,
+    nationalMedals: 0,
+    moments: [],
     seasons: [],
     awards: {},
     timeline: [],
+    firedScenarioIds: [],
+    growthBiases: [],
+    lastPlayedStats: null,
   };
-}
-
-export function addRatings(base: Ratings, deltas: Partial<Ratings>): Ratings {
-  const next = { ...base };
-  for (const key of RATING_KEYS) {
-    next[key] = base[key] + (deltas[key] ?? 0);
-  }
-  return clampRatings(next);
 }
 
 export function tallyAward(tally: AwardTally, id: AwardId): void {
   tally[id] = (tally[id] ?? 0) + 1;
-}
-
-/**
- * Apply a prologue choice outcome to the state, returning a new state (the
- * input is never mutated).
- */
-export function applyPrologueOutcome(
-  state: CareerState,
-  entry: Omit<TimelineEntry, 'headline'>,
-  outcome: ChoiceOutcome,
-): CareerState {
-  return {
-    ...state,
-    ratings: outcome.ratings ? addRatings(state.ratings, outcome.ratings) : state.ratings,
-    athleticism: clamp(state.athleticism + (outcome.athleticism ?? 0), 0, 100),
-    durability: clamp(state.durability + (outcome.durability ?? 0), 0, 100),
-    hype: clamp(state.hype + (outcome.hype ?? 0), 0, 100),
-    draftStock: clamp(state.draftStock + (outcome.draftStock ?? 0), 0, 100),
-    timeline: [...state.timeline, { ...entry, headline: outcome.headline }],
-  };
 }

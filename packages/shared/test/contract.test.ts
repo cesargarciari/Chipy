@@ -5,17 +5,28 @@ import { createCareerRequestSchema, idSchema, monthKey } from '../src/api.js';
 
 function autoPlay(seed: string, profile: PlayerProfile): CareerSummary {
   const choices: Array<{ nodeId: string; choiceId: string }> = [];
-  for (let i = 0; i < 100; i += 1) {
+  for (let i = 0; i < 500; i += 1) {
     const res = runCareer({ seed, profile, choices });
     if (res.status === 'complete') return res.summary;
     const p = res.pending;
     const opts =
       p.kind === 'prologue'
-        ? p.prologue!.choices.map((c) => c.id)
-        : p.kind === 'landing'
-          ? p.landing!.offers.map((o) => o.choiceId)
-          : p.season!.decision.options.map((o) => o.id);
-    const id = opts.find((o) => o !== 'retire') ?? opts[0]!;
+        ? p.prologue!.options.map((o) => o.id)
+        : p.kind === 'college_pick'
+          ? p.collegePick!.schools.map((s) => s.id)
+          : p.kind === 'college_year'
+            ? p.collegeYear!.options.map((o) => o.id)
+            : p.kind === 'landing'
+              ? p.landing!.offers.map((o) => o.id)
+              : p.kind === 'midseason'
+                ? p.midseason!.decision.options.map((o) => o.id)
+                : p.kind === 'overseas_offer'
+                  ? p.overseasOffer!.options.map((o) => o.id)
+                  : p.kind === 'farewell'
+                    ? p.farewell!.options.map((o) => o.id)
+                    : p.season!.decision.options.map((o) => o.id);
+    let id = opts.find((o) => o !== 'retire') ?? opts[0]!;
+    if (p.kind === 'college_year') id = opts.find((o) => o.startsWith('cy_declare')) ?? id;
     choices.push({ nodeId: p.nodeId, choiceId: id });
   }
   throw new Error('career did not finish');
@@ -26,6 +37,9 @@ const PROFILE: PlayerProfile = {
   position: 'PG',
   archetype: 'floor_general',
   market: 'mid',
+  jerseyNumber: 11,
+  country: 'ESP',
+  handedness: 'left',
 };
 
 describe('career summary contract', () => {
@@ -33,6 +47,9 @@ describe('career summary contract', () => {
     const summary = autoPlay('contract-1', PROFILE);
     const parsed = careerSummarySchema.parse(summary);
     expect(parsed).toEqual(JSON.parse(JSON.stringify(summary)));
+    expect(parsed.college?.years.length).toBeGreaterThanOrEqual(1);
+    expect(parsed.profile.jerseyNumber).toBe(11);
+    expect(parsed.profile.country).toBe('ESP');
   });
 
   it('holds for several archetypes', () => {
@@ -46,6 +63,9 @@ describe('career summary contract', () => {
         position,
         archetype,
         market: 'large',
+        jerseyNumber: 23,
+        country: 'USA',
+        handedness: 'right',
       });
       expect(() => careerSummarySchema.parse(summary)).not.toThrow();
     }
@@ -53,7 +73,7 @@ describe('career summary contract', () => {
 });
 
 describe('create-career request', () => {
-  it('requires a full career (>= 5 choices)', () => {
+  it('requires a full career (>= 3 choices)', () => {
     const base = { seed: 1, profile: PROFILE };
     expect(
       createCareerRequestSchema.safeParse({

@@ -30,19 +30,46 @@
 
 ## The career loop
 
-`runCareer({ seed, profile, choices })` walks: **prologue** (2 nodes) →
-**draft** (engine derives a hidden `talent` ceiling from draft stock) →
-**landing spot** (1 of 3 team offers) → **season loop** (one decision per
-season; the engine then rolls an in-season event, grows ratings on an
-age curve scaled by archetype weights and `talent²`, simulates the season and
-playoffs, resolves awards, and — on odd summers — an Olympic / World Cup medal)
-→ **legacy** (career totals, trophy tally, a 0-1000+ legacy score → tier +
-grade + Hall-of-Fame roll).
+`runCareer({ seed, profile, choices })` walks: **prologue** (high school +
+recruiting) → **college** (pick a real program, play an interactive freshman
+year, declare/return/transfer up to 3 years) → **draft** (engine derives a
+hidden `talent` ceiling from draft stock) → **landing spot** (1 of 3 team
+offers, each with a salary) → **season loop**: a repeatable **perks shop**
+(`buy_<id>` … `perks_done`), then the year's call — a themed **scenario**, or
+**free agency** on a contract year — then ~30% of seasons a branching
+**mid-season situation** in place of the silent event; the engine grows ratings
+on an age curve × archetype weight × `talent²` plus any lingering decision /
+perk bias, simulates the season and playoffs with role momentum + stat
+smoothing, banks pay, accrues injuries, resolves awards, and — on odd summers —
+a country-weighted Olympic / World Cup medal. A washed-out NBA player can be
+offered the **EuroLeague** (`overseas_offer`) instead of retiring, and runs the
+same loop abroad with a route back. It ends on **legacy** (career totals,
+earnings, trophy tally, a 0-1000+ score → tier + grade + Hall-of-Fame roll).
 
 `choices` is variable-length. When it runs out, `runCareer` returns
-`status: 'awaiting_choice'` with the next node to render; when the career ends
-(retirement or a forced end), it returns `status: 'complete'` with the full
-`CareerSummary`. The web drives this loop entirely client-side.
+`status: 'awaiting_choice'` with the next node to render (`prologue` /
+`college_pick` / `college_year` / `landing` / `perks` / `season` / `midseason` /
+`overseas_offer`); when the career ends it returns `status: 'complete'` with the
+full `CareerSummary`. The web drives this loop entirely client-side. Node
+resolution consumes no main-stream RNG (offers use derived streams), so partial
+evaluation replays byte-identically.
+
+## One option model + the scenario library
+
+Prologue, college, and season decisions all use one `GameOption` shape:
+`effect` (flat integer deltas → shown as `+8 FINISHING` chips by
+`describeEffects`, applied by `applyOption`) and `stance` (impact/team/award
+multipliers, role bias, and a lingering multi-season `growthBias` → shown as a
+one-word tag). No RNG on choice effects; the card promises what you get.
+
+Season content lives in `packages/engine/src/season/scenarios/*.ts` — one file
+per theme, each an array of `Scenario` objects with a declarative `gate`
+(phase / age / season / role / market / `once` / `weight` / `predicate`) and 2–4
+options. `pickScenario` filters by gate and weight-picks; adding content is
+appending an object. `buildScenarioIndex` validates the pack in tests. The
+mid-season pool (`season/midseason.ts`) and the perks shop reuse the same option
+model — `stance` gains `forceTrade` / `injuredGames` / `valueMult`, and
+`effect` gains `money` (rendered as a gold `+$18M` / red `−$2M` chip).
 
 ## Two ideas doing the heavy lifting
 

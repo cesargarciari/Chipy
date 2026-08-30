@@ -1,10 +1,10 @@
-import { runCareer } from '@chipy/engine';
 import { careerSummarySchema } from '@chipy/shared';
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LegacyCard } from '../features/legacy/LegacyCard.js';
 import { ApiError, api } from '../lib/api.js';
+import { runCareerSafe } from '../lib/runCareerSafe.js';
 import { useCareerRun } from '../store/career.js';
 
 export function LegacyPage() {
@@ -12,19 +12,25 @@ export function LegacyPage() {
   const { seed, profile, choices, reset } = useCareerRun();
 
   const result = useMemo(
-    () => (profile ? runCareer({ seed, profile, choices }) : null),
+    () => (profile ? runCareerSafe({ seed, profile, choices }) : null),
     [seed, profile, choices],
   );
   const complete = result?.status === 'complete';
 
   useEffect(() => {
-    if (!profile) navigate('/create', { replace: true });
-    else if (result && !complete) navigate('/play', { replace: true });
-  }, [profile, result, complete, navigate]);
+    if (!profile) {
+      navigate('/create', { replace: true });
+    } else if (result?.status === 'error') {
+      reset();
+      navigate('/create', { replace: true });
+    } else if (result && !complete) {
+      navigate('/play', { replace: true });
+    }
+  }, [profile, result, complete, navigate, reset]);
 
   const summary = useMemo(
-    () => (complete ? careerSummarySchema.parse(result!.summary) : null),
-    [complete, result],
+    () => (result?.status === 'complete' ? careerSummarySchema.parse(result.summary) : null),
+    [result],
   );
 
   const save = useQuery({

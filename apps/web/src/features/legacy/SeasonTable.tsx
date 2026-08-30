@@ -1,6 +1,6 @@
 import type { CareerSummaryDto } from '@chipy/shared';
 import { useState } from 'react';
-import { TEAM_RESULT_LABELS } from '../../lib/format.js';
+import { moneyM, TEAM_RESULT_LABELS } from '../../lib/format.js';
 
 const RESULT_TONE: Record<string, string> = {
   champion: 'text-amber',
@@ -22,7 +22,7 @@ export function SeasonTable({ seasons }: { seasons: CareerSummaryDto['seasons'] 
 
       {open && (
         <div className="mt-3 overflow-x-auto">
-          <table className="w-full min-w-[520px] text-left text-xs">
+          <table className="w-full min-w-[580px] text-left text-xs">
             <thead className="text-ink-dim">
               <tr className="border-b border-court-700">
                 <th className="py-1.5 pr-2">#</th>
@@ -31,6 +31,7 @@ export function SeasonTable({ seasons }: { seasons: CareerSummaryDto['seasons'] 
                 <th className="pr-2 text-right">PPG</th>
                 <th className="pr-2 text-right">RPG</th>
                 <th className="pr-2 text-right">APG</th>
+                <th className="pr-2 text-right">Salary</th>
                 <th className="pr-2">Result</th>
                 <th>Honours</th>
               </tr>
@@ -44,10 +45,14 @@ export function SeasonTable({ seasons }: { seasons: CareerSummaryDto['seasons'] 
                   <td className="pr-2 text-right font-mono tabular-nums">{s.stats.ppg}</td>
                   <td className="pr-2 text-right font-mono tabular-nums">{s.stats.rpg}</td>
                   <td className="pr-2 text-right font-mono tabular-nums">{s.stats.apg}</td>
+                  <td className="pr-2 text-right font-mono tabular-nums text-ink-dim">
+                    {moneyM(s.salary)}
+                  </td>
                   <td className={`pr-2 ${RESULT_TONE[s.teamResult] ?? 'text-ink-dim'}`}>
                     {TEAM_RESULT_LABELS[s.teamResult]}
                   </td>
                   <td className="text-ink-dim">
+                    {s.midseasonId && <span title={s.midseasonHeadline ?? ''}>◆ </span>}
                     {s.awards.includes('mvp') && <span className="text-amber">MVP </span>}
                     {s.awards.includes('champion') && <span className="text-amber">🏆 </span>}
                     {s.awards.includes('all_star') && !s.awards.includes('mvp') && 'All-Star '}

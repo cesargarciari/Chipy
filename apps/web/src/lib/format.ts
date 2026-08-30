@@ -1,11 +1,37 @@
-import { getArchetype, teamLabel, type ArchetypeId, type AwardId } from '@chipy/engine';
+import {
+  FRANCHISE_TIER_LABELS,
+  getArchetype,
+  getCountry,
+  getPerk,
+  perkExists,
+  teamLabel,
+  type ArchetypeId,
+  type AwardId,
+  type FranchiseTier,
+} from '@chipy/engine';
 import type { CareerSummaryDto } from '@chipy/shared';
+
+type EuroResult = CareerSummaryDto['overseasSeasons'][number]['result'];
+
+export { FRANCHISE_TIER_LABELS };
+export type { FranchiseTier };
+
+/** How prominent a franchise tier should read — drives colour on the legacy card. */
+export const FRANCHISE_TIER_TONE: Record<FranchiseTier, string> = {
+  none: 'text-ink-dim',
+  known: 'text-ink-dim',
+  favorite: 'text-sky-400',
+  cornerstone: 'text-emerald-400',
+  idol: 'text-amber',
+  legend: 'text-amber',
+};
 
 type LegacyTier = CareerSummaryDto['legacy']['tier'];
 type Role = CareerSummaryDto['seasons'][number]['role'];
 type TeamResult = CareerSummaryDto['seasons'][number]['teamResult'];
 type Phase = CareerSummaryDto['seasons'][number]['phase'];
 type GradeLetter = CareerSummaryDto['legacy']['grade'];
+type SchoolTier = NonNullable<CareerSummaryDto['college']>['tier'];
 
 export function archetypeLabel(id: ArchetypeId): string {
   return getArchetype(id).label;
@@ -14,6 +40,21 @@ export function archetypeLabel(id: ArchetypeId): string {
 export function teamName(id: string): string {
   return teamLabel(id);
 }
+
+export function countryLabel(id: string): string {
+  const c = getCountry(id);
+  return `${c.flag} ${c.name}`;
+}
+
+export function countryName(id: string): string {
+  return getCountry(id).name;
+}
+
+export const SCHOOL_TIER_LABELS: Record<SchoolTier, string> = {
+  blue_blood: 'Blue-blood program',
+  mid_major: 'Mid-major',
+  overseas: 'Overseas / G League',
+};
 
 export function ordinal(n: number): string {
   const s = ['th', 'st', 'nd', 'rd'];
@@ -24,6 +65,25 @@ export function ordinal(n: number): string {
 export function pctText(pct: number): string {
   return `${pct % 1 === 0 ? pct.toFixed(0) : pct.toFixed(1)}%`;
 }
+
+/** `$18M`, `$1.5M`, `$1.2B` — the game's money unit is $M. */
+export function moneyM(m: number): string {
+  if (m >= 1000) return `$${(m / 1000).toFixed(m % 1000 === 0 ? 0 : 1)}B`;
+  return `$${m % 1 === 0 ? m.toFixed(0) : m.toFixed(1)}M`;
+}
+
+/** Human name for a perk id (`shooting_trainer` → "Shooting trainer"). */
+export function perkLabel(id: string): string {
+  return perkExists(id) ? getPerk(id).name : id;
+}
+
+export const EURO_RESULT_LABELS: Record<EuroResult, string> = {
+  euroleague_champion: 'EuroLeague Champion',
+  euroleague_final_four: 'EuroLeague Final Four',
+  domestic_title: 'Domestic Title',
+  euro_playoffs: 'EuroLeague Playoffs',
+  euro_missed: 'No silverware',
+};
 
 export function draftLabel(draft: CareerSummaryDto['draft']): string {
   if (draft.undrafted || draft.pick === null) return 'Undrafted';
@@ -102,6 +162,9 @@ export const AWARD_LABELS: Record<AwardId, string> = {
   oly_gold: 'Olympic Gold',
   oly_silver: 'Olympic Silver',
   oly_bronze: 'Olympic Bronze',
+  euroleague_champion: 'EuroLeague Champion',
+  euroleague_mvp: 'EuroLeague MVP',
+  euro_domestic_title: 'Domestic League Title',
 };
 
 /** Big-ticket awards, in the order a trophy case should show them. */
@@ -127,6 +190,9 @@ export const TROPHY_ORDER: AwardId[] = [
   'assists_title',
   'steals_title',
   'blocks_title',
+  'euroleague_champion',
+  'euroleague_mvp',
+  'euro_domestic_title',
   'oly_silver',
   'oly_bronze',
   'wc_silver',

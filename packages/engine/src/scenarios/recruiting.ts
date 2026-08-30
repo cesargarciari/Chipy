@@ -1,77 +1,82 @@
-import { jitter } from '../rng.js';
-import type { PrologueNode } from '../types.js';
+import { int, type Rng } from '../rng.js';
+import type { GameOption, PrologueNode } from '../types.js';
+import { balancedEffect, PLAYMAKING, rollEdge, SCORING, SLASHING } from './prologue-roll.js';
 
-export const recruitingNode: PrologueNode = {
+/**
+ * The recruiting choice only picks a *tier*. `college1` then offers real
+ * programs from that tier and a freshman year is simulated — so the real
+ * draft-stock swing comes from the school + how you play, not from here. The
+ * effects on these options are light, equal-value tier flavour, rerolled per
+ * career.
+ */
+export const RECRUITING_TEMPLATE = {
   id: 'recruiting',
   stage: 'Recruiting',
-  title: 'The Decision',
+  title: 'THE DECISION',
   prompt: 'The letters are in and the cameras are on. Where do you take your talents?',
-  choices: [
+  options: [
     {
       id: 'blue_blood',
-      label: 'Commit to a blue-blood',
-      blurb: 'Bright lights, a loaded roster, and a coach who sends players to the lottery.',
-      resolve: ({ rng }) => ({
-        ratings: {
-          basketballIQ: 3 + jitter(rng, 2),
-          perimeterDefense: 2 + jitter(rng, 2),
-          playmaking: -2,
-        },
-        hype: 12 + jitter(rng, 3),
-        draftStock: 8 + jitter(rng, 3),
-        headline:
-          'You come off the bench for a Final Four team. Modest numbers, but you guarded everyone and NBA staffs trust the pedigree.',
-      }),
+      label: 'BLUE-BLOOD',
+      blurb: 'Bright lights, a loaded roster, a coach who sends players to the lottery.',
+      tag: 'Pedigree',
     },
     {
       id: 'mid_major_hub',
-      label: 'Pick a development-first mid-major',
-      blurb: 'Somewhere you start on day one and get thirty shots if you want them.',
-      resolve: ({ rng }) => ({
-        ratings: {
-          finishing: 4 + jitter(rng, 2),
-          threePoint: 4 + jitter(rng, 2),
-          playmaking: 3 + jitter(rng, 2),
-          basketballIQ: 2,
-        },
-        hype: -2 + jitter(rng, 2),
-        draftStock: 2 + jitter(rng, 2),
-        headline:
-          'You post 22-6-5 as a freshman and drag them into March. Evaluators keep circling "level of competition."',
-      }),
+      label: 'MID-MAJOR',
+      blurb: 'A development-first program where you start day one and get 30 shots.',
+      tag: 'High usage',
     },
     {
       id: 'g_league_ignite',
-      label: 'Join the G League Ignite',
+      label: 'G LEAGUE IGNITE',
       blurb: 'A paid development team built to prepare prospects for the next level.',
-      resolve: ({ rng }) => ({
-        ratings: {
-          perimeterDefense: 3 + jitter(rng, 2),
-          basketballIQ: 3 + jitter(rng, 1),
-        },
-        athleticism: 2 + jitter(rng, 2),
-        hype: 2 + jitter(rng, 2),
-        draftStock: 6 + jitter(rng, 3),
-        headline:
-          'You spend a year scrimmaging against grown professionals. The film is exactly what front offices want to study.',
-      }),
+      tag: 'Pro prep',
     },
     {
       id: 'overseas_pro',
-      label: 'Sign overseas as a pro',
-      blurb: 'Get paid now, practice against seasoned men, live far from home.',
-      resolve: ({ rng }) => ({
-        ratings: {
-          perimeterDefense: 4 + jitter(rng, 2),
-          basketballIQ: 4 + jitter(rng, 2),
-        },
-        athleticism: 3 + jitter(rng, 2),
-        hype: -4 + jitter(rng, 2),
-        durability: 3,
-        draftStock: 5 + jitter(rng, 3),
-        headline:
-          'A season against veterans hardens your game and your body. Casual fans have no idea who you are yet.',
-      }),
+      label: 'OVERSEAS PRO',
+      blurb: 'Get paid now, practise against seasoned men, live far from home.',
+      tag: 'Pro habits',
     },
   ],
-};
+} as const;
+
+/**
+ * Four tier options of equal card value (~5 shown attribute points plus a
+ * similar draft-stock bump), with one getting a small random edge each career.
+ * The pool and athleticism/durability share are rerolled per playthrough so no
+ * tier is a permanent best pick.
+ */
+export function buildRecruitingNode(rng: Rng): PrologueNode {
+  const TARGET = 5;
+  const edge = rollEdge(rng, 4);
+  const bumpFor = (i: number) => (i === edge.index ? edge.bump : 0);
+  const t = RECRUITING_TEMPLATE;
+  const stock = () => int(rng, 4, 6);
+
+  const options: GameOption[] = [
+    {
+      ...t.options[0],
+      effect: { ...balancedEffect(rng, PLAYMAKING, TARGET + bumpFor(0), 0), draftStock: stock() },
+      stance: { tag: t.options[0].tag },
+    },
+    {
+      ...t.options[1],
+      effect: { ...balancedEffect(rng, SCORING, TARGET + bumpFor(1), 1), draftStock: stock() },
+      stance: { tag: t.options[1].tag, roleBias: 0.2 },
+    },
+    {
+      ...t.options[2],
+      effect: { ...balancedEffect(rng, SLASHING, TARGET + bumpFor(2), 2), draftStock: stock() },
+      stance: { tag: t.options[2].tag },
+    },
+    {
+      ...t.options[3],
+      effect: { ...balancedEffect(rng, PLAYMAKING, TARGET + bumpFor(3), 2), draftStock: stock() },
+      stance: { tag: t.options[3].tag },
+    },
+  ];
+
+  return { id: t.id, stage: t.stage, title: t.title, prompt: t.prompt, options };
+}

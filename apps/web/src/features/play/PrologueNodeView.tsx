@@ -1,5 +1,5 @@
 import type { PendingDecision } from '@chipy/engine';
-import { Card, CardBody } from '../../components/ui/card.js';
+import { ChoiceCard } from '../../components/ChoiceCard.js';
 
 export function PrologueNodeView({
   node,
@@ -9,28 +9,25 @@ export function PrologueNodeView({
   onChoose: (choiceId: string) => void;
 }) {
   return (
-    <Card>
-      <CardBody className="space-y-5">
-        <div className="space-y-2">
-          <div className="text-xs uppercase tracking-wide text-ink-dim">{node.stage}</div>
-          <h2 className="text-2xl font-black">{node.title}</h2>
-          <p className="text-ink-dim">{node.prompt}</p>
-        </div>
-        <div className="space-y-3">
-          {node.choices.map((choice) => (
-            <button
-              key={choice.id}
-              onClick={() => onChoose(choice.id)}
-              className="group w-full rounded-xl border border-court-600 p-4 text-left transition-colors hover:border-amber hover:bg-amber/5"
-            >
-              <span className="block font-bold text-ink group-hover:text-amber">
-                {choice.label}
-              </span>
-              <span className="mt-1 block text-sm text-ink-dim">{choice.blurb}</span>
-            </button>
-          ))}
-        </div>
-      </CardBody>
-    </Card>
+    <div className="space-y-4">
+      <div>
+        <div className="text-xs uppercase tracking-wide text-ink-dim">{node.stage}</div>
+        <h2 className="mt-1 text-3xl">{node.title}</h2>
+        <p className="mt-1 max-w-prose text-ink-dim">{node.prompt}</p>
+      </div>
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {node.options.map((o) => (
+          <ChoiceCard
+            key={o.id}
+            title={o.label}
+            description={o.blurb}
+            effects={o.effects}
+            tag={o.tag}
+            watermark={o.watermark}
+            onClick={() => onChoose(o.id)}
+          />
+        ))}
+      </div>
+    </div>
   );
 }

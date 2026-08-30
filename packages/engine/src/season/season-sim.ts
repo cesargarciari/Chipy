@@ -48,17 +48,33 @@ function shiftRole(role: Role, ranks: number): Role {
   return ROLE_ORDER[i]!;
 }
 
+export function roleRank(role: Role): number {
+  return ROLE_ORDER.indexOf(role);
+}
+
 export function roleFor(args: {
   overall: number;
   teamStrength: number;
   isRookie: boolean;
   effect: SeasonEffect;
+  /** Last season's role — the result can't move more than one rank from it. */
+  previousRole?: Role;
+  /** Bypass the momentum clamp (big overall jump, or a lost season). */
+  allowJump?: boolean;
 }): Role {
   let role = roleFromOverall(args.overall);
   if (args.isRookie && args.overall < 84) role = shiftRole(role, -1);
   if (args.teamStrength >= 0.7 && args.overall < 85) role = shiftRole(role, -1);
   if (args.teamStrength <= 0.35 && args.overall >= 70) role = shiftRole(role, 1);
   role = shiftRole(role, args.effect.roleBias ?? 0);
+
+  // Role momentum: don't jump/crash more than one tier a year.
+  if (args.previousRole && !args.allowJump && !args.isRookie) {
+    const prev = roleRank(args.previousRole);
+    const target = roleRank(role);
+    const clamped = clamp(target, prev - 1, prev + 1);
+    role = ROLE_ORDER[clamped]!;
+  }
   return role;
 }
 
@@ -89,8 +105,12 @@ export interface SeasonSimArgs {
   athleticism: number;
   position: Position;
   role: Role;
+  age: number;
   durability: number;
   effect: SeasonEffect;
+  /** Last *played* season's line — the new line is smoothed toward it. */
+  previousStats?: SeasonStatLine | null;
+  previousRole?: Role;
 }
 
 export interface SeasonSimResult {
@@ -103,7 +123,7 @@ export interface SeasonSimResult {
 }
 
 export function simulateSeason(rng: Rng, args: SeasonSimArgs): SeasonSimResult {
-  const { ratings: r, athleticism, position, role, durability, effect } = args;
+  const { ratings: r, athleticism, position, role, age, durability, effect } = args;
 
   const injuredGames = effect.injuredGames ?? 0;
   const absences = int(rng, 0, 7) + Math.round((100 - durability) / 12);
@@ -121,10 +141,27 @@ export function simulateSeason(rng: Rng, args: SeasonSimArgs): SeasonSimResult {
     };
   }
 
+  // Continuity: pull each stat toward last played season so a role change can't
+  // crater a scoring average (24 → 6). `w` is how much the fresh number counts.
+  const prev = args.previousStats;
+  const roleDelta =
+    args.previousRole !== undefined ? roleRank(role) - roleRank(args.previousRole) : 0;
+  let w = 0.6 + (age <= 24 ? 0.15 : 0) + (roleDelta > 0 ? 0.12 : 0) + (roleDelta < 0 ? -0.1 : 0);
+  w = clamp(w, 0.45, 0.9);
+  const upBand = age <= 23 ? 1.7 : 1.5;
+  const smooth = (raw: number, was: number | undefined, floorAllowed = true): number => {
+    if (was === undefined || was <= 0) return raw;
+    const blended = raw * w + was * (1 - w);
+    return clamp(blended, floorAllowed ? was * 0.62 : 0, was * upBand);
+  };
+
   const scoringRate = (r.finishing * 0.4 + r.midRange * 0.28 + r.threePoint * 0.32) / 100;
   const ppg = clamp(
     roundTo(
-      mpg * scoringRate * USAGE[role] * impactMult * (0.88 + rng() * 0.22) + jitter(rng, 1),
+      smooth(
+        mpg * scoringRate * USAGE[role] * impactMult * (0.88 + rng() * 0.22) + jitter(rng, 1),
+        prev?.ppg,
+      ),
       1,
     ),
     0,
@@ -132,29 +169,28 @@ export function simulateSeason(rng: Rng, args: SeasonSimArgs): SeasonSimResult {
   );
 
   const rebRate = (r.rebounding * 0.6 + r.interiorDefense * 0.25 + athleticism * 0.15) / 100;
-  const rpg = clamp(roundTo(mpg * rebRate * REB_POS[position] * 0.21, 1), 0, 16);
+  const rpg = clamp(roundTo(smooth(mpg * rebRate * REB_POS[position] * 0.21, prev?.rpg), 1), 0, 16);
 
   const astRate = (r.playmaking * 0.75 + r.basketballIQ * 0.25) / 100;
-  const apg = clamp(roundTo(mpg * astRate * AST_POS[position] * 0.185, 1), 0, 12);
+  const apg = clamp(
+    roundTo(smooth(mpg * astRate * AST_POS[position] * 0.185, prev?.apg), 1),
+    0,
+    12,
+  );
 
   const stlRate = (r.perimeterDefense * 0.6 + r.basketballIQ * 0.4) / 100;
-  const spg = clamp(roundTo(mpg * stlRate * 0.048, 1), 0, 3.2);
+  const spg = clamp(roundTo(smooth(mpg * stlRate * 0.048, prev?.spg), 1), 0, 3.2);
 
   const blkRate = (r.interiorDefense * 0.55 + athleticism * 0.3 + r.rebounding * 0.15) / 100;
-  const bpg = clamp(roundTo(mpg * blkRate * BLK_POS[position] * 0.047, 1), 0, 4);
+  const bpg = clamp(roundTo(smooth(mpg * blkRate * BLK_POS[position] * 0.047, prev?.bpg), 1), 0, 4);
 
-  const tsPct = clamp(
-    roundTo(
-      0.5 +
-        (r.threePoint - 60) / 450 +
-        (r.finishing - 60) / 500 +
-        (r.basketballIQ - 60) / 700 +
-        jitter(rng, 2) / 100,
-      3,
-    ),
-    0.44,
-    0.7,
-  );
+  const rawTs =
+    0.5 +
+    (r.threePoint - 60) / 450 +
+    (r.finishing - 60) / 500 +
+    (r.basketballIQ - 60) / 700 +
+    jitter(rng, 2) / 100;
+  const tsPct = clamp(roundTo(prev?.tsPct ? rawTs * 0.7 + prev.tsPct * 0.3 : rawTs, 3), 0.44, 0.7);
 
   const availability = clamp(gp / 72, 0.45, 1.04);
   const impact =

@@ -39,6 +39,7 @@ export interface CareerItem {
   seasons: number;
   rings: number;
   mvps: number;
+  earnings: number;
   // The full, authoritative simulation output.
   summary: CareerSummaryDto;
 }
