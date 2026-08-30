@@ -38,8 +38,10 @@ describe('career shape (200 random careers)', () => {
       for (let i = 1; i < s.overseasSeasons.length; i += 1) {
         expect(s.overseasSeasons[i]!.age).toBeGreaterThan(s.overseasSeasons[i - 1]!.age);
       }
-      expect(s.seasons[0]!.age).toBe(19);
-      expect(s.college?.years.length ?? 0).toBeGreaterThanOrEqual(1);
+      // Rookie age is 19 plus one year for every extra season spent in school.
+      const collegeYears = s.college?.years.length ?? 1;
+      expect(s.seasons[0]!.age).toBe(19 + Math.max(0, collegeYears - 1));
+      expect(collegeYears).toBeGreaterThanOrEqual(1);
     }
   });
 

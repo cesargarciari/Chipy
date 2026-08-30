@@ -1,5 +1,5 @@
 import type { CareerMomentDto } from '@chipy/shared';
-import { awardArt, clubCrest, teamLogo } from '../lib/art.js';
+import { awardArt } from '../lib/art.js';
 import { cn } from '../lib/cn.js';
 import { teamName } from '../lib/format.js';
 
@@ -29,13 +29,14 @@ const TONE: Record<CareerMomentDto['kind'], string> = {
 };
 
 /**
- * A single big-moment card — a trade, a ring, an MVP. Deliberately image-ready:
- * the glyph box shows award art (`assets/awards/<awardId>.png`) or a team /
- * club logo (`assets/teams/<TEAMID>.png`) when one has been added, else an
- * emoji glyph. See `src/lib/art.ts`.
+ * A single recap-banner beat — an award, a franchise milestone, an injury. The
+ * glyph box shows award art (`assets/awards/<awardId>.png`) when one exists,
+ * otherwise an emoji glyph. Team logos are deliberately *not* shown here — they
+ * add clutter to a stack of event notifications (they live on the trade modal
+ * and the contract cards instead). See `src/lib/art.ts`.
  */
 export function MomentCard({ moment }: { moment: CareerMomentDto }) {
-  const art = awardArt(moment.awardId) ?? teamLogo(moment.teamId) ?? clubCrest(moment.teamId);
+  const art = awardArt(moment.awardId);
   return (
     <div
       className={cn(

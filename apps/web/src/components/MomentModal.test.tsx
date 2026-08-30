@@ -16,12 +16,13 @@ const moment = (over: Partial<CareerMomentDto>): CareerMomentDto => ({
 });
 
 describe('isHeadlineMoment', () => {
-  it('flags MVP / DPOY / rings, not trades or all-NBA', () => {
+  it('flags MVP / DPOY / rings / trades, not all-NBA or injuries', () => {
     expect(isHeadlineMoment(moment({ awardId: 'mvp' }))).toBe(true);
     expect(isHeadlineMoment(moment({ awardId: 'dpoy' }))).toBe(true);
     expect(isHeadlineMoment(moment({ kind: 'ring', awardId: 'champion' }))).toBe(true);
+    expect(isHeadlineMoment(moment({ kind: 'trade', awardId: undefined }))).toBe(true);
     expect(isHeadlineMoment(moment({ kind: 'award', awardId: 'all_nba_1' }))).toBe(false);
-    expect(isHeadlineMoment(moment({ kind: 'trade', awardId: undefined }))).toBe(false);
+    expect(isHeadlineMoment(moment({ kind: 'injury', awardId: undefined }))).toBe(false);
   });
 });
 

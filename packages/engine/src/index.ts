@@ -20,6 +20,7 @@ export {
   RATING_FLOOR,
   RATING_CEIL,
   AWARD_IDS,
+  STATUS_TIER_LABELS,
 } from './types.js';
 
 export type {
@@ -81,6 +82,7 @@ export type {
   MomentKind,
   CareerMoment,
   Handedness,
+  StatusTier,
 } from './types.js';
 
 export { mulberry32, normalizeSeed, randomSeed, type Rng } from './rng.js';
@@ -107,6 +109,7 @@ export {
   type InjuryRollCtx,
   type RolledInjury,
 } from './season/injuries.js';
+export { statusTier, statusRank, tradeChance } from './season/status.js';
 export {
   buildPerkShop,
   perkHighlightKeys,

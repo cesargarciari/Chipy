@@ -3,7 +3,7 @@
  * existing `(seed, profile, choices)` tuple. Stored on every `CareerSummary` so
  * the API can tell whether a persisted career predates the current rules.
  */
-export const ENGINE_VERSION = '4.6.0';
+export const ENGINE_VERSION = '4.8.0';
 
 export const POSITIONS = ['PG', 'SG', 'SF', 'PF', 'C'] as const;
 export type Position = (typeof POSITIONS)[number];
@@ -93,6 +93,17 @@ export type TeamResult =
   | 'missed_season';
 
 export type Role = 'franchise' | 'starter' | 'rotation' | 'bench' | 'fringe';
+
+/** Where the player sits in the league pecking order — drives trade leverage. */
+export type StatusTier = 'fringe' | 'role_player' | 'star' | 'superstar' | 'generational';
+
+export const STATUS_TIER_LABELS: Record<StatusTier, string> = {
+  fringe: 'Fringe / rotation',
+  role_player: 'Role player',
+  star: 'Star',
+  superstar: 'Superstar',
+  generational: 'Generational talent',
+};
 
 export type CareerPhase = 'rookie' | 'rising' | 'prime' | 'veteran' | 'decline';
 
@@ -223,6 +234,8 @@ export interface OptionView {
   tag?: string;
   watermark: string;
   rare?: boolean;
+  /** NBA team id or overseas club id — the client shows its logo on the card. */
+  teamId?: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -451,9 +464,6 @@ export const AWARD_IDS = [
   'mvp',
   'champion',
   'finals_mvp',
-  'wc_gold',
-  'wc_silver',
-  'wc_bronze',
   'oly_gold',
   'oly_silver',
   'oly_bronze',
@@ -645,6 +655,12 @@ export interface CareerState {
   farewellChosen: boolean;
   /** True during the single ceremonial season a "farewell tour" grants. */
   onFarewellTour: boolean;
+  /** Seasons left in the post-ring contention window (5 after each title). */
+  ringWindowLeft: number;
+  /** True for the season right after any trade — suppresses back-to-back moves. */
+  justTraded: boolean;
+  /** 0..100 — how well you gel with teammates. Low chemistry gets you traded. */
+  chemistry: number;
   /** An injury rolled this season — consumed when the season record is written. */
   pendingInjury: InjuryEntry | null;
   peakOverall: number;

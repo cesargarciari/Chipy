@@ -39,6 +39,17 @@ export const QUIET_GOODBYE_VIEW: OptionView = {
   watermark: 'END',
 };
 
+/** Star-and-up players can force their way out — a new team, at a cost to your
+ *  standing with the one you left. */
+export const DEMAND_TRADE_VIEW: OptionView = {
+  id: 'demand_trade',
+  label: 'DEMAND A TRADE',
+  blurb: 'Tell the front office you want out. You will be moved before next season.',
+  effects: [],
+  tag: 'Force a move',
+  watermark: 'OUT',
+};
+
 const money = (m: number): string => `$${m % 1 === 0 ? m.toFixed(0) : m.toFixed(1)}M`;
 
 /** A team offer rendered as an option card. */
@@ -50,6 +61,7 @@ export function teamOfferView(offer: TeamOffer, resign: boolean): OptionView {
     effects: [{ key: 'money', label: 'MONEY', short: '$', delta: offer.salary }],
     tag: `${money(offer.salary)}/yr`,
     watermark: resign ? 'STAY' : 'SIGN',
+    teamId: offer.team.id,
   };
 }
 
@@ -63,6 +75,7 @@ export function clubOfferView(offer: ClubOffer): OptionView {
     effects: [{ key: 'money', label: 'MONEY', short: '$', delta: offer.salary }],
     tag: `${money(offer.salary)}/yr`,
     watermark: stay ? 'STAY' : 'EURO',
+    teamId: offer.club.id,
   };
 }
 

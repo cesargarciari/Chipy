@@ -22,6 +22,7 @@ import {
   simulateCollegeYear,
 } from './season/college.js';
 import {
+  DEMAND_TRADE_VIEW,
   FAREWELL_TOUR_VIEW,
   QUIET_GOODBYE_VIEW,
   RETIRE_VIEW,
@@ -72,9 +73,11 @@ import {
   simulateSeason,
   teamStrengthFor,
 } from './season/season-sim.js';
+import { statusRank, statusTier, tradeChance } from './season/status.js';
 import { freeAgencyOffers, landingOffers } from './season/teams-sim.js';
 import {
   ENGINE_VERSION,
+  RATING_KEYS,
   type AwardId,
   type CareerMoment,
   type CareerState,
@@ -97,6 +100,7 @@ import {
   type SchoolTier,
   type SeasonDecisionNode,
   type SeasonRecord,
+  type StatusTier,
   type TeamRef,
   type TeamResult,
 } from './types.js';
@@ -133,6 +137,14 @@ export interface SeasonPreview {
   franchiseProgress: number;
   /** National-team standing so far. */
   nationalTeam: NationalStanding;
+  /** League pecking-order tier — star+ players can demand a trade. */
+  statusTier: StatusTier;
+  /** 0..1 rough chance of being traded this season; the HUD flags it when tense. */
+  tradeChance: number;
+  /** Seasons of a still-open championship window (a ring keeps you a contender). */
+  ringWindow: number;
+  /** 0..100 team chemistry — low chemistry drives trades. */
+  chemistry: number;
   /** Rating keys the last decision bumped — the client tints these. */
   raisedKeys: string[];
   /** Big beats from the season that just finished. */
@@ -313,6 +325,10 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
     if (kind === 'transfer') currentSchool = null;
   }
 
+  // Every extra year in school ages you: a one-and-done reaches the NBA at 19,
+  // a player who went back once is 20, twice is 21.
+  state.age += Math.max(0, collegeYears.length - 1);
+
   state.college = {
     finalSchool: currentSchool?.name ?? collegeYears.at(-1)?.school ?? '',
     tier: recruitTier,
@@ -373,6 +389,9 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
   let prevImpact = 0;
   // Rating keys the most recent decision bumped — the client tints these orange.
   let raisedKeys: string[] = [];
+  // HUD-only reads, refreshed at the top of each season before any preview.
+  let hudStatus: StatusTier = 'fringe';
+  let hudTradeChance = 0;
 
   const nationalStanding = (): NationalStanding =>
     buildNationalStanding({
@@ -420,6 +439,10 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
     franchiseSeasons: state.team ? (state.franchiseSeasons[state.team.id] ?? 0) : 0,
     franchiseProgress: state.team ? franchiseProgress(state.franchiseScore[state.team.id] ?? 0) : 0,
     nationalTeam: nationalStanding(),
+    statusTier: hudStatus,
+    tradeChance: hudTradeChance,
+    ringWindow: state.ringWindowLeft,
+    chemistry: state.chemistry,
     raisedKeys: [...raisedKeys],
     // The big beats of the season just finished — the web pops these as cards.
     moments: state.moments.filter((m) => m.seasonIndex === sn - 1),
@@ -438,6 +461,33 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
         ? 'franchise'
         : (prevRole ?? (overall >= 82 ? 'starter' : overall >= 72 ? 'rotation' : 'bench'));
     const contractYear = state.contractYearsLeft <= 1;
+
+    // League status + a rough trade estimate — HUD reads and the demand-trade
+    // gate. RNG-free so it stays a display value.
+    hudStatus = statusTier({
+      overall,
+      peakOverall: state.peakOverall,
+      mvps: state.awards.mvp ?? 0,
+      allNba:
+        (state.awards.all_nba_1 ?? 0) +
+        (state.awards.all_nba_2 ?? 0) +
+        (state.awards.all_nba_3 ?? 0),
+      allStars: state.awards.all_star ?? 0,
+      hype: state.hype,
+    });
+    hudTradeChance =
+      state.league === 'nba' && state.team
+        ? tradeChance({
+            teamStrength: teamStrengthFor(seed, state.team.id, state.seasonIndex),
+            role: approxRole,
+            contractYearsLeft: state.contractYearsLeft,
+            franchiseProgress: franchiseProgress(state.franchiseScore[state.team.id] ?? 0),
+            franchiseTier: state.franchiseTierSeen[state.team.id] ?? 'none',
+            status: hudStatus,
+            chemistry: state.chemistry,
+            justTraded: state.justTraded,
+          })
+        : 0;
 
     // ===== 1. Perks shop — an always-open aside on the season screen, never a
     // blocking step. Yearly perks auto-renew from the bank first; any recorded
@@ -481,6 +531,7 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
     let decisionHeadline: string;
     let decisionId: string;
     let scenarioId = 'free_agency';
+    let tradeDemanded = false;
 
     if (state.league === 'overseas' && contractYear) {
       const offerNodeId = `overseas_offer${seasonNumber}`;
@@ -607,13 +658,19 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
       const offer = faOffers.find((o) => o.choiceId === pick.choiceId);
       if (!offer) throw new Error(`Unknown free-agency offer "${pick.choiceId}"`);
       const resign = offer.team.id === state.team.id;
+      // Re-signing *extends* the current stint: the team, the standing, and the
+      // years-with-team counter all carry over — only the contract is new.
       if (!resign) state.seasonsWithTeam = 0;
       state.team = offer.team;
       state.contractYearsLeft = offer.years + 1;
       state.salary = offer.salary;
-      decisionHeadline = `${resign ? 'You re-sign with' : 'You sign with'} the ${offer.team.city} ${
-        offer.team.name
-      } (${offer.years}yr, ${money(offer.salary)}/yr).`;
+      decisionHeadline = resign
+        ? `You sign a ${offer.years}-year extension with the ${offer.team.city} ${offer.team.name} (${money(
+            offer.salary,
+          )}/yr).`
+        : `You sign with the ${offer.team.city} ${offer.team.name} (${offer.years}yr, ${money(
+            offer.salary,
+          )}/yr).`;
     } else {
       const scenario = pickScenario(rng, {
         seasonNumber,
@@ -629,6 +686,15 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
       });
       scenarioId = scenario.id;
       const options = scenario.options.map((o) => optionView(o, state.ratings));
+      // Star-and-up players on a settled roster can force their way out.
+      const canDemandTrade =
+        state.league === 'nba' &&
+        state.team !== null &&
+        !state.justTraded &&
+        !contractYear &&
+        state.seasonIndex >= 2 &&
+        statusRank(hudStatus) >= statusRank('star');
+      if (canDemandTrade) options.push(DEMAND_TRADE_VIEW);
       if (state.retirementEligible) options.push(RETIRE_VIEW);
       const decision: SeasonDecisionNode = {
         nodeId,
@@ -662,21 +728,39 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
         });
         break;
       }
-      const found = findScenarioOption(pick.choiceId);
-      if (!found || found.scenario.id !== scenarioId) {
-        throw new Error(`Unknown scenario option "${pick.choiceId}" for "${scenarioId}"`);
+      if (pick.choiceId === 'demand_trade') {
+        if (!canDemandTrade) throw new Error('demand_trade not available this season');
+        tradeDemanded = true;
+        effect.forceTrade = true;
+        // Burning the bridge costs you standing with the team you're leaving
+        // (only where you actually have a history to lose).
+        if (state.team && (state.franchiseSeasons[state.team.id] ?? 0) > 0) {
+          state.franchiseScore[state.team.id] = (state.franchiseScore[state.team.id] ?? 0) - 14;
+        }
+        decisionHeadline = 'You demand a trade. The front office starts shopping you.';
+        state.timeline.push({
+          nodeId,
+          choiceId: 'demand_trade',
+          stage: `Age ${state.age}`,
+          headline: decisionHeadline,
+        });
+      } else {
+        const found = findScenarioOption(pick.choiceId);
+        if (!found || found.scenario.id !== scenarioId) {
+          throw new Error(`Unknown scenario option "${pick.choiceId}" for "${scenarioId}"`);
+        }
+        const option = found.scenario.options.find((o) => o.id === pick.choiceId)!;
+        raisedKeys = Object.entries(effectiveRatings(option))
+          .filter(([, v]) => (v ?? 0) > 0)
+          .map(([k]) => k);
+        Object.assign(state, applyOption(state, option));
+        effect = stanceToEffect(option.stance);
+        decisionHeadline = `${decision.title}: ${option.label}.`;
+        if (scenarioId === 'scn_shoe_deal') {
+          state.shoeDeal = SHOE_BRANDS[pick.choiceId] ?? state.shoeDeal;
+        }
+        if (!state.firedScenarioIds.includes(scenarioId)) state.firedScenarioIds.push(scenarioId);
       }
-      const option = found.scenario.options.find((o) => o.id === pick.choiceId)!;
-      raisedKeys = Object.entries(effectiveRatings(option))
-        .filter(([, v]) => (v ?? 0) > 0)
-        .map(([k]) => k);
-      Object.assign(state, applyOption(state, option));
-      effect = stanceToEffect(option.stance);
-      decisionHeadline = `${decision.title}: ${option.label}.`;
-      if (scenarioId === 'scn_shoe_deal') {
-        state.shoeDeal = SHOE_BRANDS[pick.choiceId] ?? state.shoeDeal;
-      }
-      if (!state.firedScenarioIds.includes(scenarioId)) state.firedScenarioIds.push(scenarioId);
     }
 
     // ===== 3. Mid-season situation (~30% from season 3 on) =====
@@ -738,6 +822,9 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
           state.franchiseScore[state.team.id] =
             (state.franchiseScore[state.team.id] ?? 0) + mr.franchiseDelta;
         }
+        if (mr.chemistryDelta) {
+          effect = mergeEffects(effect, { chemistry: mr.chemistryDelta });
+        }
         midId = mid.id;
         midHeadline = `${mid.title}: ${found.option.label} — ${mr.note}`;
         // Surface the bizarre situation + the call the player made in the
@@ -791,9 +878,12 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
       injuryResist: perkAgg.injuryResist,
     });
     if (injury) {
-      effect.injuredGames = (effect.injuredGames ?? 0) + injury.gamesMissed;
+      effect.injuredGames = injury.seasonEnding
+        ? 82
+        : (effect.injuredGames ?? 0) + injury.gamesMissed;
       effect.athleticism = (effect.athleticism ?? 0) - injury.athleticismHit;
       effect.durability = (effect.durability ?? 0) - injury.durabilityHit;
+      if (injury.overallHit > 0) effect.overallHit = (effect.overallHit ?? 0) + injury.overallHit;
       if (injury.careerEnding) effect.careerEnding = true;
       if (injury.retirementEligible) effect.retirementEligible = true;
       state.pendingInjury = {
@@ -804,12 +894,57 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
       };
     }
 
+    // A "tense situation" / toxic-locker-room trade — rolled once against the
+    // same estimate the HUD shows (which already folds in low chemistry).
+    if (
+      !effect.forceTrade &&
+      !state.justTraded &&
+      state.league === 'nba' &&
+      state.team &&
+      state.seasonsWithTeam >= 2 &&
+      rng() < hudTradeChance
+    ) {
+      effect.forceTrade = true;
+    }
+
     let tradedThisSeason = false;
     if (effect.forceTrade && state.league === 'nba' && state.team) {
       state.team = pickTradeTeam(rng, state.team.id);
       state.seasonsWithTeam = 0;
       tradedThisSeason = true;
+      // Fresh locker room — chemistry resets toward neutral (a clean slate).
+      state.chemistry = clamp(Math.round(state.chemistry * 0.4 + 33), 0, 100);
+      // A trade this severe usually costs some of the ring-window momentum.
+      if (!tradeDemanded && state.ringWindowLeft > 0) {
+        state.ringWindowLeft = Math.max(0, state.ringWindowLeft - 2);
+      }
     }
+
+    // Dynasty window — a title keeps you a contender for a few years (decaying),
+    // so back-to-backs and repeat runs are a real possibility, not automatic.
+    if (state.league === 'nba' && state.ringWindowLeft > 0) {
+      effect = mergeEffects(effect, {
+        teamMult: 1 + 0.12 * (0.45 + 0.55 * (state.ringWindowLeft / 5)),
+      });
+    }
+
+    // A flat OVR hit (a surgery-grade injury, a locker-room blow-up) is spread
+    // evenly across every rating so the overall really does drop by that much.
+    if (effect.overallHit && effect.overallHit > 0) {
+      const drop = effect.overallHit;
+      const r: Partial<Ratings> = { ...(effect.ratings ?? {}) };
+      for (const k of RATING_KEYS) r[k] = (r[k] ?? 0) - drop;
+      effect.ratings = r;
+    }
+
+    // Team chemistry eases back toward a middling baseline each year (a room
+    // repairs itself), plus this season's scenario / event swing.
+    const chemDrift = state.chemistry < 50 ? 4 : state.chemistry > 60 ? -2 : 0;
+    state.chemistry = clamp(
+      Math.round(state.chemistry + chemDrift + (effect.chemistry ?? 0)),
+      0,
+      100,
+    );
 
     const teamStrength =
       state.league === 'overseas'
@@ -856,7 +991,7 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
     state.peakOverall = Math.max(state.peakOverall, overallAfter);
 
     let lastRole: Role = approxRole;
-    let injuredGames: number;
+    let gamesMissed: number;
 
     if (state.league === 'overseas') {
       const os = simulateOverseasSeason(rng, {
@@ -871,7 +1006,7 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
       });
       const osAwards = [...os.awards, ...runNationalSummer(overallAfter, os.impact)];
       for (const a of osAwards) tallyAward(state.awards, a);
-      injuredGames = os.stats.gp === 0 ? 82 : (effect.injuredGames ?? 0);
+      gamesMissed = 82 - os.stats.gp;
       state.overseasSeasons.push({
         index: seasonNumber,
         age: state.age,
@@ -923,12 +1058,15 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
         previousStats: state.lastPlayedStats,
         previousRole: prevRole,
       });
-      injuredGames = sim.injuredGames;
+      gamesMissed = sim.gamesMissed;
 
       const teamResult: TeamResult =
         sim.stats.gp === 0
           ? 'missed_season'
           : simulatePlayoffs(rng, teamStrength, sim.impact, effect);
+
+      // Open (or refresh) the 5-season championship window on a title.
+      if (teamResult === 'champion') state.ringWindowLeft = 5;
 
       const seasonAwards = [
         ...resolveAwards({
@@ -994,7 +1132,7 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
         awards: seasonAwards,
         overallAfter,
         ratingsAfter: { ...state.ratings },
-        injuredGames: sim.injuredGames,
+        injuredGames: sim.gamesMissed,
         salary: state.salary,
       });
       const pointsAfter = pointsBefore + sim.stats.gp * sim.stats.ppg;
@@ -1007,6 +1145,7 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
         tallyAfter: state.awards,
         teamResult,
         traded: tradedThisSeason,
+        tradeDemanded,
         pointsBefore,
         pointsAfter,
         franchiseTierUp: tierUp,
@@ -1019,29 +1158,30 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
     }
 
     if (state.pendingInjury) {
-      // A rolled injury — record it by its real name and, for the bad ones,
-      // pop a card. `gamesMissed` uses the season's actual total (absences +
-      // any other lost time), not just the injury's own range.
-      const entry = { ...state.pendingInjury, gamesMissed: Math.max(injuredGames, 1) };
+      // A rolled injury — record it by its real name. `gamesMissed` is the
+      // season's actual total (82 − games played), so it always adds up.
+      const entry = { ...state.pendingInjury, gamesMissed: Math.max(gamesMissed, 1) };
       state.injuryHistory.push(entry);
       if (entry.severity === 'moderate' || entry.severity === 'severe') {
+        const ended = state.careerEndingInjury || effect.careerEnding;
         state.moments.push({
           seasonIndex: seasonNumber,
           kind: 'injury',
           id: `injury_${entry.type.replace(/[^a-z]+/gi, '_').toLowerCase()}`,
           title: entry.type.toUpperCase(),
-          subtitle: `Age ${state.age} · ${entry.gamesMissed} game${
-            entry.gamesMissed === 1 ? '' : 's'
-          } missed${state.careerEndingInjury || effect.careerEnding ? ' · career over' : ''}`,
+          subtitle: `Age ${state.age} · ${entry.gamesMissed} of 82 missed${
+            ended ? ' · career over' : entry.gamesMissed >= 82 ? ' · out for the season' : ''
+          }`,
           teamId: state.team?.id,
         });
       }
       state.pendingInjury = null;
-    } else if (injuredGames >= 12) {
+    } else if (gamesMissed >= 25) {
       state.injuryHistory.push({
         seasonIndex: seasonNumber,
-        type: midId ?? evt.id,
-        gamesMissed: injuredGames,
+        type: 'nagging injuries',
+        gamesMissed,
+        severity: 'strain',
       });
     }
 
@@ -1072,6 +1212,10 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
     state.age += 1;
     state.seasonIndex += 1;
     state.contractYearsLeft = Math.max(0, state.contractYearsLeft - 1);
+    if (state.ringWindowLeft > 0 && !(state.league === 'nba' && wonRing)) {
+      state.ringWindowLeft -= 1;
+    }
+    state.justTraded = tradedThisSeason;
 
     if (effect.careerEnding) {
       state.careerEndingInjury = true;
@@ -1101,19 +1245,36 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
       if (state.age >= 35) state.retirementEligible = true;
 
       // Early washout — a real cut for role players who never develop. Not while
-      // a signed multi-year deal still has years left.
+      // a signed multi-year deal still has years left. A late-second-round or
+      // undrafted start makes it markedly more likely (and a slightly higher
+      // overall still isn't safe).
+      const draftPick = state.draft?.pick ?? null;
+      const draftRisk = state.draft?.undrafted
+        ? 0.24
+        : draftPick === null
+          ? 0
+          : draftPick >= 46
+            ? 0.22
+            : draftPick >= 31
+              ? 0.14
+              : draftPick >= 21
+                ? 0.04
+                : 0;
+      const washCeil = draftRisk >= 0.14 ? 77 : 73;
       const earlyWashout =
         !state.forcedRetire &&
         !underContract &&
         state.seasonIndex >= 2 &&
-        state.seasonIndex <= 12 &&
-        (lastRole === 'fringe' || lastRole === 'bench') &&
-        overallAfter < 73 &&
-        state.talent < 0.95 &&
-        rng() < 0.36;
+        state.seasonIndex <= 13 &&
+        (lastRole === 'fringe' ||
+          lastRole === 'bench' ||
+          (draftRisk >= 0.14 && lastRole === 'rotation')) &&
+        overallAfter < washCeil &&
+        state.talent < 1.0 &&
+        rng() < 0.3 + draftRisk;
       // A washed-out player who can still hoop gets real EuroLeague interest; the
       // rest are simply out of the game (→ a short, low-grade career).
-      const euroInterest = overallAfter >= 70 && state.age <= 33;
+      const euroInterest = overallAfter >= 67 && state.age <= 33;
 
       // Age-out cascade — the decline is all after ~34. Only fires at a contract
       // boundary; layered with real rng so careers end anywhere from the mid-30s
@@ -1240,6 +1401,9 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
           headline: 'You announce next season is your last — a farewell tour, arena by arena.',
         });
       } else {
+        // Quiet goodbye — retire now, no extra season.
+        state.forcedRetire = true;
+        state.onFarewellTour = false;
         state.timeline.push({
           nodeId: farewellNode,
           choiceId: pick.choiceId,

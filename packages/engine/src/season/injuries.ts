@@ -15,9 +15,13 @@ export interface RolledInjury {
   type: string;
   severity: InjurySeverity;
   gamesMissed: number;
+  /** True when the injury wipes the rest of the year (surgery / rupture). */
+  seasonEnding: boolean;
   /** Permanent hit applied through the season `effect`. */
   athleticismHit: number;
   durabilityHit: number;
+  /** Flat OVR drop — the season pipeline subtracts this from every rating. */
+  overallHit: number;
   /** Ends the career on the spot. */
   careerEnding: boolean;
   /** Makes the player retirement-eligible (they can choose to walk). */
@@ -32,14 +36,20 @@ interface InjuryType {
   games: [number, number];
   athHit?: [number, number];
   durHit?: [number, number];
+  /** Flat OVR drop range — only the surgery-grade injuries carry one. */
+  ovrHit?: [number, number];
+  /** `true` = always season-ending; `number` = chance it is (surgery call). */
+  seasonEnding?: true | number;
   /** Per-injury chance it ends the career (before age scaling / wear). */
   endBase?: number;
 }
 
 /**
- * The catalogue. Minor knocks are common; the ligament ruptures sit at the
- * bottom with small weights and only they carry an `endBase`. Nothing here is
- * impossible — a healthy 24-year-old can still tear an ACL, just rarely.
+ * The catalogue. Minor knocks are common and cost a handful of games; the
+ * surgery-grade knee/achilles injuries at the bottom are season-ending, take a
+ * chunk of your athleticism *and* two-plus OVR points for good, and carry a
+ * real career-ending chance. Nothing is impossible — a healthy 24-year-old can
+ * still tear an ACL, just rarely.
  */
 export const INJURY_CATALOG: readonly InjuryType[] = [
   { type: 'jammed finger', severity: 'knock', weight: 15, games: [1, 4] },
@@ -53,54 +63,64 @@ export const INJURY_CATALOG: readonly InjuryType[] = [
   { type: 'high ankle sprain', severity: 'moderate', weight: 7, games: [14, 30], durHit: [1, 2] },
   { type: 'back spasms', severity: 'moderate', weight: 7, games: [6, 20], durHit: [1, 2] },
   {
-    type: 'shoulder subluxation',
+    type: 'dislocated shoulder',
     severity: 'moderate',
     weight: 4,
     games: [12, 28],
     durHit: [1, 3],
+    ovrHit: [1, 2],
   },
   {
     type: 'foot stress fracture',
     severity: 'moderate',
     weight: 5,
-    games: [18, 36],
+    games: [22, 42],
     athHit: [1, 3],
     durHit: [1, 3],
+    ovrHit: [1, 2],
   },
   {
     type: 'torn meniscus',
     severity: 'moderate',
     weight: 5,
-    games: [20, 40],
-    athHit: [1, 3],
+    games: [30, 55],
+    athHit: [2, 4],
     durHit: [2, 4],
+    ovrHit: [2, 3],
+    seasonEnding: 0.55, // the surgery-vs-rehab call
   },
   {
     type: 'torn ACL',
     severity: 'severe',
     weight: 2.2,
-    games: [45, 68],
-    athHit: [2, 5],
+    games: [82, 82],
+    athHit: [3, 6],
     durHit: [3, 6],
-    endBase: 0.06,
+    ovrHit: [3, 5],
+    seasonEnding: true,
+    endBase: 0.08,
   },
   {
     type: 'torn Achilles',
     severity: 'severe',
     weight: 1.6,
-    games: [50, 78],
-    athHit: [3, 6],
+    games: [82, 82],
+    athHit: [4, 8],
     durHit: [3, 7],
-    endBase: 0.12,
+    ovrHit: [3, 6],
+    seasonEnding: true,
+    endBase: 0.16,
   },
   {
     type: 'ruptured patellar tendon',
     severity: 'severe',
     weight: 1.1,
-    games: [52, 80],
-    athHit: [3, 6],
+    games: [82, 82],
+    athHit: [4, 8],
     durHit: [4, 8],
-    endBase: 0.16,
+    ovrHit: [3, 6],
+    seasonEnding: true,
+    endBase: 0.2,
   },
 ];
 
@@ -141,9 +161,17 @@ export function rollSeasonInjury(rng: Rng, c: InjuryRollCtx): RolledInjury | nul
     INJURY_CATALOG.map((t) => [t, t.weight * scale[t.severity]] as const),
   );
 
-  const gamesMissed = int(rng, chosen.games[0], chosen.games[1]);
+  const seasonEnding =
+    chosen.seasonEnding === true
+      ? true
+      : typeof chosen.seasonEnding === 'number'
+        ? rng() < chosen.seasonEnding
+        : false;
+
+  const gamesMissed = seasonEnding ? 82 : int(rng, chosen.games[0], chosen.games[1]);
   const athleticismHit = chosen.athHit ? int(rng, chosen.athHit[0], chosen.athHit[1]) : 0;
   const durabilityHit = chosen.durHit ? int(rng, chosen.durHit[0], chosen.durHit[1]) : 0;
+  const overallHit = chosen.ovrHit ? int(rng, chosen.ovrHit[0], chosen.ovrHit[1]) : 0;
 
   let careerEnding = false;
   if (chosen.endBase) {
@@ -158,8 +186,10 @@ export function rollSeasonInjury(rng: Rng, c: InjuryRollCtx): RolledInjury | nul
     type: chosen.type,
     severity: chosen.severity,
     gamesMissed,
+    seasonEnding,
     athleticismHit,
     durabilityHit,
+    overallHit,
     careerEnding,
     retirementEligible,
   };

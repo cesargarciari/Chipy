@@ -16,6 +16,7 @@ export function describeChoice(nodeId: string, choiceId: string): string | null 
   if (choiceId === 'retire') return 'Retire';
   if (choiceId === 'farewell_tour') return 'Farewell tour';
   if (choiceId === 'quiet_goodbye') return 'Quiet goodbye';
+  if (choiceId === 'demand_trade') return 'Demand a trade';
   if (choiceId === 'nba_return') return 'Return to the NBA';
   if (choiceId === 'perks_done') return null;
   if (choiceId.startsWith('buy_')) {

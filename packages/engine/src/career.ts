@@ -40,6 +40,9 @@ export function createInitialState(rng: Rng, profile: PlayerProfile): CareerStat
     careerEndingInjury: false,
     farewellChosen: false,
     onFarewellTour: false,
+    ringWindowLeft: 0,
+    justTraded: false,
+    chemistry: 40 + Math.round(rng() * 30), // 40..70 — earned over a career
     pendingInjury: null,
     peakOverall: overall,
     salary: 0,

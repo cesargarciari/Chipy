@@ -69,6 +69,7 @@ export function OverseasOffer({
             effects={o.effects}
             tag={o.tag}
             watermark={o.watermark}
+            teamId={o.teamId}
             tone={o.id === 'retire' ? 'danger' : 'default'}
             onHoverKeys={(k) => setHighlight(k ?? undefined)}
             onClick={() => onChoose(o.id)}

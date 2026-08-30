@@ -35,7 +35,7 @@ export function getPrologueOption(node: PrologueNode, optionId: string): GameOpt
 export function recruitingTier(optionId: string): 'blue_blood' | 'mid_major' | 'overseas' {
   if (optionId === 'blue_blood') return 'blue_blood';
   if (optionId === 'mid_major_hub') return 'mid_major';
-  return 'overseas'; // g_league_ignite, overseas_pro
+  return 'overseas'; // overseas_pro
 }
 
 export function prologueView(node: PrologueNode, current?: Ratings): PrologueNodeView {

@@ -13,6 +13,10 @@ export interface SeasonEffect {
   athleticism?: number;
   durability?: number;
   hype?: number;
+  /** Delta to team chemistry (0..100). Negative from drama, positive from bonding. */
+  chemistry?: number;
+  /** A flat overall drop — subtracted from every rating so the OVR falls by ~this. */
+  overallHit?: number;
   /** Nudges playing-time role up/down (in role ranks). */
   roleBias?: number;
   /** Adds to minutes-per-game target. */
@@ -47,6 +51,8 @@ export function mergeEffects(a: SeasonEffect, b: SeasonEffect): SeasonEffect {
     athleticism: (a.athleticism ?? 0) + (b.athleticism ?? 0),
     durability: (a.durability ?? 0) + (b.durability ?? 0),
     hype: (a.hype ?? 0) + (b.hype ?? 0),
+    chemistry: (a.chemistry ?? 0) + (b.chemistry ?? 0),
+    overallHit: (a.overallHit ?? 0) + (b.overallHit ?? 0),
     roleBias: (a.roleBias ?? 0) + (b.roleBias ?? 0),
     mpgBias: (a.mpgBias ?? 0) + (b.mpgBias ?? 0),
     impactMult: (a.impactMult ?? 1) * (b.impactMult ?? 1),

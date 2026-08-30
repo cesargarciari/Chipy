@@ -1,4 +1,4 @@
-import type { SeasonPreview } from '@chipy/engine';
+import { STATUS_TIER_LABELS, type SeasonPreview } from '@chipy/engine';
 import { IdolatryBar } from '../../components/IdolatryBar.js';
 import { RatingStrip } from '../../components/RatingStrip.js';
 import { countryName, moneyM } from '../../lib/format.js';
@@ -48,6 +48,54 @@ export function CareerHud({
           <Money label="Salary" value={preview.salary} suffix="/yr" />
           <Money label="Value" value={preview.marketValue} suffix="/yr" tone="text-amber" />
         </div>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+        <span className="inline-flex items-baseline gap-1.5">
+          <span className="text-[11px] uppercase tracking-wide text-ink-dim">Status</span>
+          <span className="text-xs font-bold text-ink">
+            {STATUS_TIER_LABELS[preview.statusTier]}
+          </span>
+        </span>
+        {preview.league === 'nba' && (
+          <span
+            className="inline-flex items-baseline gap-1.5"
+            title="How you gel with teammates — low chemistry gets you traded"
+          >
+            <span className="text-[11px] uppercase tracking-wide text-ink-dim">Chemistry</span>
+            <span
+              className={`text-xs font-bold ${
+                preview.chemistry >= 55
+                  ? 'text-emerald-400'
+                  : preview.chemistry >= 35
+                    ? 'text-amber'
+                    : 'text-rose-400'
+              }`}
+            >
+              {preview.chemistry}
+            </span>
+          </span>
+        )}
+        {preview.league === 'nba' && preview.tradeChance >= 0.14 && (
+          <span
+            className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide ${
+              preview.tradeChance >= 0.22
+                ? 'bg-rose-500/15 text-rose-400'
+                : 'bg-amber/15 text-amber'
+            }`}
+            title="Rough odds you're moved before next season"
+          >
+            ⇄ Trade risk {Math.round(preview.tradeChance * 100)}%
+          </span>
+        )}
+        {preview.ringWindow > 0 && (
+          <span
+            className="inline-flex items-center gap-1.5 rounded-full bg-amber/15 px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide text-amber"
+            title="You're a proven winner — the title window is still open"
+          >
+            🏆 Contention window · {preview.ringWindow}y
+          </span>
+        )}
       </div>
 
       <RatingStrip

@@ -311,58 +311,57 @@ export const MIDSEASON_SCENARIOS: Scenario[] = [
       },
     ],
   },
+  {
+    id: 'msx_teammate_birthday',
+    theme: 'team',
+    gate: { minSeason: 2, weight: 1 },
+    title: "IT'S A TEAMMATE'S 30TH",
+    prompt: 'Half the roster is going out tonight — and there is a game tomorrow.',
+    options: [
+      {
+        id: 'msx_bday_out',
+        label: 'GO OUT WITH THE GUYS',
+        blurb: 'Show up for the room. You can gut through one groggy back-to-back.',
+        effect: {},
+        stance: { tag: 'One of the guys' },
+      },
+      {
+        id: 'msx_bday_home',
+        label: 'STAY HOME',
+        blurb: 'Ice bath, film, bed. Game day is game day.',
+        effect: {},
+        stance: { tag: 'Pro' },
+      },
+    ],
+  },
+  {
+    id: 'msx_burner_account',
+    theme: 'media',
+    gate: { minSeason: 3, weight: 0.7 },
+    title: 'THEY FOUND YOUR BURNER',
+    prompt: 'An anonymous account that liked some ugly posts has been traced back to you.',
+    options: [
+      {
+        id: 'msx_burner_own',
+        label: 'OWN UP TO IT',
+        blurb: 'Admit it, apologize to the room, wear it.',
+        effect: {},
+        stance: { tag: 'Accountable' },
+      },
+      {
+        id: 'msx_burner_deny',
+        label: 'DENY IT',
+        blurb: '"Not my account." Nobody in the locker room buys it.',
+        effect: {},
+        stance: { tag: 'Stonewalling' },
+      },
+    ],
+  },
 ];
 
 // ---------------------------------------------------------------------------
 // Outcomes — how each option lands, resolved against the player's status
 // ---------------------------------------------------------------------------
-
-export type MidConsequence =
-  | 'standing' // fans / front office cool on you
-  | 'role' // minutes and games (young) or trust (star)
-  | 'chemistry' // the team plays worse together for a stretch
-  | 'focus' // your own production dips this year
-  | 'neutral' // it blows over
-  | 'spark'; // rare: you channel it (small, intangible, positive)
-
-interface MidOutcome {
-  consequence: MidConsequence;
-  forceTrade?: boolean;
-}
-
-/**
- * Keyed by option id. The mature / team-first choice tends to be `neutral` (it
- * blows over), the dramatic one carries a development cost. Anything missing
- * resolves as `neutral`.
- */
-export const MIDSEASON_OUTCOMES: Record<string, MidOutcome> = {
-  msx_fight_hash: { consequence: 'role' },
-  msx_fight_trade: { consequence: 'chemistry', forceTrade: true },
-  msx_club_apology: { consequence: 'neutral' },
-  msx_club_own: { consequence: 'chemistry' },
-  msx_bench_meeting: { consequence: 'standing' },
-  msx_bench_accept: { consequence: 'neutral' },
-  msx_viral_milk: { consequence: 'focus' },
-  msx_viral_lock: { consequence: 'neutral' },
-  msx_family_home: { consequence: 'role' },
-  msx_family_stay: { consequence: 'neutral' },
-  msx_ref_rein: { consequence: 'neutral' },
-  msx_ref_edge: { consequence: 'role' },
-  msx_tweet_clarify: { consequence: 'neutral' },
-  msx_tweet_silence: { consequence: 'standing' },
-  msx_legend_fuel: { consequence: 'spark' },
-  msx_legend_brush: { consequence: 'neutral' },
-  msx_pos_embrace: { consequence: 'neutral' },
-  msx_pos_resist: { consequence: 'chemistry' },
-  msx_leak_lean: { consequence: 'standing' },
-  msx_leak_downplay: { consequence: 'neutral' },
-  msx_prank_own: { consequence: 'neutral' },
-  msx_prank_laugh: { consequence: 'chemistry' },
-  msx_probe_pr: { consequence: 'neutral' },
-  msx_probe_silent: { consequence: 'standing' },
-  msx_allstar_chase: { consequence: 'chemistry' },
-  msx_allstar_defer: { consequence: 'spark' },
-};
 
 export interface MidResolveCtx {
   role: Role;
@@ -374,76 +373,189 @@ export interface MidResolution {
   effect: SeasonEffect;
   /** Change to the standing with the current team (usually negative). */
   franchiseDelta: number;
-  /** One-line description of how it actually landed. */
+  /** Change to team chemistry (0..100). Negative from drama, positive from bonding. */
+  chemistryDelta: number;
+  /** One-line description of how it actually landed — a real consequence. */
   note: string;
 }
 
+interface ResolveArgs {
+  rng: Rng;
+  /** 0.6 … 1.5 severity multiplier for the season. */
+  m: number;
+  star: boolean;
+  young: boolean;
+}
+
+type OutcomeFn = (a: ResolveArgs) => Partial<MidResolution> & { effect?: SeasonEffect };
+
+/** "The front office isn't happy — the situation is tense." Feeds trade odds. */
+function frontOfficeCold(a: ResolveArgs): Partial<MidResolution> {
+  return {
+    franchiseDelta: -Math.round((a.star ? 22 : 12) * a.m),
+    chemistryDelta: -Math.round(6 * a.m),
+    effect: { teamMult: 1 - 0.015 * a.m },
+    note: 'The front office is not happy. The situation around you gets tense.',
+  };
+}
+
+/** A groggy stretch or a nagging distraction — a real hit to your play. */
+function ownGameDips(a: ResolveArgs, ovr = 0): Partial<MidResolution> {
+  return {
+    effect: ovr > 0 ? { overallHit: ovr } : { impactMult: 1 - (0.03 + 0.05 * a.m) },
+    note:
+      ovr > 0
+        ? `It costs you a real step — about ${ovr} off your overall.`
+        : 'It nags at your game the rest of the year.',
+  };
+}
+
 /**
- * Turn a chosen option into this season's mechanical cost, rolled and scaled by
- * status. Consumes RNG — call once, at resolve time.
+ * Per-option resolvers. Every branch produces a *concrete* consequence — lost
+ * overall, a chemistry swing, a colder front office (which raises trade odds),
+ * or a genuine spark. Anything not listed just blows over.
+ */
+export const MIDSEASON_OUTCOMES: Record<string, OutcomeFn> = {
+  // Fight with the star
+  msx_fight_hash: (a) => ({
+    effect: { roleBias: -(0.2 + 0.4 * a.m), mpgBias: -(2 + 3 * a.m) },
+    chemistryDelta: -Math.round(4 * a.m),
+    note: 'You fold in around him — fewer touches, smaller role for a while.',
+  }),
+  msx_fight_trade: (a) => ({
+    effect: { forceTrade: true, impactMult: 1 + 0.02 * a.m },
+    chemistryDelta: -20,
+    note: 'One of you had to go. You get your wish — moved by the deadline.',
+  }),
+  // Nightclub photo
+  msx_club_apology: () => ({ note: 'You get in front of it. It blows over in a week.' }),
+  msx_club_own: (a) => ({
+    ...frontOfficeCold(a),
+    note: 'Ownership is furious behind closed doors. The room notices, and so do rivals.',
+  }),
+  // Benched in the 4th
+  msx_bench_meeting: frontOfficeCold,
+  msx_bench_accept: (a) => ({
+    effect: { growth: { basketballIQ: 1 } },
+    chemistryDelta: Math.round(3 * a.m),
+    note: 'You take the coaching. The staff trusts you more for it.',
+  }),
+  // Viral practice clip
+  msx_viral_milk: (a) => ownGameDips(a),
+  msx_viral_lock: (a) => ({
+    effect: { impactMult: 1 + 0.02 * a.m },
+    note: 'Back to work — you stay sharp.',
+  }),
+  // Family emergency
+  msx_family_home: (a) => ({
+    effect: { injuredGames: Math.round(5 + 4 * a.m) },
+    chemistryDelta: Math.round(4 * a.m),
+    note: 'You miss a road trip — the guys have your back when you return.',
+  }),
+  msx_family_stay: () => ({
+    effect: { hype: -1 },
+    note: 'It sits with you, but the team pulls together.',
+  }),
+  // Tech-happy stretch
+  msx_ref_rein: () => ({
+    effect: { growth: { basketballIQ: 1 } },
+    note: 'You reel it in. The calls start going your way again.',
+  }),
+  msx_ref_edge: (a) => ({
+    effect: { injuredGames: Math.round(2 + 3 * a.m), impactMult: 1 + 0.02 * a.m },
+    note: 'You eat a one-game suspension, but the edge stays — and it shows.',
+  }),
+  // Cryptic tweet
+  msx_tweet_clarify: () => ({ note: 'You walk it back. The beat moves on.' }),
+  msx_tweet_silence: frontOfficeCold,
+  // "Not a real winner"
+  msx_legend_fuel: (a) => ({
+    effect: { impactMult: 1 + 0.05 + 0.02 * a.m, awardMult: { scoring: 1.06 } },
+    note: 'You tape it to your locker and answer on the floor.',
+  }),
+  msx_legend_brush: () => ({ note: "Old man yells at cloud. You've got a game in an hour." }),
+  // Position change
+  msx_pos_embrace: (a) => ({
+    effect: { growth: { playmaking: 1, perimeterDefense: 1 } },
+    chemistryDelta: Math.round(3 * a.m),
+    note: 'You buy in. More versatile is more valuable — the staff loves it.',
+  }),
+  msx_pos_resist: (a) =>
+    a.rng() < 0.5
+      ? {
+          effect: { impactMult: 1 + 0.03 * a.m, roleBias: 0.2 },
+          note: 'The staff fixes the rotation. You go back to shining in your spot.',
+        }
+      : frontOfficeCold(a),
+  // Agent leaks the number
+  msx_leak_lean: (a) => ({
+    ...frontOfficeCold(a),
+    effect: { teamMult: 1 - 0.01 * a.m },
+    note: 'You confirm the number. The front office bristles and the room gets tense.',
+  }),
+  msx_leak_downplay: () => ({ note: '"I let my agent handle business." It fades.' }),
+  // Rookie prank
+  msx_prank_own: (a) => ({
+    chemistryDelta: Math.round(3 * a.m),
+    note: 'You take the rookies to dinner. The room is tighter for it.',
+  }),
+  msx_prank_laugh: (a) => ({
+    chemistryDelta: -Math.round(9 * a.m),
+    note: 'Half the locker room lets it go. The other half remembers.',
+  }),
+  // Gambling probe (cleared)
+  msx_probe_pr: () => ({ note: 'You get ahead of it and turn the page.' }),
+  msx_probe_silent: frontOfficeCold,
+  // All-Star captain buzz
+  msx_allstar_chase: (a) => ({
+    effect: { teamMult: 1 - (0.02 + 0.02 * a.m) },
+    chemistryDelta: -Math.round(7 * a.m),
+    note: 'You campaign. Teammates notice the shot count creep up.',
+  }),
+  msx_allstar_defer: (a) => ({
+    effect: { teamMult: 1 + 0.02 + 0.02 * a.m },
+    chemistryDelta: Math.round(5 * a.m),
+    note: 'You let the record make the case. The room rallies around you.',
+  }),
+  // Teammate's birthday
+  msx_bday_out: (a) => ({
+    chemistryDelta: Math.round(12 + 6 * a.m),
+    effect: { overallHit: 2 },
+    note: 'The room loves you for it — but a groggy month costs you ~2 overall.',
+  }),
+  msx_bday_home: (a) => ({
+    chemistryDelta: -Math.round(8 + 4 * a.m),
+    note: "The professional call — and the guys notice you didn't show.",
+  }),
+  // Burner account
+  msx_burner_own: () => ({
+    chemistryDelta: -60,
+    note: 'You come clean. The locker room ices you out — trade talk starts within the week.',
+  }),
+  msx_burner_deny: (a) => ({
+    effect: { overallHit: 3 },
+    chemistryDelta: -Math.round(10 * a.m),
+    note: 'Nobody believes you. It gnaws at your game all year — about 3 off your overall.',
+  }),
+};
+
+/**
+ * Turn a chosen option into this season's concrete consequence, rolled and
+ * scaled by status. Consumes RNG — call once, at resolve time.
  */
 export function resolveMidseason(rng: Rng, optionId: string, ctx: MidResolveCtx): MidResolution {
-  const outcome = MIDSEASON_OUTCOMES[optionId] ?? { consequence: 'neutral' };
+  const fn = MIDSEASON_OUTCOMES[optionId];
   const star = ctx.role === 'franchise' || ctx.role === 'starter';
   const young = ctx.phase === 'rookie' || ctx.phase === 'rising';
   const m = 0.6 + rng() * 0.9; // 0.6 … 1.5
 
-  const effect: SeasonEffect = {};
-  let franchiseDelta = 0;
-  let note: string;
-
-  switch (outcome.consequence) {
-    case 'standing':
-      franchiseDelta = -Math.round((star ? 24 : 13) * m);
-      effect.teamMult = 1 - 0.015 * m;
-      if (!star) effect.roleBias = -0.25 * m;
-      note = star
-        ? 'The front office and fans cool on you for a while.'
-        : 'You slide down the pecking order.';
-      break;
-    case 'role':
-      if (young) {
-        effect.roleBias = -(0.4 + 0.55 * m);
-        effect.mpgBias = -(3 + 4.5 * m);
-        note = 'Your minutes get cut while it plays out.';
-      } else if (star) {
-        franchiseDelta = -Math.round(11 * m);
-        effect.teamMult = 1 - 0.012 * m;
-        note = "They can't sit you — but the trust dips.";
-      } else {
-        effect.roleBias = -(0.2 + 0.4 * m);
-        effect.mpgBias = -(2 + 3 * m);
-        note = 'A stretch of DNPs to send a message.';
-      }
-      break;
-    case 'chemistry':
-      effect.teamMult = 1 - (0.03 + 0.045 * m);
-      note = 'The locker room feels it for a month.';
-      break;
-    case 'focus':
-      effect.impactMult = 1 - (0.03 + 0.05 * m);
-      note = 'It nags at your game for the rest of the year.';
-      break;
-    case 'spark':
-      if (rng() < 0.5) effect.impactMult = 1 + 0.02 + 0.02 * m;
-      else effect.teamMult = 1 + 0.02 + 0.025 * m;
-      franchiseDelta = Math.round(6 * m);
-      note = 'You channel it — the room rallies around you.';
-      break;
-    case 'neutral':
-    default:
-      effect.hype = rng() < 0.5 ? 2 : -2;
-      note = 'It blows over in a week.';
-  }
-
-  if (outcome.forceTrade) {
-    effect.forceTrade = true;
-    effect.impactMult = (effect.impactMult ?? 1) * (1 + 0.02 * m);
-    franchiseDelta = 0;
-    note = 'You get your wish — moved at the deadline.';
-  }
-
-  return { effect, franchiseDelta, note };
+  const out = fn?.({ rng, m, star, young }) ?? { note: 'It blows over in a week.' };
+  return {
+    effect: out.effect ?? {},
+    franchiseDelta: out.franchiseDelta ?? 0,
+    chemistryDelta: out.chemistryDelta ?? 0,
+    note: out.note ?? 'It blows over in a week.',
+  };
 }
 
 // ---------------------------------------------------------------------------

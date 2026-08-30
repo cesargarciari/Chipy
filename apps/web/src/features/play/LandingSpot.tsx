@@ -27,6 +27,7 @@ export function LandingSpot({
             description={o.blurb}
             tag={o.tag}
             watermark={o.watermark}
+            teamId={o.teamId}
             onClick={() => onChoose(o.id)}
           />
         ))}

@@ -176,14 +176,36 @@ time. The web's `HEADLINE_AWARDS` (the full-screen modal set) is the curated
 present for most; `mip` / `sixth_man` fall back to a glyph until their PNGs land.
 `art.ts` globs now accept upper-case extensions (`DEN.PNG`).
 
-`ENGINE_VERSION` → `4.6.0` (v4.5 prologue/fame rebalance plus the v4.6 injury
-roll, contract gating, and farewell node all change replay results); packages →
-`0.4.6`. `MomentKind` and `careerMomentSchema` gain `injury`; `injuryEntrySchema`
-gains an optional `severity`. The web keys its persisted run to `ENGINE_VERSION`,
-wraps every in-render `runCareer` in a `runCareerSafe` try/catch, mounts a
-top-level `ErrorBoundary`, renders the perks shop as a modal, shows the idolatry
-bars and an injury-record card on the legacy screen, and labels the overseas
-school route "International".
+**Trades, status, dynasties, no World Cup (v4.7).** `season/status.ts` adds
+`statusTier` (`fringe → role_player → star → superstar → generational`, from
+overall with accolade lifts) and `tradeChance` — an RNG-free 0..~~0.26 estimate
+from team strength / role / contract year / franchise idolatry / status. The HUD
+shows the status tier always and "Trade risk N%" once it's tense; the sim rolls
+once against it (after `seasonsWithTeam >= 3`) to force a move. Star-and-up
+players get a `DEMAND A TRADE` option on the season screen — it forces a move and
+docks 14 franchise points. Any trade now pops the award-style `MomentModal`
+("Traded to <team>" with the destination logo); the trade `CareerMoment`'s
+`title` is the new team's label, `id` is `trade` / `trade_demand`. A
+championship opens a 5-season `ringWindowLeft` that adds a decaying `teamMult`
+(~~+12%→+5%) so repeat titles are a real chance, not automatic (a trade eats two
+years of it). Washout-to-overseas now scales with draft slot — a pick ≥46 or
+undrafted adds up to +0.24 to the washout roll and a higher overall ceiling, so
+late-second-rounders reach the EuroLeague ~7× more often than lottery picks. The
+**World Cup is gone** as a trophy: `international.ts` is Olympics-only, and
+`wc_gold` / `wc_silver` / `wc_bronze` are removed from `AWARD_IDS` (and every
+label / points / moment / trophy-order table).
+
+`ENGINE_VERSION` → `4.6.0` then `4.7.0` (each of the injury roll, contract
+gating, farewell node, the trade roll, the dynasty `teamMult`, the WC removal,
+and the washout re-tune shifts replay results); packages → `0.4.7`. `MomentKind`
+and `careerMomentSchema` gained `injury`; `injuryEntrySchema` gained optional
+`severity`. `OptionView` gained an optional `teamId` — the client draws that
+team's logo on contract cards (free agency, landing, overseas), while the recap
+`MomentCard` deliberately drops team logos to keep the notification stack clean.
+The web keys its persisted run to `ENGINE_VERSION`, wraps every in-render
+`runCareer` in a `runCareerSafe` try/catch, mounts a top-level `ErrorBoundary`,
+renders the perks shop as a modal, shows the idolatry bars and an injury-record
+card on the legacy screen, and labels the overseas school route "International".
 
 ## Consequences
 
@@ -198,6 +220,12 @@ school route "International".
   ~38, career p50 ~19 seasons) — realistic for a star, and the age-cap on
   offers keeps it from running away. Random-strategy careers still spread and
   still bottom out (grade C/D present).
+- The involuntary trade roll adds ~2 moves to a journeyman's career and ~0 to a
+  franchise idol's; `seasonsWithTeam >= 3` keeps a just-signed player from being
+  flipped. `buildFranchiseStandings` now drops 0-season phantom entries.
+- The dynasty `teamMult` is deliberately modest: ~29% of optimal-play careers
+  win a ring, ~1 in 8 of those win another within five years — dynasties happen,
+  they aren't the norm.
 - Node resolution stays RNG-free (offers use derived streams) so partial
   evaluation replays byte-identically.
 - Real EuroLeague club names join the static-data files disclaimed in the README.

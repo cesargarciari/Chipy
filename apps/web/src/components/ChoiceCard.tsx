@@ -1,4 +1,5 @@
 import type { EffectChip } from '@chipy/engine';
+import { clubCrest, teamLogo } from '../lib/art.js';
 import { cn } from '../lib/cn.js';
 import { moneyM } from '../lib/format.js';
 import { mergeDefenseChips, toDisplayKey } from '../lib/ratings.js';
@@ -13,6 +14,8 @@ interface ChoiceCardProps {
   tone?: 'default' | 'danger';
   /** A once-a-career breakthrough — rendered gold. */
   rare?: boolean;
+  /** NBA team id / overseas club id — shows that logo on the card (contracts). */
+  teamId?: string;
   /** Reports the stat-tile keys this option would move (or null on leave). */
   onHoverKeys?: (keys: string[] | null) => void;
 }
@@ -27,8 +30,10 @@ export function ChoiceCard({
   onClick,
   tone = 'default',
   rare = false,
+  teamId,
   onHoverKeys,
 }: ChoiceCardProps) {
+  const logo = teamId ? (teamLogo(teamId) ?? clubCrest(teamId)) : undefined;
   const shown = mergeDefenseChips(effects);
   const statKeys = effects.filter((e) => e.key !== 'money').map((e) => toDisplayKey(e.key));
   const hoverOn = onHoverKeys ? () => onHoverKeys(statKeys) : undefined;
@@ -68,6 +73,7 @@ export function ChoiceCard({
             Gold
           </span>
         )}
+        {logo && <img src={logo} alt="" className="mb-2 h-10 w-10 object-contain" />}
         <h3
           className={cn(
             'font-display text-2xl leading-none tracking-wide',

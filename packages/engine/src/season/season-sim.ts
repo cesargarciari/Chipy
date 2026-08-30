@@ -115,7 +115,8 @@ export interface SeasonSimArgs {
 
 export interface SeasonSimResult {
   stats: SeasonStatLine;
-  injuredGames: number;
+  /** Games missed this season — always exactly `82 - stats.gp`. */
+  gamesMissed: number;
   /** Overall on-court value (drives MVP / All-NBA / All-Star). */
   impact: number;
   /** Defensive value (drives DPOY / All-Defense). */
@@ -135,7 +136,7 @@ export function simulateSeason(rng: Rng, args: SeasonSimArgs): SeasonSimResult {
   if (gp === 0) {
     return {
       stats: { gp: 0, mpg: 0, ppg: 0, rpg: 0, apg: 0, spg: 0, bpg: 0, tsPct: 0 },
-      injuredGames: 82,
+      gamesMissed: 82,
       impact: 0,
       defImpact: 0,
     };
@@ -208,7 +209,7 @@ export function simulateSeason(rng: Rng, args: SeasonSimArgs): SeasonSimResult {
 
   return {
     stats: { gp, mpg: roundTo(mpg, 1), ppg, rpg, apg, spg, bpg, tsPct },
-    injuredGames,
+    gamesMissed: 82 - gp,
     impact: roundTo(impact, 2),
     defImpact: roundTo(defImpact, 2),
   };

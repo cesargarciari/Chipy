@@ -19,13 +19,14 @@ export interface IntlResult {
   awards: AwardId[];
 }
 
-type Cycle = 'wc' | 'oly' | null;
+type Cycle = 'oly' | null;
 
-/** World Cup on odd off-Olympic summers, Olympics every four years. */
+/**
+ * The Olympics every four years — the only international basketball that moves
+ * the needle. (The World Cup is deliberately not modelled as a trophy.)
+ */
 function cycleFor(seasonIndex: number): Cycle {
-  if (seasonIndex % 4 === 3) return 'oly';
-  if (seasonIndex % 4 === 1) return 'wc';
-  return null;
+  return seasonIndex % 4 === 3 ? 'oly' : null;
 }
 
 /**

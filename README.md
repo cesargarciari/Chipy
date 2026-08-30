@@ -15,7 +15,7 @@ defer, or force a trade), sign a **shoe deal** at fame 80+, and when the NBA
 stops calling, rebuild your career as a **EuroLeague** centrepiece and earn your
 way back. Attributes grow on an age curve gated by hidden talent; seasons play
 out with awards (All-NBA, DPOY, MVP, scoring titles), playoff runs, rings, and
-Olympic / World Cup medals weighted by your country's pedigree. It ends on a
+Olympic medals weighted by your country's pedigree. It ends on a
 **legacy screen** — trophy case, career totals, career earnings, a Hall-of-Fame
 verdict. Inspired by Copero's _simulador-carrera_ and Potrero's _El Idolo_.
 
@@ -123,17 +123,22 @@ The API creates the local table on boot. To (re)create it manually:
    line → playoff run), pay is banked, and every season rolls its own **injury**
    check — mostly knocks and strains, but a low durability (or age, or a long
    injury record) can bring on a hamstring, a stress fracture, or, rarely, a
-   torn ACL / Achilles that costs you a chunk of your athleticism for good.
-   Your **idolatry** with the club and the national team fills toward _legend_
-   (a few years and a ring can make you their _idol_), and **awards** resolve.
-   **Fame** is not a stat you train — it tracks what happens on the floor
-   (impact, awards, rings) and the off-court scenes (the mid-season forks, the
-   shoe deal). Big beats — a ring, an MVP, a deadline trade, a serious injury —
-   pop their own card on the next screen, and the headline trophies (**MVP,
-   DPOY, Finals MVP, ROY, MIP, Sixth Man, a championship, Olympic / World Cup
-   medals**) take over the screen as a full **award modal**; every other honour
-   is still noted in the recap banner. Odd summers add a **World Cup / Olympics**
-   call-up; fame 80+ triggers a one-time **shoe deal** (pick the brand).
+   torn ACL / Achilles that costs you a chunk of your athleticism for good. The
+   HUD carries your **status tier** (fringe → role player → star → superstar →
+   generational) and, when your seat gets shaky, a **trade risk %**; a bad team
+   can move you (a modal shows who you were **traded to**), and once you're a
+   star you can **demand a trade** yourself. Your **idolatry** with the club and
+   the national team fills toward _legend_ (a few years and a ring can make you
+   their _idol_); a **championship keeps you a contender for ~5 seasons**, so
+   repeat rings are a real chance without being a given. **Fame** is not a stat
+   you train — it tracks what happens on the floor (impact, awards, rings) and
+   the off-court scenes (the mid-season forks, the shoe deal). Big beats — a
+   ring, an MVP, a trade, a serious injury — pop their own card on the next
+   screen, and the headline trophies (**MVP, DPOY, Finals MVP, ROY, MIP, Sixth
+   Man, a championship, Olympic medals**) take over the screen as a full **award
+   modal**; every other honour is still noted in the recap banner. Every fourth
+   summer brings an **Olympic** call-up (gold/silver/bronze by your country's
+   pedigree); fame 80+ triggers a one-time **shoe deal** (pick the brand).
 5. **Overseas** — if the NBA stops calling while you can still play, sign in the
    **EuroLeague** instead of retiring: the same loop, its own clubs, trophies
    (EuroLeague MVP / title), and free agency, plus a path back to the NBA once
@@ -196,12 +201,16 @@ owners — ship your own stylised marks if you publish.
   pre-retirement **farewell** choice, mid-season branching situations
   (status-scaled — they cost minutes or goodwill, never ratings), a fame-gated
   shoe deal, the EuroLeague as a full parallel league with a path back, a
-  per-team **franchise standing** (fan favorite → idol → legend), end-of-season
-  **big-moment** cards (rings, awards, serious injuries) with a full-screen
-  **award modal** for the headline trophies, per-career **randomised prologue**
-  options, performance-driven **fame** (no longer a trainable stat), a slow
-  rating economy where option cards show the exact gain after the 99-cap plus a
-  **rare** once-a-career gold `+9`, and a persistent stat strip + money bar
+  per-team **franchise standing** (fan favorite → idol → legend), a **status
+  tier** + **trade probability** with team-forced and player-demanded trades
+  (shown as a "traded to" modal), a **5-season championship window** after a
+  ring, draft-slot-scaled washout odds (late second-rounders bust to the
+  EuroLeague far more often), end-of-season **big-moment** cards (rings, awards,
+  trades, serious injuries) with a full-screen **award modal** for the headline
+  trophies, per-career **randomised prologue** options, performance-driven
+  **fame** (no longer a trainable stat), a slow rating economy where option
+  cards show the exact gain after the 99-cap plus a **rare** once-a-career gold
+  `+9`, and a persistent stat strip + money bar
 - **M2 — AWS deploy (cheapest):** Terraform modules, remote state, GitHub Actions
   deploy via AWS OIDC, CloudWatch dashboard + Budgets alarm
 - **M3 — depth:** salary-cap rules & sign-and-trades, multi-player trades, named

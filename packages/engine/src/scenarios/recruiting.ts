@@ -28,12 +28,6 @@ export const RECRUITING_TEMPLATE = {
       tag: 'High usage',
     },
     {
-      id: 'g_league_ignite',
-      label: 'G LEAGUE IGNITE',
-      blurb: 'A paid development team built to prepare prospects for the next level.',
-      tag: 'Pro prep',
-    },
-    {
       id: 'overseas_pro',
       label: 'OVERSEAS PRO',
       blurb: 'Get paid now, practise against seasoned men, live far from home.',
@@ -43,14 +37,14 @@ export const RECRUITING_TEMPLATE = {
 } as const;
 
 /**
- * Four tier options of equal card value (~5 shown attribute points plus a
+ * Three tier options of equal card value (~5 shown attribute points plus a
  * similar draft-stock bump), with one getting a small random edge each career.
  * The pool and athleticism/durability share are rerolled per playthrough so no
  * tier is a permanent best pick.
  */
 export function buildRecruitingNode(rng: Rng): PrologueNode {
   const TARGET = 5;
-  const edge = rollEdge(rng, 4);
+  const edge = rollEdge(rng, 3);
   const bumpFor = (i: number) => (i === edge.index ? edge.bump : 0);
   const t = RECRUITING_TEMPLATE;
   const stock = () => int(rng, 4, 6);
@@ -70,11 +64,6 @@ export function buildRecruitingNode(rng: Rng): PrologueNode {
       ...t.options[2],
       effect: { ...balancedEffect(rng, SLASHING, TARGET + bumpFor(2), 2), draftStock: stock() },
       stance: { tag: t.options[2].tag },
-    },
-    {
-      ...t.options[3],
-      effect: { ...balancedEffect(rng, PLAYMAKING, TARGET + bumpFor(3), 2), draftStock: stock() },
-      stance: { tag: t.options[3].tag },
     },
   ];
 

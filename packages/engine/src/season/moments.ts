@@ -18,9 +18,6 @@ const AWARD_MOMENTS: Partial<Record<AwardId, { title: string; everyTime: boolean
   assists_title: { title: 'ASSISTS TITLE', everyTime: true },
   steals_title: { title: 'STEALS TITLE', everyTime: true },
   blocks_title: { title: 'BLOCKS TITLE', everyTime: true },
-  wc_gold: { title: 'WORLD CUP GOLD', everyTime: true },
-  wc_silver: { title: 'WORLD CUP SILVER', everyTime: true },
-  wc_bronze: { title: 'WORLD CUP BRONZE', everyTime: true },
   oly_gold: { title: 'OLYMPIC GOLD', everyTime: true },
   oly_silver: { title: 'OLYMPIC SILVER', everyTime: true },
   oly_bronze: { title: 'OLYMPIC BRONZE', everyTime: true },
@@ -55,6 +52,8 @@ export interface SeasonMomentArgs {
   tallyAfter: AwardTally;
   teamResult: TeamResult;
   traded: boolean;
+  /** The player forced the move themselves (a trade demand). */
+  tradeDemanded?: boolean;
   /** Career points before and after this season, for milestone crossings. */
   pointsBefore: number;
   pointsAfter: number;
@@ -108,9 +107,12 @@ export function detectSeasonMoments(a: SeasonMomentArgs): CareerMoment[] {
     out.push({
       ...base,
       kind: 'trade',
-      id: 'trade',
-      title: 'TRADED',
-      subtitle: `Age ${a.age} · a new home at the deadline`,
+      id: a.tradeDemanded ? 'trade_demand' : 'trade',
+      // The client's trade modal shows this as "Traded to <title>".
+      title: a.teamLabel.toUpperCase(),
+      subtitle: a.tradeDemanded
+        ? `Age ${a.age} · you forced your way out`
+        : `Age ${a.age} · moved at the deadline`,
     });
   }
 

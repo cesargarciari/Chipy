@@ -92,8 +92,12 @@ describe('contracts + farewell', () => {
         const res = runCareer({ seed, profile, choices });
         if (res.status === 'complete') {
           if (signedAt !== null && signedYears > 1) {
-            const played = res.summary.seasons.filter((s) => s.index >= signedAt!).length;
-            expect(played).toBeGreaterThanOrEqual(2);
+            const after = res.summary.seasons.filter((s) => s.index >= signedAt!);
+            // The deal is honoured unless a catastrophic injury cut it short.
+            const endedByInjury = res.summary.injuryHistory.some(
+              (inj) => inj.severity === 'severe' && inj.seasonIndex >= signedAt!,
+            );
+            expect(after.length >= 2 || endedByInjury).toBe(true);
           }
           break;
         }

@@ -6,7 +6,6 @@ import {
   playerProfileSchema,
   randomSeed,
   type ArchetypeId,
-  type Market,
   type Position,
 } from '@chipy/engine';
 import { useMemo, useState, type FormEvent } from 'react';
@@ -17,12 +16,6 @@ import { Button } from '../../components/ui/button.js';
 import { Card, CardBody, CardTitle } from '../../components/ui/card.js';
 import { useCareerRun } from '../../store/career.js';
 
-const MARKET_LABELS: Record<Market, string> = {
-  small: 'Small market',
-  mid: 'Mid market',
-  large: 'Large market',
-};
-
 export function CreatePlayer() {
   const navigate = useNavigate();
   const start = useCareerRun((s) => s.start);
@@ -30,7 +23,6 @@ export function CreatePlayer() {
   const [name, setName] = useState('');
   const [position, setPosition] = useState<Position>('PG');
   const [archetype, setArchetype] = useState<ArchetypeId>(archetypesFor('PG')[0]!.id);
-  const [market, setMarket] = useState<Market>('mid');
   const [jerseyNumber, setJerseyNumber] = useState(() => 1 + Math.floor(randomSeed() % 30));
   const [country, setCountry] = useState('USA');
   const [handedness, setHandedness] = useState<'left' | 'right'>('right');
@@ -45,6 +37,8 @@ export function CreatePlayer() {
 
   function onSubmit(e: FormEvent) {
     e.preventDefault();
+    // Home market is no longer a player choice — it's rolled with the career.
+    const market = MARKETS[Math.floor(randomSeed() % MARKETS.length)]!;
     const parsed = playerProfileSchema.safeParse({
       name,
       position,
@@ -183,27 +177,6 @@ export function CreatePlayer() {
                   <span className="block text-sm font-bold text-ink">{a.label}</span>
                   <span className="mt-0.5 block text-xs text-amber-soft">{a.comps}</span>
                   <span className="mt-1 block text-xs text-ink-dim">{a.blurb}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="space-y-1.5">
-            <span className="text-xs uppercase tracking-wide text-ink-dim">Home market</span>
-            <div className="flex flex-wrap gap-2">
-              {MARKETS.map((m) => (
-                <button
-                  key={m}
-                  type="button"
-                  onClick={() => setMarket(m)}
-                  className={cn(
-                    'rounded-lg border px-3 py-2 text-sm transition-colors',
-                    m === market
-                      ? 'border-amber bg-amber/10 text-ink'
-                      : 'border-court-600 text-ink-dim hover:text-ink',
-                  )}
-                >
-                  {MARKET_LABELS[m]}
                 </button>
               ))}
             </div>

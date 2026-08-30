@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { ChoiceCard } from '../../components/ChoiceCard.js';
 import { MomentModal, isHeadlineMoment } from '../../components/MomentModal.js';
 import { Card, CardBody } from '../../components/ui/card.js';
+import { clubCrest, teamLogo } from '../../lib/art.js';
 import { TEAM_RESULT_LABELS, teamName } from '../../lib/format.js';
 import { AwardChips } from './AwardChips.js';
 import { CareerHud } from './CareerHud.js';
@@ -34,6 +35,8 @@ export function SeasonScreen({
       : preview.team
         ? teamName(preview.team.id)
         : '—';
+  const crest =
+    preview.league === 'overseas' ? clubCrest(preview.club?.id) : teamLogo(preview.team?.id);
 
   return (
     <div className="space-y-4">
@@ -41,9 +44,10 @@ export function SeasonScreen({
         <div className="font-semibold">
           Season {preview.seasonNumber} · Age {preview.age}
         </div>
-        <div className="text-ink-dim">
+        <div className="flex items-center gap-1.5 text-ink-dim">
+          {crest && <img src={crest} alt="" className="h-5 w-5 object-contain" />}
           {where}
-          {preview.contractYear && <span className="ml-2 text-amber">· contract year</span>}
+          {preview.contractYear && <span className="ml-1 text-amber">· contract year</span>}
         </div>
       </div>
 
@@ -100,7 +104,8 @@ export function SeasonScreen({
               rare={o.rare}
               tag={o.tag}
               watermark={o.watermark}
-              tone={o.id === 'retire' ? 'danger' : 'default'}
+              teamId={o.teamId}
+              tone={o.id === 'retire' || o.id === 'demand_trade' ? 'danger' : 'default'}
               onHoverKeys={(k) => setHighlight(k ?? undefined)}
               onClick={() => onChoose(o.id)}
             />

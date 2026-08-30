@@ -118,6 +118,7 @@ export interface BuildStandingsArgs {
 /** Final per-team standings, best first. */
 export function buildFranchiseStandings(a: BuildStandingsArgs): FranchiseStanding[] {
   return Object.keys(a.score)
+    .filter((teamId) => (a.seasons[teamId] ?? 0) > 0)
     .map((teamId) => {
       const score = Math.round(a.score[teamId] ?? 0);
       const seasons = a.seasons[teamId] ?? 0;

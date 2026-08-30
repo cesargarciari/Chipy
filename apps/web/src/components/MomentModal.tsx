@@ -22,9 +22,6 @@ const HEADLINE_AWARDS = new Set([
   'oly_gold',
   'oly_silver',
   'oly_bronze',
-  'wc_gold',
-  'wc_silver',
-  'wc_bronze',
   'euroleague_mvp',
   'euroleague_champion',
 ]);
@@ -44,13 +41,12 @@ const GLYPH: Record<string, string> = {
   oly_gold: '🥇',
   oly_silver: '🥈',
   oly_bronze: '🥉',
-  wc_gold: '🥇',
-  wc_silver: '🥈',
-  wc_bronze: '🥉',
 };
 
 export function isHeadlineMoment(m: CareerMomentDto): boolean {
-  return m.kind === 'ring' || (m.awardId != null && HEADLINE_AWARDS.has(m.awardId));
+  return (
+    m.kind === 'ring' || m.kind === 'trade' || (m.awardId != null && HEADLINE_AWARDS.has(m.awardId))
+  );
 }
 
 /**
@@ -88,10 +84,12 @@ export function MomentModal({
   if (done) return null;
 
   const m = moments[i]!;
-  const art = awardArt(m.awardId);
+  const isTrade = m.kind === 'trade';
   const logo = teamLogo(m.teamId) ?? clubCrest(m.teamId);
-  const glyph = (m.awardId && GLYPH[m.awardId]) ?? '🏆';
-  const kicker = m.kind === 'ring' ? 'Champions' : 'The hardware';
+  // For a trade the hero image is the destination team's logo, not award art.
+  const art = isTrade ? logo : awardArt(m.awardId);
+  const glyph = isTrade ? '🔁' : ((m.awardId && GLYPH[m.awardId]) ?? '🏆');
+  const kicker = isTrade ? 'Traded to' : m.kind === 'ring' ? 'Champions' : 'The hardware';
 
   return (
     <div
@@ -109,11 +107,11 @@ export function MomentModal({
             {kicker}
           </div>
 
-          {/* ── AWARD ART DROP POINT (128×128) ──
-              add src/assets/awards/<awardId>.png — see src/lib/art.ts */}
-          <div className="mx-auto my-5 grid h-32 w-32 place-items-center rounded-2xl bg-court-950/60">
+          {/* ── HERO ART (128×128 box) ──
+              awards: src/assets/awards/<awardId>.png · teams: src/assets/teams/<TEAMID>.png */}
+          <div className="mx-auto my-5 flex h-32 w-32 items-center justify-center overflow-hidden rounded-2xl bg-court-950/60">
             {art ? (
-              <img src={art} alt={m.title} className="h-full w-full object-contain p-1" />
+              <img src={art} alt={m.title} className="block max-h-full max-w-full object-contain" />
             ) : (
               <span className="text-6xl leading-none">{glyph}</span>
             )}
@@ -122,7 +120,7 @@ export function MomentModal({
           <h2 className="font-display text-3xl leading-none tracking-wide text-ink">{m.title}</h2>
           <p className="mt-2 text-sm text-ink-dim">{m.subtitle}</p>
 
-          {m.teamId && (
+          {!isTrade && m.teamId && (
             <div className="mt-3 inline-flex items-center gap-2 text-xs text-ink-dim">
               {logo && <img src={logo} alt="" className="h-5 w-5 object-contain" />}
               {teamName(m.teamId)}

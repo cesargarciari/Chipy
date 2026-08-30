@@ -5,9 +5,6 @@ const MEDAL_REP: Partial<Record<AwardId, number>> = {
   oly_gold: 46,
   oly_silver: 24,
   oly_bronze: 15,
-  wc_gold: 34,
-  wc_silver: 18,
-  wc_bronze: 11,
 };
 
 /** Rep from one national-team summer — a call-up alone is worth something. */
