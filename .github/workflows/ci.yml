@@ -65,7 +65,9 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @chipy/web exec playwright install --with-deps chromium
-      - run: pnpm --filter @chipy/web build
+      # Build @chipy/engine and @chipy/shared first: vite build (Rolldown) resolves
+      # the workspace packages from their dist/, which a bare --filter never emits.
+      - run: pnpm --filter "@chipy/web..." build
       - run: pnpm --filter @chipy/web e2e
       - uses: actions/upload-artifact@v4
         if: failure()
@@ -77,6 +79,11 @@ jobs:
   secrets:
     name: gitleaks (secret scan)
     runs-on: ubuntu-latest
+    # gitleaks-action lists the PR's commits via the API; the default GITHUB_TOKEN
+    # is contents-only, so grant PR read or it 403s before it scans anything.
+    permissions:
+      contents: read
+      pull-requests: read
     steps:
       - uses: actions/checkout@v4
         with:
