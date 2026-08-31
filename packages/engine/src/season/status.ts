@@ -89,6 +89,13 @@ export function tradeChance(a: TradeChanceArgs): number {
 
   // Bad chemistry is a term of its own - it can move anyone, star or not.
   const chem = clamp((52 - a.chemistry) / 100, 0, 0.4);
+  const raw = clamp(clamp(base, 0.01, 0.24) + chem, 0.01, 0.6);
 
-  return clamp(clamp(base, 0.01, 0.24) + chem, 0.01, 0.6);
+  // A superstar dictates his own destination - the front office does not shop
+  // him out from under his feet. If he wants out, that's the `demand_trade`
+  // path, not this roll.
+  if (a.status === 'superstar' || a.status === 'generational') {
+    return clamp(raw, 0.01, a.status === 'generational' ? 0.02 : 0.04);
+  }
+  return raw;
 }

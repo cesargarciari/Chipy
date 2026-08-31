@@ -1,4 +1,5 @@
 import type { PendingDecision } from '@chipy/engine';
+import { ShoppingCart } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { cn } from '../../lib/cn.js';
 import { moneyM } from '../../lib/format.js';
@@ -9,10 +10,11 @@ type PerkItem = PerkShop['items'][number];
 const KIND_TAG: Record<PerkItem['kind'], string> = { yearly: '/yr', permanent: 'once' };
 
 /**
- * The perks shop: a compact trigger that shows the bank, plus a modal grid of
- * small perk tiles. Owned perks stay in the grid with an orange highlight;
- * perks you can't afford are shown greyed and can't be picked. Buying records a
- * `perks{n}` choice and keeps the modal open so you can grab a few.
+ * The perks shop: a small cart button (it sits by the team name in the season
+ * header) that opens a modal grid of perk tiles. Owned perks stay in the grid
+ * with an orange highlight; perks you can't afford are greyed and unpickable.
+ * Buying records a `perks{n}` choice and keeps the modal open so you can grab a
+ * few.
  */
 export function PerksDrawer({
   shop,
@@ -37,18 +39,21 @@ export function PerksDrawer({
   return (
     <>
       <button
+        type="button"
         onClick={() => setOpen(true)}
-        className="flex w-full items-center justify-between rounded-2xl border border-court-700 bg-court-900/40 px-4 py-2.5 text-left transition-colors hover:border-amber"
+        aria-label="Perks shop"
+        title={`Perks shop · ${ownedCount} active · ${moneyM(shop.bank)} in bank`}
+        className="relative inline-flex items-center gap-1.5 rounded-lg border border-court-700 bg-court-900/60 px-2 py-1 text-ink-dim transition-colors hover:border-amber hover:text-amber"
       >
-        <span className="font-display text-base tracking-wide">
-          Perks shop{' '}
-          <span className="text-xs font-normal text-ink-dim">
-            · {ownedCount} active{buyable > 0 && ` · ${buyable} to buy`}
+        <ShoppingCart size={15} strokeWidth={1.75} />
+        <span className="text-[11px] font-semibold uppercase tracking-wide">
+          {moneyM(shop.bank)}
+        </span>
+        {buyable > 0 && (
+          <span className="absolute -right-1.5 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-amber px-1 text-[9px] font-bold leading-none text-court-950">
+            {buyable}
           </span>
-        </span>
-        <span className="text-xs font-bold uppercase tracking-wide text-emerald-400">
-          {moneyM(shop.bank)} in bank
-        </span>
+        )}
       </button>
 
       {open && (

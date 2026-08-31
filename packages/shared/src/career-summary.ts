@@ -133,6 +133,7 @@ export const seasonRecordSchema = z.object({
   ratingsAfter: ratingsSchema,
   injuredGames: z.number().int().min(0).max(82),
   salary: money,
+  recap: z.string(),
 });
 
 export const overseasSeasonSchema = z.object({

@@ -1,13 +1,14 @@
 import { weightedPick, type Rng } from '../rng.js';
-import type { GameOption } from '../types.js';
+import { RATING_KEYS, type GameOption, type Ratings } from '../types.js';
 import type { SeasonEffect } from './effects.js';
 
 /**
  * The chemistry channel - a lightweight question that fires on its own roll,
  * separate from the fame / mid-season one, so both can land in the same season
  * (they're about different things). Every scenario is the same shape of choice:
- * be one of the guys (chemistry up, but a night out / time away costs you a
- * couple of overall points) or keep it strictly professional (chemistry down).
+ * be one of the guys (chemistry up) or keep it strictly professional (chemistry
+ * down). Which side of a given scenario leaves you sharper and which nicks your
+ * game is decided at random, so neither option is always the "safe" one.
  */
 export interface ChemistryScenario {
   id: string;
@@ -100,43 +101,58 @@ export interface ChemResolution {
   note: string;
 }
 
+/** Direction-neutral outcome per option - the stat tail is appended after. */
 const CHEM_NOTE: Record<string, string> = {
-  chm_dinner_join: 'The room warms to you; the short night takes a small edge off your game.',
+  chm_dinner_join: 'The room warms to you.',
   chm_dinner_skip: 'Professional to a fault. The guys stop inviting you.',
-  chm_camp_go: 'You come into camp tight with the group, a touch worn down.',
-  chm_camp_solo: 'You show up in great shape and a step removed from the room.',
-  chm_rookie_yes: 'The locker room respects it; the extra hours cost you a little of your own.',
-  chm_rookie_no: 'Fair enough, but the young guys notice who helped and who did not.',
-  chm_night_roll: 'One of the guys now. A little heavy-legged on the second night.',
-  chm_night_rest: 'You feel fresh. You also feel like an outsider.',
-  chm_feud_broker: 'You patch it up; playing counsellor for a month nicks your focus.',
+  chm_camp_go: 'You come into camp tight with the group.',
+  chm_camp_solo: 'You show up a step removed from the room.',
+  chm_rookie_yes: 'The locker room respects it.',
+  chm_rookie_no: 'The young guys notice who helped and who did not.',
+  chm_night_roll: 'One of the guys now.',
+  chm_night_rest: 'You feel like an outsider for it.',
+  chm_feud_broker: 'You patch it up. The room owes you one.',
   chm_feud_stayout: 'The tension lingers and a few teammates hold the distance against you.',
-  chm_gala_speak: 'He will not forget it. A late night, but only a slight one.',
+  chm_gala_speak: 'He will not forget it.',
   chm_gala_donate: 'Generous, but he wanted you there, not your money.',
 };
 
+const SHARP_TAIL = 'You come out of it sharp.';
+const DULL_TAIL = 'It takes a small edge off your game.';
+
+/** An even, small ratings nudge across every skill - about half an overall point. */
+function spread(delta: number): Partial<Ratings> {
+  return RATING_KEYS.reduce((acc, k) => {
+    acc[k] = delta;
+    return acc;
+  }, {} as Partial<Ratings>);
+}
+
 /**
- * Resolve a chemistry choice. The sociable option (`[0]`) trades a *small*
- * overall dip (1, occasionally 2) for a chemistry gain; the professional option
- * (`[1]`) trades chemistry away.
+ * Resolve a chemistry choice. The sociable option (`[0]`) always gains chemistry
+ * and the professional option (`[1]`) always loses it - but which of the two
+ * *sharpens* your game and which *dulls* it (by about half an overall point) is
+ * a coin flip per scenario, so there is no option that is always the safe pick.
  */
 export function resolveChemistry(rng: Rng, scenarioId: string, optionId: string): ChemResolution {
   const scenario = CHEMISTRY_SCENARIOS.find((s) => s.id === scenarioId);
   const isSocial = scenario?.options[0]?.id === optionId;
   const m = 0.7 + rng() * 0.6; // 0.7 .. 1.3
 
-  if (isSocial) {
-    const hit = rng() < 0.75 ? 1 : 2;
-    return {
-      effect: { overallHit: hit, chemistry: Math.round(12 + 8 * m) },
-      chemistryDelta: Math.round(12 + 8 * m),
-      note: CHEM_NOTE[optionId] ?? 'The room warms to you.',
-    };
-  }
+  const chemUp = Math.round(12 + 8 * m);
+  const chemDown = -Math.round(8 + 7 * m);
+  const nick = 0.28 + 0.12 * m; // ~0.4 overall, a bit either way
+  const socialSharpens = rng() < 0.5;
+  const sharpened = isSocial ? socialSharpens : !socialSharpens;
+
+  const statEffect: SeasonEffect = sharpened ? { ratings: spread(nick) } : { overallHit: nick };
+  const base =
+    CHEM_NOTE[optionId] ?? (isSocial ? 'The room warms to you.' : 'You keep your distance.');
+
   return {
-    effect: { chemistry: -Math.round(8 + 7 * m) },
-    chemistryDelta: -Math.round(8 + 7 * m),
-    note: CHEM_NOTE[optionId] ?? 'You keep your distance, and it costs you goodwill.',
+    effect: { ...statEffect, chemistry: isSocial ? chemUp : chemDown },
+    chemistryDelta: isSocial ? chemUp : chemDown,
+    note: `${base} ${sharpened ? SHARP_TAIL : DULL_TAIL}`,
   };
 }
 

@@ -11,11 +11,12 @@ anything unless I ask in a follow-up.
    should also run.
 2. Make sure DynamoDB Local is up for the API tests:
    `docker compose up -d dynamodb-local`.
-3. Run these in order. Stop at the first failure and show its output verbatim:
+3. Run these in order. Stop at the first failure and show its output verbatim
+   (`DYNAMODB_ENDPOINT` is set for the session in `.claude/settings.json`):
    - `pnpm format:check`
    - `pnpm lint`
    - `pnpm typecheck`
-   - `DYNAMODB_ENDPOINT=http://localhost:8000 pnpm test`
+   - `pnpm test`
    - `pnpm --filter @chipy/engine test:coverage` (only if the engine changed)
    - `pnpm e2e` (only if step 1 flagged it)
 4. Summary: a checklist of what passed and what failed, plus the exact command to

@@ -3,7 +3,7 @@
  * existing `(seed, profile, choices)` tuple. Stored on every `CareerSummary` so
  * the API can tell whether a persisted career predates the current rules.
  */
-export const ENGINE_VERSION = '4.13.0';
+export const ENGINE_VERSION = '4.14.0';
 
 export const POSITIONS = ['PG', 'SG', 'SF', 'PF', 'C'] as const;
 export type Position = (typeof POSITIONS)[number];
@@ -421,6 +421,8 @@ export interface TeamOffer {
   years: number;
   /** $M/yr on the table. */
   salary: number;
+  /** 0..1 title odds if you sign here (roster strength lifted by your own ceiling). */
+  contender: number;
   pitch: string;
 }
 

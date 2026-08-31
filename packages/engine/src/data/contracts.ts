@@ -2,7 +2,7 @@ import { clamp, jitter, type Rng } from '../rng.js';
 import type { DraftResult } from '../types.js';
 
 /** Share of gross pay that actually reaches the bank (taxes + agent + lifestyle). */
-export const KEEP_RATE = 0.52;
+export const KEEP_RATE = 0.62;
 
 /** First-contract salary ($M/yr) from where you were drafted. */
 export function rookieScale(draft: DraftResult): number {

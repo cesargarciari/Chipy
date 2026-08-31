@@ -1,4 +1,4 @@
-import type { EffectChip, Ratings } from '@chipy/engine';
+import { defenseRatingOf, type EffectChip, type Ratings } from '@chipy/engine';
 
 /**
  * The engine keeps eight rated skills, but the UI collapses interior + perimeter
@@ -20,10 +20,14 @@ export const DISPLAY_AXES: DisplayAxis[] = [
   { key: 'basketballIQ', label: 'BASKETBALL IQ', short: 'IQ' },
 ];
 
-/** The value to show for a display axis - defense is the mean of the two D's. */
+/**
+ * The value to show for a display axis. DEFENSE folds the two D ratings, weighted
+ * toward the stronger one (engine `defenseRatingOf`), so a one-way stopper still
+ * reads elite and a true two-way defender can climb past 85 into the 90s.
+ */
 export function displayRatingValue(ratings: Ratings, key: string): number {
   if (key === 'defense') {
-    return Math.round((ratings.perimeterDefense + ratings.interiorDefense) / 2);
+    return defenseRatingOf(ratings.interiorDefense, ratings.perimeterDefense);
   }
   return ratings[key as keyof Ratings];
 }

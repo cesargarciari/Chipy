@@ -25,9 +25,12 @@ describe('describeEffects', () => {
     expect(chips[0]).toMatchObject({ key: 'finishing', delta: 4, nominal: 8 });
   });
 
-  it('shows a maxed stat as +0 rather than dropping it', () => {
-    const chips = describeEffects({ ratings: { threePoint: 6 } }, ratingsAt(99));
-    expect(chips[0]).toMatchObject({ key: 'threePoint', delta: 0, nominal: 6 });
+  it('drops a rating chip entirely once that stat is at the 99 cap', () => {
+    const chips = describeEffects(
+      { ratings: { threePoint: 6, finishing: 4 } },
+      { ...ratingsAt(50), threePoint: 99 },
+    );
+    expect(chips.map((c) => c.key)).toEqual(['finishing']);
   });
 });
 

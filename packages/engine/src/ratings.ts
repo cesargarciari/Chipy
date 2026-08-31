@@ -87,6 +87,18 @@ export function overallFor(position: Position, ratings: Ratings): number {
   return clamp(Math.round(raw + Math.min(eliteBonus, 6)), RATING_FLOOR, RATING_CEIL);
 }
 
+/**
+ * A single "defense" number from the two D ratings, weighted toward the stronger
+ * one - a true specialist (elite on one end, ordinary on the other) still reads
+ * as an elite defender, and a genuine two-way stopper can push into the 90s.
+ * Used for the merged DEFENSE tile and the DPOY consideration bar.
+ */
+export function defenseRatingOf(interiorDefense: number, perimeterDefense: number): number {
+  const hi = Math.max(interiorDefense, perimeterDefense);
+  const lo = Math.min(interiorDefense, perimeterDefense);
+  return clamp(Math.round(hi * 0.66 + lo * 0.34), RATING_FLOOR, RATING_CEIL);
+}
+
 export function clampRatings(ratings: Ratings): Ratings {
   return RATING_KEYS.reduce((acc, key) => {
     acc[key] = clamp(Math.round(ratings[key]), RATING_FLOOR, RATING_CEIL);

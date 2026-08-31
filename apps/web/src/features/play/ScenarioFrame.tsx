@@ -20,7 +20,8 @@ const KICKER: Record<ScenarioAccent, string> = {
  * the kicker / title / prompt, then the options right underneath it (no big HUD
  * wedged in between). Anything passed as `footer` - the ratings + money HUD,
  * usually - renders below the options where it does not separate the question
- * from the answer.
+ * from the answer. The frame itself does not animate on a new question; only the
+ * option cards ease in (`option-enter`), so it never reads as a full reload.
  */
 export function ScenarioFrame({
   accent = 'amber',
@@ -38,7 +39,7 @@ export function ScenarioFrame({
   footer?: ReactNode;
 }) {
   return (
-    <div className="decision-enter overflow-hidden rounded-2xl border border-court-700 bg-court-900">
+    <div className="overflow-hidden rounded-2xl border border-court-700 bg-court-900">
       <div className={cn('h-1 w-full bg-gradient-to-r', STRAND[accent])} />
       <div className="space-y-4 p-5">
         <div>

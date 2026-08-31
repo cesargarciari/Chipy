@@ -320,6 +320,59 @@ border). The trophy shelf hover is now per-award: `.trophy-group:hover` /
 
 `ENGINE_VERSION` → `4.12.0`; packages → `0.4.12`. No schema changes.
 
+**Contender markets, a real free-agent market, a season recap, softer chemistry
+(v4.13).** The five glamour franchises (`LAL` `GSW` `NYK` `BOS` `MIA`) carry a
+`+0.06` standing edge to `teamStrengthFor` every season, and free agents skew
+toward them. `freeAgencyOffers` now sizes the field by `overall`
+(`suitorCount`): a role player gets the incumbent plus one look, a solid starter
+4-5, a star 7-8, a superstar 12-17, a generational 16-20. Each `TeamOffer` carries
+a `contender` value (`contenderOdds` = roster strength lifted by the player's own
+ceiling); the offers are ranked best-title-shot first and the card shows a
+`contenderLabel` ("Title favorite" … "Rebuild") plus "title odds with you ~N%".
+Every `SeasonRecord` gets a `recap`: a seeded, one-line account of how the year
+ended, built from a derived `recap` stream so it never perturbs the sim -
+"Lost the first round in a heartbreaking five, a buzzer-beater on the road ending
+it", "Swept out of the second round in four, never in the series", "Won it all,
+closing out the Finals in six". The chemistry channel is no longer one-directional:
+`resolveChemistry` still has the sociable option gain chemistry and the pro option
+lose it, but a per-scenario coin flip decides which of the two _sharpens_ your
+game (+~0.4 across the board) and which _dulls_ it (an `overallHit` of ~0.4, down
+from a flat 1-2), so neither option is always the safe pick. `msx_bday_out`'s
+overall cost drops 2 → 1. Web: the scenario frame no longer fades on a new
+question (only the option cards ease in - `ScenarioFrame` loses `decision-enter`,
+`SeasonScreen` too); the "last decision raised these" orange tint is gone
+(`RatingStrip` drops `raised`, `SeasonPreview.raisedKeys` removed); the season
+screen's "Last season" card leads with the recap, and the legacy season table
+carries it as a tooltip.
+
+`ENGINE_VERSION` → `4.13.0`; packages → `0.4.13`. `seasonRecordSchema` gains
+`recap: z.string()`.
+
+**Defense reads honestly, superstar exemptions, a rarer breakthrough, tidier
+recaps (v4.14).** `defenseRatingOf(interior, perimeter)` folds the two D ratings
+weighted `0.66 / 0.34` toward the stronger one, so a one-way stopper reads as an
+elite defender and a true two-way one climbs past 85 into the 90s - used for the
+merged DEFENSE tile / radar and the DPOY `eliteDefender` gate (the old mean
+capped a specialist around 85). Two mid-season scenarios (`msx_star_fight`,
+`msx_benched_4th`) now gate out for the team's clear best player -
+`role !== 'franchise'`, `overall < 86`, and no MVP / first-team All-NBA - and
+`tradeChance` hard-caps a superstar at 0.04 (generational 0.02) no matter the
+chemistry: he dictates his destination through `demand_trade`, the front office
+does not ship him out. `KEEP_RATE` 0.52 → 0.62 so the bank tracks the contract
+more closely and perks feel proportional. `describeEffects` drops a rating chip
+entirely once that stat is at the 99 cap (no more `MAX +0`). The `scn_breakthrough`
+weight drops 0.5 → 0.3 (about one career in ten now sees it) and its options land
+`+12` instead of `+9` (finishing / three-point / defense / playmaking, trimmed
+only by the cap). The mid-season and chemistry outcomes no longer push a
+`kind: 'midseason'` career moment - they live on `SeasonRecord.midseasonHeadline`,
+which the "Last season" recap card already shows, instead of a card at the top of
+the next screen. Web: the perks shop shrinks to a `ShoppingCart` button in the
+season header (by the team name); the legacy screen's "Career moments" card is
+gone (the trophy case plus its non-image-award tag row cover it). The full-loop
+e2e now skips the perks button by `aria-label` rather than visible text.
+
+`ENGINE_VERSION` → `4.14.0`; packages → `0.4.14`. No schema changes.
+
 ## Consequences
 
 - The legacy score/grade bands were re-tuned (perks and the mid-season pool lift

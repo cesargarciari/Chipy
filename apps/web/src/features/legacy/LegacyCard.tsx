@@ -14,7 +14,6 @@ import {
   perkLabel,
   teamName,
 } from '../../lib/format.js';
-import { MomentCard } from '../../components/MomentCard.js';
 import { FranchiseStandings } from './FranchiseStandings.js';
 import { SeasonTable } from './SeasonTable.js';
 import { ShareRow } from './ShareRow.js';
@@ -32,28 +31,6 @@ interface LegacyCardProps {
 
 export function LegacyCard({ summary, shareUrl, saving, saveError, onPlayAgain }: LegacyCardProps) {
   const { profile, legacy, careerTotals: ct, awards } = summary;
-
-  // The legacy card shows only the headline beats - rings, MVP-class awards,
-  // franchise idol/legend, big milestones - not every All-Star nod.
-  const HEADLINE_MOMENT_IDS = new Set([
-    'mvp',
-    'dpoy',
-    'roy',
-    'finals_mvp',
-    'euroleague_champion',
-    'euroleague_mvp',
-    'franchise_idol',
-    'franchise_legend',
-  ]);
-  const bigMoments = summary.moments
-    .filter(
-      (m) =>
-        m.kind === 'ring' ||
-        m.kind === 'milestone' ||
-        HEADLINE_MOMENT_IDS.has(m.id) ||
-        (m.awardId ? HEADLINE_MOMENT_IDS.has(m.awardId) : false),
-    )
-    .slice(0, 10);
 
   return (
     <div className="space-y-5">
@@ -266,19 +243,6 @@ export function LegacyCard({ summary, shareUrl, saving, saveError, onPlayAgain }
               franchises={summary.franchises}
               nationalTeam={summary.nationalTeam}
             />
-          </CardBody>
-        </Card>
-      )}
-
-      {bigMoments.length > 0 && (
-        <Card>
-          <CardBody className="space-y-3">
-            <h3 className="font-bold">Career moments</h3>
-            <div className="space-y-2">
-              {bigMoments.map((m, i) => (
-                <MomentCard key={`${m.id}-${i}`} moment={m} />
-              ))}
-            </div>
           </CardBody>
         </Card>
       )}

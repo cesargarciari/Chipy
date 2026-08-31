@@ -103,7 +103,6 @@ export function CareerHud({
         athleticism={preview.athleticism}
         durability={preview.durability}
         highlight={highlight}
-        raised={preview.raisedKeys}
       />
 
       {(preview.franchiseTier !== 'none' || preview.nationalTeam.tier !== 'none') && (

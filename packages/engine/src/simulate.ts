@@ -5,7 +5,7 @@ import { getPerk, perkExists } from './data/perks.js';
 import { getTeam, teamLabel, TEAMS } from './data/teams.js';
 import { simulateDraft } from './draft.js';
 import { applyOption, optionView } from './options.js';
-import { overallFor } from './ratings.js';
+import { defenseRatingOf, overallFor } from './ratings.js';
 import { clamp, mulberry32, normalizeSeed, weightedPick } from './rng.js';
 import {
   buildPrologueNodes,
@@ -849,18 +849,9 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
           effect = mergeEffects(effect, { chemistry: mr.chemistryDelta });
         }
         midId = mid.id;
+        // The situation + the call live on `SeasonRecord.midseasonHeadline` and
+        // fold into that season's recap line - not a separate card at the top.
         midHeadline = `${mid.title}: ${found.option.label} - ${mr.note}`;
-        // Surface the bizarre situation + the call the player made in the
-        // season summary alongside the trades and trophies.
-        state.moments.push({
-          seasonIndex: seasonNumber,
-          kind: 'midseason',
-          id: mid.id,
-          title: mid.title,
-          subtitle: mr.note,
-          choice: found.option.label,
-          teamId: state.team?.id,
-        });
         if (!state.firedScenarioIds.includes(mid.id)) state.firedScenarioIds.push(mid.id);
       }
     }
@@ -909,16 +900,8 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
       const cr = resolveChemistry(rng, chm.id, pick.choiceId);
       effect = mergeEffects(effect, cr.effect);
       const optLabel = chm.options.find((o) => o.id === pick.choiceId)?.label ?? '';
+      // Folds into the season recap line rather than a top-of-screen card.
       chemHeadline = `${chm.title}: ${optLabel} - ${cr.note}`;
-      state.moments.push({
-        seasonIndex: seasonNumber,
-        kind: 'midseason',
-        id: chm.id,
-        title: chm.title,
-        subtitle: cr.note,
-        choice: optLabel,
-        teamId: state.team?.id,
-      });
       if (!state.firedChemistryIds.includes(chm.id)) state.firedChemistryIds.push(chm.id);
     }
     if (chemHeadline) midHeadline = midHeadline ? `${midHeadline} ${chemHeadline}` : chemHeadline;
@@ -1172,8 +1155,9 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
         allStars: state.awards.all_star ?? 0,
         hype: state.hype,
       });
-      const defenseRating = Math.round(
-        (state.ratings.interiorDefense + state.ratings.perimeterDefense) / 2,
+      const defenseRating = defenseRatingOf(
+        state.ratings.interiorDefense,
+        state.ratings.perimeterDefense,
       );
 
       const seasonAwards = [

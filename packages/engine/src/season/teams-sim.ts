@@ -1,9 +1,15 @@
 import { offerSalary, rookieScale } from '../data/contracts.js';
 import { getTeam, TEAMS } from '../data/teams.js';
-import { clamp, roundTo, weightedPick, type Rng } from '../rng.js';
+import { clamp, int, roundTo, weightedPick, type Rng } from '../rng.js';
 import type { DraftResult, Market, Role, TeamOffer, TeamRef, TeamWindow } from '../types.js';
 import { contractLenFor, ROOKIE_CONTRACT_YEARS } from './phase.js';
-import { derivedRng, teamStrengthFor, windowFromStrength } from './season-sim.js';
+import {
+  contenderOdds,
+  derivedRng,
+  GLAMOUR_TEAMS,
+  teamStrengthFor,
+  windowFromStrength,
+} from './season-sim.js';
 
 const MARKET_ADJACENCY: Record<Market, Record<Market, number>> = {
   small: { small: 2.4, mid: 1.3, large: 0.7 },
@@ -102,6 +108,7 @@ export function landingOffers({ seed, overall, market, draft }: OfferArgs): Team
       projectedMpg: MPG_BY_ROLE[role],
       years,
       salary,
+      contender: contenderOdds(strength, overall),
       pitch: windowPitch(window, team, role),
     };
   });
@@ -118,7 +125,24 @@ export interface FreeAgencyArgs {
   marketValue: number;
 }
 
-/** Three free-agency offers; the first is always re-signing with the current team. */
+/**
+ * How many teams come calling when the contract is up. A fringe / role player
+ * gets a couple of looks; a star draws a real market; a bona fide superstar has
+ * most of the league in the room.
+ */
+export function suitorCount(rng: Rng, overall: number): number {
+  if (overall >= 91) return int(rng, 16, 20); // generational
+  if (overall >= 87) return int(rng, 12, 17); // superstar
+  if (overall >= 84) return int(rng, 7, 8); // star
+  if (overall >= 79) return int(rng, 4, 5); // solid starter
+  return 2; // role player - just the incumbent + one look
+}
+
+/**
+ * Free-agency offers. `[0]` is always re-signing with the current team; the rest
+ * are ranked by how good a title shot they give you (best destinations first).
+ * Stars and up draw a crowd, and the glamour markets punch above their record.
+ */
 export function freeAgencyOffers({
   seed,
   seasonIndex,
@@ -130,6 +154,7 @@ export function freeAgencyOffers({
 }: FreeAgencyArgs): TeamOffer[] {
   const rng = derivedRng(seed, 'fa', seasonIndex);
   const star = overall >= 84;
+  const count = suitorCount(rng, overall);
 
   const others = sampleTeams(
     rng,
@@ -138,12 +163,15 @@ export function freeAgencyOffers({
       const strength = teamStrengthFor(seed, t.id, seasonIndex);
       let w = MARKET_ADJACENCY[market][t.market];
       w *= star ? (strength > 0.6 ? 1.8 : 0.7) : strength > 0.45 ? 1.1 : 1.0;
+      // Free agents chase rings and bright lights - the glamour teams always
+      // get a seat at the table.
+      if (GLAMOUR_TEAMS.has(t.id)) w *= star ? 1.6 : 1.25;
       return w;
     },
-    2,
+    count,
   );
 
-  const make = (team: TeamRef, i: number, resign: boolean): TeamOffer => {
+  const make = (team: TeamRef, resign: boolean): Omit<TeamOffer, 'choiceId'> => {
     const strength = teamStrengthFor(seed, team.id, seasonIndex);
     const window = windowFromStrength(strength);
     const role = projectRole(overall, strength);
@@ -151,18 +179,21 @@ export function freeAgencyOffers({
     // Bird rights - the incumbent can always offer a touch more.
     const salary = roundTo(offerSalary(rng, marketValue, strength, years) * (resign ? 1.08 : 1), 1);
     return {
-      choiceId: `offer_${i}`,
       team,
       window,
       projectedRole: role,
       projectedMpg: MPG_BY_ROLE[role],
       years,
       salary,
+      contender: contenderOdds(strength, overall),
       pitch: resign
         ? `Run it back in ${team.city}. ${windowPitch(window, team, role).split('. ')[1] ?? ''}`.trim()
         : windowPitch(window, team, role),
     };
   };
 
-  return [make(getTeam(currentTeamId), 0, true), ...others.map((t, i) => make(t, i + 1, false))];
+  const resign = make(getTeam(currentTeamId), true);
+  const rest = others.map((t) => make(t, false)).sort((a, b) => b.contender - a.contender);
+
+  return [resign, ...rest].map((o, i) => ({ ...o, choiceId: `offer_${i}` }));
 }

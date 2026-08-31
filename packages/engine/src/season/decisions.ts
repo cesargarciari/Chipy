@@ -1,4 +1,5 @@
 import type { ClubOffer, GameOption, OptionView, TeamOffer } from '../types.js';
+import { contenderLabel } from './season-sim.js';
 
 /** Offered in the free-agency node once the player is retirement-eligible. */
 export const RETIRE_OPTION: GameOption = {
@@ -54,12 +55,13 @@ const money = (m: number): string => `$${m % 1 === 0 ? m.toFixed(0) : m.toFixed(
 
 /** A team offer rendered as an option card. */
 export function teamOfferView(offer: TeamOffer, resign: boolean): OptionView {
+  const titleOdds = Math.round(offer.contender * 100);
   return {
     id: offer.choiceId,
     label: `${offer.team.city.toUpperCase()} ${offer.team.name.toUpperCase()}`,
-    blurb: `${resign ? 'Run it back - ' : ''}${offer.years}yr · ${money(offer.salary)}/yr. ${offer.pitch}`,
+    blurb: `${resign ? 'Run it back - ' : ''}${offer.years}yr · ${money(offer.salary)}/yr · title odds with you ~${titleOdds}%. ${offer.pitch}`,
     effects: [{ key: 'money', label: 'MONEY', short: '$', delta: offer.salary }],
-    tag: `${money(offer.salary)}/yr`,
+    tag: `${contenderLabel(offer.contender)} · ${money(offer.salary)}/yr`,
     watermark: resign ? 'STAY' : 'SIGN',
     teamId: offer.team.id,
   };

@@ -3,8 +3,9 @@ import type { Scenario } from '../scenario-types.js';
 /**
  * The one-per-career leap. Every option is `rare` (the client renders it gold)
  * and - because rare options skip the global rating slowdown - actually lands
- * its full `+9`. Fires at most once, and only for a player who has already
- * carved out a role.
+ * its full `+12` (trimmed only by the 99 cap). Rare: it turns up for roughly one
+ * career in ten, at most once, and only for a player who has already carved out
+ * a role.
  */
 export const breakthroughScenarios: Scenario[] = [
   {
@@ -12,7 +13,7 @@ export const breakthroughScenarios: Scenario[] = [
     theme: 'training',
     gate: {
       once: true,
-      weight: 0.5,
+      weight: 0.3,
       minSeason: 3,
       maxSeason: 13,
       role: ['rotation', 'starter', 'franchise'],
@@ -25,7 +26,7 @@ export const breakthroughScenarios: Scenario[] = [
         id: 'brk_finishing',
         label: 'UNSTOPPABLE AT THE RIM',
         blurb: 'Nobody keeps you out of the paint anymore.',
-        effect: { ratings: { finishing: 9 } },
+        effect: { ratings: { finishing: 12 } },
         rare: true,
         stance: { tag: 'Breakthrough', impactMult: 1.03 },
       },
@@ -33,7 +34,7 @@ export const breakthroughScenarios: Scenario[] = [
         id: 'brk_threePoint',
         label: 'THE STROKE IS PURE',
         blurb: 'Off the catch, off the dribble, from the logo. It just goes in.',
-        effect: { ratings: { threePoint: 9 } },
+        effect: { ratings: { threePoint: 12 } },
         rare: true,
         stance: { tag: 'Breakthrough', impactMult: 1.03 },
       },
@@ -41,7 +42,7 @@ export const breakthroughScenarios: Scenario[] = [
         id: 'brk_defense',
         label: 'A LOCKDOWN SWITCH',
         blurb: 'You start erasing the other team’s best option, one through five.',
-        effect: { ratings: { perimeterDefense: 5, interiorDefense: 4 } },
+        effect: { ratings: { perimeterDefense: 7, interiorDefense: 5 } },
         rare: true,
         stance: { tag: 'Breakthrough', awardMult: { defense: 1.08 } },
       },
@@ -49,7 +50,7 @@ export const breakthroughScenarios: Scenario[] = [
         id: 'brk_playmaking',
         label: 'THE GAME SLOWS DOWN',
         blurb: 'You see the pass a beat before anyone else - the offense runs through you now.',
-        effect: { ratings: { playmaking: 9 } },
+        effect: { ratings: { playmaking: 12 } },
         rare: true,
         stance: { tag: 'Breakthrough', roleBias: 0.3 },
       },

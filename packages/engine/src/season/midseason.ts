@@ -15,7 +15,13 @@ export const MIDSEASON_SCENARIOS: Scenario[] = [
   {
     id: 'msx_star_fight',
     theme: 'team',
-    gate: { minSeason: 3, weight: 1.2 },
+    // Once you ARE the team's best player, there's no bigger dog to defer to.
+    gate: {
+      minSeason: 3,
+      weight: 1.2,
+      role: ['fringe', 'bench', 'rotation', 'starter'],
+      predicate: (ctx) => ctx.overall < 86 && !ctx.hasAward('mvp') && !ctx.hasAward('all_nba_1'),
+    },
     title: 'IT GOT PHYSICAL IN PRACTICE',
     prompt: "You and the team's best player had to be pulled apart.",
     options: [
@@ -61,7 +67,13 @@ export const MIDSEASON_SCENARIOS: Scenario[] = [
   {
     id: 'msx_benched_4th',
     theme: 'team',
-    gate: { minSeason: 2, weight: 1 },
+    // A superstar closes games. This one only lands on players who don't yet.
+    gate: {
+      minSeason: 2,
+      weight: 1,
+      role: ['fringe', 'bench', 'rotation', 'starter'],
+      predicate: (ctx) => ctx.overall < 86 && !ctx.hasAward('mvp') && !ctx.hasAward('all_nba_1'),
+    },
     title: 'BENCHED IN THE FOURTH',
     prompt: 'The coach rode the other unit to the win on national TV.',
     options: [
@@ -520,8 +532,8 @@ export const MIDSEASON_OUTCOMES: Record<string, OutcomeFn> = {
   // Teammate's birthday
   msx_bday_out: (a) => ({
     chemistryDelta: Math.round(12 + 6 * a.m),
-    effect: { overallHit: 2 },
-    note: 'The room loves you for it - but a groggy month costs you ~2 overall.',
+    effect: { overallHit: 1 },
+    note: 'The room loves you for it - a groggy week takes a slight edge off your game.',
   }),
   msx_bday_home: (a) => ({
     chemistryDelta: -Math.round(8 + 4 * a.m),

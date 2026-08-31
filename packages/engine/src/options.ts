@@ -65,7 +65,8 @@ export function describeEffects(effect: OptionEffect, current?: Ratings): Effect
       delta =
         nominal > 0 ? Math.max(0, Math.min(nominal, room)) : Math.min(0, Math.max(nominal, room));
     }
-    // Keep a fully-capped chip (delta 0) so the player sees the stat is maxed.
+    // A stat already at the cap simply drops off the card - no "MAX +0" chip.
+    if (current && delta === 0) continue;
     ratingChips.push({
       key,
       label: ATTR_LABELS[key]!,

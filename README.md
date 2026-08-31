@@ -112,36 +112,44 @@ The API creates the local table on boot. To (re)create it manually:
    a few second-rounders still climb into stardom.
 3. **Landing spot** — choose one of three team offers (weighted by draft slot and
    a home-market roll), each with a **dollar figure**. That's your rookie team.
-4. **Season loop** — each offseason you first visit the **perks shop** (a modal
-   grid showing your bank; every perk stays on the shelf — owned ones flagged in
-   orange, ones you can't afford greyed out and unclickable, prices in green as
-   a plain cost; yearly perks auto-renew from the bank, permanent ones unlock
-   mid-career), then make the year's call: a **scenario** from a themed content
-   library, or — on a contract year — **free agency**, where a rival's bigger
-   offer is a real temptation (modest-overall veterans get short, 1-2 year
-   journeyman deals; stars get the long ones). Every question sits in a framed
-   card — a coloured strand up top, the prompt, then the options right beneath it
-   (they ease in as the screen loads) — and each card shows its exact
-   `+N ATTRIBUTE` / `±$M` effects and lights the stat tiles it moves. ~30% of seasons a **bizarre
+4. **Season loop** — the **perks shop** rides a small cart button by the team
+   name (about 62% of every contract lands in the bank; every perk stays on the
+   shelf — owned ones flagged in orange, ones you can't afford greyed out and
+   unclickable, prices in green; yearly perks auto-renew from the bank, permanent
+   ones unlock mid-career). Then make the year's call: a **scenario** from a themed content
+   library, or — on a contract year — **free agency**. How many teams come
+   calling scales with how good you are: a role player gets the incumbent plus a
+   look, a star draws 7-8, a superstar 12-17. Each offer shows a **contender
+   rating** ("title odds with you ~N%", best destinations first), the glamour
+   markets (Lakers, Warriors, Knicks, Celtics, Heat) punch above their record,
+   and modest-overall veterans get short 1-2 year journeyman deals while stars
+   get the long ones. Every question sits in a framed card — a coloured strand up
+   top, the prompt, then the options right beneath it (only the options ease in,
+   not the whole screen) — and each card shows its exact `+N ATTRIBUTE` / `±$M`
+   effects and lights the stat tiles it moves. ~30% of seasons a **bizarre
    mid-season fork** fires instead of the silent event, and every branch lands a
    **concrete consequence** — the front office cools on you and the situation
    gets tense, the staff fixes the rotation and you go back to shining, a groggy
-   month costs you a couple of overall points. Attributes climb on an **age curve
+   week takes a slight edge off your game. Attributes climb on an **age curve
    × archetype × talent²** — a decelerating rise through the early 30s, then a
    real decline once age catches up at ~34. The season is simulated (role →
    minutes → stat line → playoff run), and most teams around a real player are
    competitive: the **play-in** and a first-round trip are the norm, the lottery
-   the exception. Pay is banked, and every season rolls its own **injury** check
+   the exception. Each year ends with a **randomly-flavoured recap** — "lost the
+   first round in a heartbreaking five, a buzzer-beater on the road ending it",
+   "swept out of the second round in four", "won it all, closing out the Finals
+   in six". Pay is banked, and every season rolls its own **injury** check
    — mostly knocks and strains (games missed always adds up to `82 − games
 played`), but a low durability, age, or a long injury record can bring on a
    hamstring, a torn meniscus (surgery — often season-ending), or, rarely, a
    **torn ACL / Achilles** — those end the year and take **2–6 off your overall
    for good**. A separate **locker-room question** turns up every 2–3 seasons (it
-   can land the same year as a fame one): being one of the guys lifts **team
-   chemistry** for a small cost (a point off your overall); staying strictly
-   professional keeps you sharp and a little distant — and low chemistry gets you
-   traded. Chemistry also builds on its own the longer you stay with one team
-   (and resets on a trade). The HUD carries your **status tier** (fringe → role player → star →
+   can land the same year as a fame one): being one of the guys always lifts
+   **team chemistry** and staying strictly professional always costs it, but
+   which of the two leaves you sharper and which nicks your game (about half an
+   overall point, either way) is a coin flip each time, so neither option is a
+   free pass. Low chemistry gets you traded; chemistry also builds on its own the
+   longer you stay with one team (and resets on a trade). The HUD carries your **status tier** (fringe → role player → star →
    superstar → generational), your **team chemistry**, and — when your seat gets
    shaky — a **trade risk %**; a bad team or a toxic locker room can move you (a
    modal shows who you were **traded to**), and once you're a star you can
@@ -171,12 +179,12 @@ played`), but a low durability, age, or a long injury record can bring on a
    you pick your exit: a **farewell tour** (one more ceremonial season) or a
    **quiet goodbye**.
 7. A **legacy screen**: a **horizontal trophy case** (each award a stack of that
-   many trophies, clumped at rest and spreading apart on hover), career totals,
-   **career earnings**, a
-   season-by-season table (with salary), any overseas years, an **injury
-   record**, the perks you ran and shoe brand you signed, **where you're
-   remembered** (per-team standing), a **career-moments** strip, final-ratings
-   radar, a legacy **tier**
+   many trophies, clumped at rest and spreading apart on hover, with the
+   non-image honours as a row of little tags), career totals, **career
+   earnings**, a season-by-season table (with salary), any overseas years, an
+   **injury record**, the perks you ran and shoe brand you signed, **where
+   you're remembered** (per-team standing), final-ratings radar, a legacy
+   **tier**
    (Journeyman → Inner-Circle All-Timer) and **grade**, and a Hall-of-Fame
    verdict. If the API is up the career is saved — you get a `/c/<id>` share link
    and "N% of players also chose X"; if not, the screen still stands (offline).
@@ -223,8 +231,12 @@ owners — ship your own stylised marks if you publish.
   per-season **injury system** (named injuries from knocks to season-ending
   ACL/Achilles that take 2–6 off the overall; games missed = `82 − GP`),
   **honoured contracts** + a pre-retirement **farewell** choice, an independent
-  **team-chemistry** question channel (bonding costs overall, distance costs
-  chemistry, low chemistry drives trades), a real postseason with a **play-in**
+  **team-chemistry** question channel (one option always helps chemistry and one
+  always hurts it, but which one nicks or sharpens your game — half an overall
+  point — is a coin flip), a **free-agent market that scales with your standing**
+  (a role player gets a couple of looks, a superstar 12-17) where every offer
+  shows a **contender rating** and the glamour markets punch above their record,
+  a per-season **randomly-flavoured recap**, a real postseason with a **play-in**
   tier (most teams make it; the lottery is the exception), Olympics gated to
   stars for Team USA, mid-season branching situations with concrete per-branch
   consequences, a fame-gated shoe deal, the EuroLeague as a full parallel league
@@ -242,12 +254,14 @@ owners — ship your own stylised marks if you publish.
   trades, serious injuries) with a full-screen **gala award reveal** for the
   headline trophies and a **horizontal hover-spread trophy case** on the legacy
   screen, in-career questions in a **framed scenario card** (colour strand,
-  prompt above the options, options fading in), per-career **randomised prologue**
-  options, age that tracks extra college
-  years, performance-driven **fame** (no longer a trainable stat), a slow rating
-  economy where option
-  cards show the exact gain after the 99-cap plus a **rare** once-a-career gold
-  `+9`, and a persistent stat strip + money bar
+  prompt above the options, options fading in), **superstar exemptions** (no
+  "benched in the fourth" or "defer to the star" once you're the guy, and near-
+  zero involuntary-trade odds), a **defense reading** weighted to your stronger
+  end so a real stopper clears 85, per-career **randomised prologue** options,
+  age that tracks extra college years, performance-driven **fame** (no longer a
+  trainable stat), a slow rating economy where option cards show the exact gain
+  after the 99-cap (a maxed stat drops off the card) plus a **rare** ~1-in-10
+  once-a-career gold `+12`, and a persistent stat strip + money bar
 - **M2 — AWS deploy (cheapest):** Terraform modules, remote state, GitHub Actions
   deploy via AWS OIDC, CloudWatch dashboard + Budgets alarm
 - **M3 — depth:** salary-cap rules & sign-and-trades, multi-player trades, named

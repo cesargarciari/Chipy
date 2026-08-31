@@ -11,6 +11,14 @@ export function derivedRng(seed: number | string, ...parts: Array<string | numbe
 // Team strength
 // ---------------------------------------------------------------------------
 
+/**
+ * The glamour franchises: free agents want to play there, ownership spends, and
+ * a real player joining almost always finds talent already in the building. They
+ * carry a standing edge to their strength every season.
+ */
+export const GLAMOUR_TEAMS: ReadonlySet<string> = new Set(['LAL', 'GSW', 'NYK', 'BOS', 'MIA']);
+const GLAMOUR_EDGE = 0.06;
+
 /** 0..1 strength for a team in a given season - a fixed base tier plus a per-season wobble. */
 export function teamStrengthFor(
   seed: number | string,
@@ -19,9 +27,10 @@ export function teamStrengthFor(
 ): number {
   const base = derivedRng(seed, 'team-base', teamId)();
   const wobble = derivedRng(seed, 'team-year', teamId, seasonIndex)();
+  const glam = GLAMOUR_TEAMS.has(teamId) ? GLAMOUR_EDGE : 0;
   // Centred a touch higher so the median team is a play-in / playoff club, not
   // a lottery one - most rosters around a real player are competitive.
-  return clamp(base * 0.5 + 0.33 + (wobble - 0.5) * 0.44, 0.08, 0.96);
+  return clamp(base * 0.5 + 0.33 + glam + (wobble - 0.5) * 0.44, 0.08, 0.96);
 }
 
 export function windowFromStrength(s: number): TeamWindow {
@@ -29,6 +38,24 @@ export function windowFromStrength(s: number): TeamWindow {
   if (s >= 0.55) return 'playoff';
   if (s >= 0.38) return 'mid';
   return 'rebuild';
+}
+
+/**
+ * How likely a title becomes if this player signs here: the roster's own
+ * strength, lifted by what the player brings (a star drags a middling team up a
+ * tier; he can't do much for one already at the top).
+ */
+export function contenderOdds(teamStrength: number, playerOverall: number): number {
+  const lift = clamp((playerOverall - 76) / 100, 0, 0.24);
+  return clamp(teamStrength + lift * (1 - teamStrength), 0.05, 0.97);
+}
+
+export function contenderLabel(odds: number): string {
+  if (odds >= 0.75) return 'Title favorite';
+  if (odds >= 0.62) return 'Real contender';
+  if (odds >= 0.48) return 'Playoff team';
+  if (odds >= 0.34) return 'On the fringe';
+  return 'Rebuild';
 }
 
 // ---------------------------------------------------------------------------

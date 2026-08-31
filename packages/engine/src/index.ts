@@ -87,7 +87,7 @@ export type {
 
 export { mulberry32, normalizeSeed, randomSeed, type Rng } from './rng.js';
 
-export { overallFor } from './ratings.js';
+export { overallFor, defenseRatingOf } from './ratings.js';
 export { ARCHETYPE_DEFS, getArchetype, archetypesFor } from './archetypes.js';
 export { TEAMS, getTeam, teamLabel } from './data/teams.js';
 export { COUNTRIES, getCountry } from './data/countries.js';

@@ -45,10 +45,7 @@ function roundName(result: TeamResult): string {
  * never perturbs the main simulation stream). Playoff results get a series
  * length, a venue and a swing moment; the rest get a short line.
  */
-export function seasonRecap(
-  rng: Rng,
-  args: { result: TeamResult; missedGames: number },
-): string {
+export function seasonRecap(rng: Rng, args: { result: TeamResult; missedGames: number }): string {
   if (args.missedGames >= 82) {
     return one(rng, [
       'The whole year went to the training room. A lost season.',

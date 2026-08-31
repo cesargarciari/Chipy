@@ -51,7 +51,10 @@ export function SeasonTable({ seasons }: { seasons: CareerSummaryDto['seasons'] 
                   <td className="pr-2 text-right font-mono tabular-nums text-ink-dim">
                     {moneyM(s.salary)}
                   </td>
-                  <td className={`pr-2 ${RESULT_TONE[s.teamResult] ?? 'text-ink-dim'}`}>
+                  <td
+                    className={`pr-2 ${RESULT_TONE[s.teamResult] ?? 'text-ink-dim'}`}
+                    title={s.recap}
+                  >
                     {TEAM_RESULT_LABELS[s.teamResult]}
                   </td>
                   <td className="text-ink-dim">

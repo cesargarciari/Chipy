@@ -40,15 +40,22 @@ export function SeasonScreen({
     preview.league === 'overseas' ? clubCrest(preview.club?.id) : teamLogo(preview.team?.id);
 
   return (
-    <div className="decision-enter space-y-4">
+    <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
         <div className="font-semibold">
           Season {preview.seasonNumber} · Age {preview.age}
         </div>
-        <div className="flex items-center gap-1.5 text-ink-dim">
-          {crest && <img src={crest} alt="" className="h-5 w-5 object-contain" />}
-          {where}
-          {preview.contractYear && <span className="ml-1 text-amber">· contract year</span>}
+        <div className="flex items-center gap-2 text-ink-dim">
+          <span className="inline-flex items-center gap-1.5">
+            {crest && <img src={crest} alt="" className="h-5 w-5 object-contain" />}
+            {where}
+            {preview.contractYear && <span className="ml-1 text-amber">· contract year</span>}
+          </span>
+          <PerksDrawer
+            shop={shop}
+            onBuy={onBuyPerk}
+            onHoverKeys={(k) => setHighlight(k ?? undefined)}
+          />
         </div>
       </div>
 
@@ -57,12 +64,6 @@ export function SeasonScreen({
       <MomentsBanner moments={bannerMoments} />
 
       <CareerHud preview={preview} highlight={highlight} />
-
-      <PerksDrawer
-        shop={shop}
-        onBuy={onBuyPerk}
-        onHoverKeys={(k) => setHighlight(k ?? undefined)}
-      />
 
       {last ? (
         <Card>
@@ -73,7 +74,10 @@ export function SeasonScreen({
                 {TEAM_RESULT_LABELS[last.teamResult]}
               </span>
             </div>
-            <p className="text-sm text-ink-dim">{last.midseasonHeadline ?? last.eventHeadline}</p>
+            <p className="text-sm text-ink">{last.recap}</p>
+            {(last.midseasonHeadline ?? last.eventHeadline) && (
+              <p className="text-sm text-ink-dim">{last.midseasonHeadline ?? last.eventHeadline}</p>
+            )}
             <StatLine stats={last.stats} />
             <AwardChips awards={last.awards} />
           </CardBody>
