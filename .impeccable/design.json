@@ -1,0 +1,441 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-31T00:00:00.000Z",
+  "title": "Design System: Chipy",
+  "extensions": {
+    "colorMeta": {
+      "amber": {
+        "role": "primary",
+        "displayName": "Broadcast Ember",
+        "canonical": "#f97316",
+        "tonalRamp": [
+          "#3d1a05",
+          "#6b2c08",
+          "#9a3f0b",
+          "#c85510",
+          "#f97316",
+          "#fb923c",
+          "#fdba8a",
+          "#ffe4d1"
+        ]
+      },
+      "amber-soft": {
+        "role": "primary",
+        "displayName": "Ember Glow",
+        "canonical": "#fb923c",
+        "tonalRamp": [
+          "#3d1a05",
+          "#6b2c08",
+          "#9a3f0b",
+          "#c85510",
+          "#f97316",
+          "#fb923c",
+          "#fdba8a",
+          "#ffe4d1"
+        ]
+      },
+      "court-950": {
+        "role": "neutral",
+        "displayName": "Rafters Black",
+        "canonical": "#0a0a0b",
+        "tonalRamp": [
+          "#0a0a0b",
+          "#131316",
+          "#1d1d22",
+          "#2a2a31",
+          "#3b3b45",
+          "#55555f",
+          "#82828d",
+          "#b8b8c0"
+        ]
+      },
+      "court-900": {
+        "role": "neutral",
+        "displayName": "Panel",
+        "canonical": "#131316",
+        "tonalRamp": [
+          "#0a0a0b",
+          "#131316",
+          "#1d1d22",
+          "#2a2a31",
+          "#3b3b45",
+          "#55555f",
+          "#82828d",
+          "#b8b8c0"
+        ]
+      },
+      "court-800": {
+        "role": "neutral",
+        "displayName": "Sub-Panel",
+        "canonical": "#1d1d22",
+        "tonalRamp": [
+          "#0a0a0b",
+          "#131316",
+          "#1d1d22",
+          "#2a2a31",
+          "#3b3b45",
+          "#55555f",
+          "#82828d",
+          "#b8b8c0"
+        ]
+      },
+      "court-700": {
+        "role": "neutral",
+        "displayName": "Rail",
+        "canonical": "#2a2a31",
+        "tonalRamp": [
+          "#0a0a0b",
+          "#131316",
+          "#1d1d22",
+          "#2a2a31",
+          "#3b3b45",
+          "#55555f",
+          "#82828d",
+          "#b8b8c0"
+        ]
+      },
+      "court-600": {
+        "role": "neutral",
+        "displayName": "Grey Rail",
+        "canonical": "#3b3b45",
+        "tonalRamp": [
+          "#0a0a0b",
+          "#131316",
+          "#1d1d22",
+          "#2a2a31",
+          "#3b3b45",
+          "#55555f",
+          "#82828d",
+          "#b8b8c0"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Chalk",
+        "canonical": "#ececf1",
+        "tonalRamp": [
+          "#1a1a1e",
+          "#2f2f36",
+          "#4a4a53",
+          "#6c6c76",
+          "#94949e",
+          "#bcbcc4",
+          "#d8d8de",
+          "#ececf1"
+        ]
+      },
+      "ink-dim": {
+        "role": "neutral",
+        "displayName": "Grandstand Grey",
+        "canonical": "#a1a1ad",
+        "tonalRamp": [
+          "#1a1a1e",
+          "#2f2f36",
+          "#4a4a53",
+          "#6c6c76",
+          "#a1a1ad",
+          "#bcbcc4",
+          "#d8d8de",
+          "#ececf1"
+        ]
+      },
+      "gain": {
+        "role": "tertiary",
+        "displayName": "Gain Green",
+        "canonical": "#34d399",
+        "tonalRamp": [
+          "#06281d",
+          "#0a4433",
+          "#0f6349",
+          "#178a63",
+          "#1fae7d",
+          "#34d399",
+          "#6ee7b7",
+          "#bbf7e0"
+        ]
+      },
+      "loss": {
+        "role": "tertiary",
+        "displayName": "Loss Red",
+        "canonical": "#fb7185",
+        "tonalRamp": [
+          "#3d0812",
+          "#66101f",
+          "#90182e",
+          "#c02040",
+          "#f43f5e",
+          "#fb7185",
+          "#fda4b0",
+          "#ffe0e5"
+        ]
+      },
+      "loss-strong": {
+        "role": "tertiary",
+        "displayName": "Rim-Out Red",
+        "canonical": "#f43f5e",
+        "tonalRamp": [
+          "#3d0812",
+          "#66101f",
+          "#90182e",
+          "#c02040",
+          "#f43f5e",
+          "#fb7185",
+          "#fda4b0",
+          "#ffe0e5"
+        ]
+      },
+      "signal": {
+        "role": "secondary",
+        "displayName": "Signal Blue",
+        "canonical": "#38bdf8",
+        "tonalRamp": [
+          "#06283d",
+          "#0a4463",
+          "#0f6389",
+          "#1787b8",
+          "#1fa8dd",
+          "#38bdf8",
+          "#7dd6fb",
+          "#c7ecfd"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Anton condensed caps for the home hero, the big HUD Overall, and the legacy grade letter. Scoreboard type, never running text."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Anton for CardTitle and section h2. Weight utilities are nominal on the single-weight face."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Anton text-2xl for the decision-card name and the scenario question (the question is set italic as 'the moment')."
+      },
+      "condensed": {
+        "displayName": "Condensed (reserved)",
+        "purpose": "Barlow Condensed 600/700 is loaded and defined as --font-condensed but no component uses it yet. Sanctioned face for future condensed body or label text."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Platform system sans for all prose. Usually Grandstand Grey; Chalk only for the sentence that must land."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "10-11px uppercase system sans, weight 700, wide tracking (0.05em to 0.35em). Kickers, field labels, stat-tile captions, HUD line labels."
+      },
+      "mono": {
+        "displayName": "Numeral",
+        "purpose": "Platform monospace with tabular-nums for every rating, score, dollar amount, seed, and count."
+      }
+    },
+    "shadows": [
+      {
+        "name": "panel-ambient",
+        "value": "0 20px 25px -5px rgba(0,0,0,0.4), 0 8px 10px -6px rgba(0,0,0,0.4)",
+        "purpose": "Every Card. Pair with backdrop-blur and a court-900/80 fill. The only ambient shadow in the system."
+      },
+      {
+        "name": "gala-bloom",
+        "value": "0 0 80px -16px rgba(249,115,22,0.5)",
+        "purpose": "The gala award-takeover panel only, with a 1px ring at rgba(249,115,22,0.4). This is light, not lift."
+      },
+      {
+        "name": "trophy-lift-shelf",
+        "value": "0 4px 10px rgba(0,0,0,0.5)",
+        "purpose": "Drop-shadow on trophy artwork on the legacy shelf so the objects sit on the shelf. Never on UI chrome."
+      },
+      {
+        "name": "trophy-lift-gala",
+        "value": "0 10px 24px rgba(0,0,0,0.6)",
+        "purpose": "Drop-shadow on the single large trophy in the gala takeover."
+      },
+      {
+        "name": "rare-ring",
+        "value": "0 0 0 1px rgba(249,115,22,0.35)",
+        "purpose": "The 1px Ember ring on a rare (once-a-career gold) decision option."
+      }
+    ],
+    "motion": [
+      {
+        "name": "fade-in",
+        "value": "opacity 0 to 1, 0.3s ease-out both",
+        "purpose": "chipy-fade keyframe. The .decision-enter entrance on a new decision screen."
+      },
+      {
+        "name": "option-stagger",
+        "value": "opacity 0 to 1, 0.34s ease-out both; nth-child 2/3/4 delayed 0.05s/0.1s/0.15s",
+        "purpose": ".option-enter. Choice cards easing in one after another under a freshly posed question."
+      },
+      {
+        "name": "trophy-fan",
+        "value": "margin-left -2.5rem to -1rem, 0.28s cubic-bezier(0.22, 1, 0.36, 1)",
+        "purpose": "Trophy stacks on the legacy shelf overlap at rest and ease apart on hover or focus-visible of that one stack."
+      },
+      {
+        "name": "state-color",
+        "value": "transition-colors, ~150ms",
+        "purpose": "The default and near-universal transition: border and background-tint shifts on hover, focus, and active. No transform."
+      }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" },
+      { "name": "column-max", "value": "48rem" }
+    ],
+    "motionRules": [
+      {
+        "name": "The Opacity-Only Rule",
+        "body": "Entrance animation never uses transform or a layout shift, only opacity. It keeps Playwright's per-click stability check happy and produces zero cumulative layout shift. Every animation is also gated behind prefers-reduced-motion: reduce."
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The only filled button. Broadcast Ember on Rafters Black, used for the one main action on a screen.",
+      "html": "<button class=\"ds-btn-primary\">Start a new career</button>",
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; height: 2.75rem; padding: 0 1.25rem; border: none; border-radius: 0.5rem; background: #f97316; color: #0a0a0b; font-family: ui-sans-serif, system-ui, sans-serif; font-size: 0.875rem; font-weight: 600; cursor: pointer; transition: background-color 150ms ease; } .ds-btn-primary:hover { background: #fb923c; } .ds-btn-primary:focus-visible { outline: none; box-shadow: 0 0 0 2px #0a0a0b, 0 0 0 4px #f97316; } .ds-btn-primary:disabled { opacity: 0.5; pointer-events: none; }"
+    },
+    {
+      "name": "Outline Button",
+      "kind": "button",
+      "refersTo": "button-outline",
+      "description": "The secondary action. Transparent with a Grey Rail border, fills Sub-Panel on hover.",
+      "html": "<button class=\"ds-btn-outline\">Start another career</button>",
+      "css": ".ds-btn-outline { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; height: 2.75rem; padding: 0 1.25rem; border: 1px solid #3b3b45; border-radius: 0.5rem; background: transparent; color: #ececf1; font-family: ui-sans-serif, system-ui, sans-serif; font-size: 0.875rem; font-weight: 600; cursor: pointer; transition: background-color 150ms ease, border-color 150ms ease; } .ds-btn-outline:hover { background: #1d1d22; } .ds-btn-outline:focus-visible { outline: none; box-shadow: 0 0 0 2px #0a0a0b, 0 0 0 4px #f97316; }"
+    },
+    {
+      "name": "Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "The default container: a layered dark panel with a soft ambient shadow, a translucent fill, and a backdrop blur.",
+      "html": "<div class=\"ds-card\"><h2 class=\"ds-card-title\">This month's greatest careers</h2><p class=\"ds-card-body\">Run a full career, one decision every offseason, from the summer circuit to a jersey in the rafters.</p></div>",
+      "css": ".ds-card { border: 1px solid #2a2a31; border-radius: 1rem; background: rgba(19,19,22,0.8); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.4), 0 8px 10px -6px rgba(0,0,0,0.4); padding: 1.5rem; } @media (min-width: 640px) { .ds-card { padding: 2rem; } } .ds-card-title { margin: 0; font-family: Anton, 'Arial Narrow', system-ui, sans-serif; font-size: 1.25rem; font-weight: 400; letter-spacing: 0.02em; color: #ececf1; } .ds-card-body { margin: 0.75rem 0 0; font-family: ui-sans-serif, system-ui, sans-serif; font-size: 0.875rem; line-height: 1.5; color: #a1a1ad; }"
+    },
+    {
+      "name": "Decision Card",
+      "kind": "custom",
+      "refersTo": "choice-card",
+      "description": "The signature interaction. A flat panel with an Anton title, a short blurb, and a row of explicit effect chips; hovering it lights the matching HUD stat tiles.",
+      "html": "<button class=\"ds-choice-card\"><span class=\"ds-choice-watermark\" aria-hidden=\"true\">7</span><span class=\"ds-choice-title\">Chase the ring</span><span class=\"ds-choice-blurb\">Sign with the contender for less. The locker room is built to win now.</span><span class=\"ds-choice-effects\"><span class=\"ds-effect ds-effect-pos\">+6 <em>THREE-POINT</em></span><span class=\"ds-effect ds-effect-money\">&minus;$4M</span><span class=\"ds-chip\">journeyman</span></span></button>",
+      "css": ".ds-choice-card { position: relative; display: flex; flex-direction: column; overflow: hidden; width: 100%; padding: 1.25rem; text-align: left; border: 1px solid #2a2a31; border-radius: 1rem; background: #131316; cursor: pointer; transition: background-color 150ms ease, border-color 150ms ease; } .ds-choice-card:hover { border-color: #f97316; background: rgba(249,115,22,0.04); } .ds-choice-card:focus-visible { outline: none; box-shadow: 0 0 0 2px #0a0a0b, 0 0 0 4px #f97316; } .ds-choice-watermark { position: absolute; right: -0.75rem; bottom: 0; font-family: Anton, 'Arial Narrow', sans-serif; font-size: 5.5rem; line-height: 1; letter-spacing: -0.01em; color: rgba(42,42,49,0.7); pointer-events: none; user-select: none; } .ds-choice-title { position: relative; font-family: Anton, 'Arial Narrow', sans-serif; font-size: 1.5rem; line-height: 1.05; letter-spacing: 0.025em; color: #ececf1; } .ds-choice-blurb { position: relative; margin-top: 0.5rem; max-width: 26ch; font-family: ui-sans-serif, system-ui, sans-serif; font-size: 0.875rem; color: #a1a1ad; } .ds-choice-effects { position: relative; display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.25rem 1rem; margin-top: 1rem; } .ds-effect { font-family: Anton, 'Arial Narrow', sans-serif; font-size: 1.25rem; line-height: 1; } .ds-effect em { font-style: normal; font-family: ui-sans-serif, system-ui, sans-serif; font-size: 0.6875rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; margin-left: 0.25rem; } .ds-effect-pos { color: #34d399; } .ds-effect-pos em { color: rgba(52,211,153,0.8); } .ds-effect-money { color: #f97316; } .ds-chip { align-self: center; border-radius: 9999px; background: #2a2a31; padding: 0.125rem 0.5rem; font-family: ui-sans-serif, system-ui, sans-serif; font-size: 0.6875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; color: #a1a1ad; }"
+    },
+    {
+      "name": "Stat Tile",
+      "kind": "custom",
+      "refersTo": "stat-tile",
+      "description": "One cell of the persistent HUD stat strip: a mono tabular value over an uppercase caption. Flips to Ember when it is the stat a hovered option would move.",
+      "html": "<div class=\"ds-stat-strip\"><div class=\"ds-stat-tile\"><span class=\"ds-stat-value\">72</span><span class=\"ds-stat-label\">Finishing</span></div><div class=\"ds-stat-tile ds-stat-tile-active\"><span class=\"ds-stat-value\">64</span><span class=\"ds-stat-label\">Three-Point</span></div><div class=\"ds-stat-tile\"><span class=\"ds-stat-value\">58</span><span class=\"ds-stat-label\">Defense</span></div></div>",
+      "css": ".ds-stat-strip { display: flex; gap: 0.375rem; overflow-x: auto; } .ds-stat-tile { min-width: 4.25rem; flex: 1; padding: 0.375rem 0.25rem; text-align: center; border: 1px solid #2a2a31; border-radius: 0.5rem; background: #131316; transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease; } .ds-stat-tile-active { border-color: #f97316; background: rgba(249,115,22,0.1); color: #f97316; } .ds-stat-value { display: block; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 1.125rem; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; color: inherit; } .ds-stat-tile:not(.ds-stat-tile-active) .ds-stat-value { color: #ececf1; } .ds-stat-label { display: block; margin-top: 0.25rem; font-family: ui-sans-serif, system-ui, sans-serif; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; line-height: 1.1; } .ds-stat-tile:not(.ds-stat-tile-active) .ds-stat-label { color: #a1a1ad; }"
+    },
+    {
+      "name": "Text Input",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Sub-Panel fill, Grey Rail border, border shifts to Ember on focus. No glow. Stacked under an uppercase label.",
+      "html": "<label class=\"ds-field\"><span class=\"ds-field-label\">Name</span><input class=\"ds-input\" type=\"text\" placeholder=\"e.g. Marcus Vale\" /></label>",
+      "css": ".ds-field { display: block; } .ds-field-label { display: block; margin-bottom: 0.375rem; font-family: ui-sans-serif, system-ui, sans-serif; font-size: 0.75rem; font-weight: 400; text-transform: uppercase; letter-spacing: 0.05em; color: #a1a1ad; } .ds-input { width: 100%; padding: 0.625rem 0.75rem; border: 1px solid #3b3b45; border-radius: 0.5rem; background: #1d1d22; color: #ececf1; font-family: ui-sans-serif, system-ui, sans-serif; font-size: 0.875rem; outline: none; transition: border-color 150ms ease; } .ds-input::placeholder { color: #6c6c76; } .ds-input:focus { border-color: #f97316; } .ds-input[aria-invalid=\"true\"] { border-color: #f43f5e; }"
+    },
+    {
+      "name": "Choice Toggle",
+      "kind": "chip",
+      "refersTo": "chip",
+      "description": "A bordered pick button (position, shooting hand, archetype). Selected takes an Ember edge and a faint Ember wash with Chalk text.",
+      "html": "<div class=\"ds-toggle-row\"><button class=\"ds-toggle ds-toggle-on\">PG</button><button class=\"ds-toggle\">SG</button><button class=\"ds-toggle\">SF</button></div>",
+      "css": ".ds-toggle-row { display: flex; flex-wrap: wrap; gap: 0.5rem; } .ds-toggle { padding: 0.5rem 1rem; border: 1px solid #3b3b45; border-radius: 0.5rem; background: transparent; color: #a1a1ad; font-family: ui-sans-serif, system-ui, sans-serif; font-size: 0.875rem; font-weight: 600; cursor: pointer; transition: color 150ms ease, border-color 150ms ease, background-color 150ms ease; } .ds-toggle:hover { color: #ececf1; } .ds-toggle-on { border-color: #f97316; background: rgba(249,115,22,0.1); color: #ececf1; } .ds-toggle:focus-visible { outline: none; box-shadow: 0 0 0 2px #0a0a0b, 0 0 0 4px #f97316; }"
+    },
+    {
+      "name": "Top Navigation",
+      "kind": "nav",
+      "refersTo": "button-ghost",
+      "description": "A flat bar inside the centered column, no background. Ember circle logo mark plus wordmark on the left, 2-3 text links on the right; active link is Ember.",
+      "html": "<header class=\"ds-nav\"><a class=\"ds-nav-brand\" href=\"#\"><span class=\"ds-nav-mark\">C</span><span class=\"ds-nav-word\">Chipy</span></a><nav class=\"ds-nav-links\"><a class=\"ds-nav-link ds-nav-link-active\" href=\"#\">Play</a><a class=\"ds-nav-link\" href=\"#\">Leaderboard</a></nav></header>",
+      "css": ".ds-nav { display: flex; align-items: center; justify-content: space-between; padding: 1.25rem 0; } .ds-nav-brand { display: flex; align-items: center; gap: 0.5rem; text-decoration: none; } .ds-nav-mark { display: grid; place-items: center; width: 2rem; height: 2rem; border-radius: 9999px; background: #f97316; color: #0a0a0b; font-family: ui-sans-serif, system-ui, sans-serif; font-size: 1.125rem; font-weight: 900; line-height: 1; } .ds-nav-word { font-family: ui-sans-serif, system-ui, sans-serif; font-size: 1.25rem; font-weight: 900; letter-spacing: -0.02em; color: #ececf1; } .ds-nav-links { display: flex; gap: 1.25rem; } .ds-nav-link { font-family: ui-sans-serif, system-ui, sans-serif; font-size: 0.875rem; font-weight: 600; text-decoration: none; color: #a1a1ad; transition: color 150ms ease; } .ds-nav-link:hover { color: #ececf1; } .ds-nav-link-active { color: #f97316; }"
+    },
+    {
+      "name": "Gala CTA",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The one gradient-filled button in the product, at the foot of the gala award takeover. Ember-to-Ember-Glow, Rafters Black uppercase Anton.",
+      "html": "<button class=\"ds-gala-cta\">Follow the career &rarr;</button>",
+      "css": ".ds-gala-cta { display: block; width: 100%; padding: 0.875rem 1.5rem; border: none; background: linear-gradient(90deg, #f97316, #fb923c); color: #0a0a0b; font-family: Anton, 'Arial Narrow', sans-serif; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.2em; cursor: pointer; transition: filter 150ms ease; } .ds-gala-cta:hover { filter: brightness(1.1); } .ds-gala-cta:focus-visible { outline: none; box-shadow: 0 0 0 2px #0a0a0b, 0 0 0 4px #f97316; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Arena at Night",
+    "overview": "Chipy looks like an NBA arena hours before tip: the bowl is dark, the seats are black, and a single sodium lamp throws one warm pool of light onto the floor. That pool is the accent. Everything else, every surface, border, and label, sits back in the shadow so the one thing that matters on a screen, the decision, the number that just moved, the trophy under the light, reads instantly. The system is disciplined and quiet by default and only goes loud at the beat that earns it.\n\nThe register is editorial, not arcade. Think a sports magazine's full-page feature more than a game menu: generous negative space, a single confident accent, and typography doing the hierarchy work. Condensed display caps (Anton) behave like scoreboard and jumbotron type; a monospaced, tabular numeral set reads like a broadcast stat bug. Cards are layered dark panels with a soft ambient shadow and a faint backdrop blur, so the interface feels like stacked physical placards rather than flat rectangles. Restraint is the through line: the accent is a spotlight, and a spotlight everywhere is just daylight.\n\nThe one sanctioned exception is the gala award takeover: when a headline honour lands the house lights drop and a full-screen panel presents the hardware under a gold glow. Even then it stays composed, centered, one trophy, one headline, one line of flavour, not a confetti storm.",
+    "keyCharacteristics": [
+      "One accent (Broadcast Ember) on a near-black arena-shadow neutral ramp.",
+      "Anton condensed caps for anything that should read like a scoreboard.",
+      "Monospaced tabular numerals for every stat, dollar figure, and score.",
+      "Layered dark panels: soft ambient shadow plus backdrop blur, borders always.",
+      "Calm by default; the gala takeover is the only place the system shouts.",
+      "Motion is opacity-only and always optional."
+    ],
+    "rules": [
+      {
+        "name": "The One Lamp Rule",
+        "body": "Broadcast Ember covers no more than roughly 10% of any screen. If two things are both amber, one of them is wrong. Rank with Chalk, Grandstand Grey, and weight before you reach for the accent.",
+        "section": "colors"
+      },
+      {
+        "name": "The Fixed-Meaning Rule",
+        "body": "Green is only 'up / good', red is only 'down / bad / danger', blue is only 'secondary signal'. Never use any of the three decoratively or to fill a neutral surface.",
+        "section": "colors"
+      },
+      {
+        "name": "Hardware Gold is not in the palette",
+        "body": "The gold gradient (#f7e3a1 to #f5c04e to #b8860b, the .text-gold-gradient treatment) exists for exactly one thing: the badge and rail of the gala award takeover. It never appears in the main flow.",
+        "section": "colors"
+      },
+      {
+        "name": "The Scoreboard Rule",
+        "body": "If a value is a number the player is meant to compare (a rating, money, a seed, a grade score), it is set in the mono tabular face, not the body font. Numbers that are part of a sentence stay in body text.",
+        "section": "typography"
+      },
+      {
+        "name": "The Anton-Never-Reads Rule",
+        "body": "Anton is for labels, names, headlines, and numbers under ~6 words. It never sets a sentence, a blurb, or help text.",
+        "section": "typography"
+      },
+      {
+        "name": "The Light-Not-Lift Rule",
+        "body": "Elevation changes come from border and tonal value. When the system wants to make something feel important it adds light (an Ember border, the gala glow), never a bigger shadow.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Opacity-Only Rule",
+        "body": "Entrance animation never uses transform or a layout shift, only opacity. It keeps Playwright's per-click stability check happy and produces zero cumulative layout shift. Every animation is also gated behind prefers-reduced-motion: reduce.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do keep Broadcast Ember under ~10% of any screen; rank with Chalk, Grandstand Grey, weight, and the mono numerals first (The One Lamp Rule).",
+      "Do set every comparable number (ratings, money, seeds, scores, percentages) in the mono tabular-nums face (The Scoreboard Rule).",
+      "Do use Anton for names, labels, headlines, and short numbers only, and the system sans for every sentence and blurb (The Anton-Never-Reads Rule).",
+      "Do build new surfaces as one centered max-w-3xl column with space-y-* rhythm and a 4px spacing scale.",
+      "Do give every surface a 1px court-700 border and one of the four radii (lg controls, xl nested, 2xl containers, full pills).",
+      "Do convey importance with light (an Ember border, the gala glow) rather than a heavier shadow (The Light-Not-Lift Rule).",
+      "Do keep green / red / blue in their fixed meanings: up / down / secondary signal (The Fixed-Meaning Rule).",
+      "Do make new decision content render through the Decision Card and light the Stat Strip; effect chips must state the exact mechanical change.",
+      "Do gate every animation behind prefers-reduced-motion and keep entrance motion opacity-only, never transform or layout shift.",
+      "Do let wide tables and the stat strip scroll inside overflow-x-auto with a min-w, never wrap or shrink."
+    ],
+    "donts": [
+      "Don't introduce a second accent hue, a light theme, or a fifth radius. The app is committed dark (color-scheme: dark, html.dark), one lamp.",
+      "Don't fill buttons, cards, or chips with a gradient. Gradients are only thin accent strands, the idolatry bar, and the gala rail/CTA/wash. Flat fills everywhere else (the anti-reference is gradient-heavy 'gamer' UI).",
+      "Don't use the Hardware Gold gradient anywhere outside the gala takeover.",
+      "Don't reach for neon, glow buttons, casino energy, confetti, or cartoon mascots. When the system celebrates, it does it once, centered, and composed.",
+      "Don't add drop shadows to UI chrome for emphasis, or add elevation on hover. Hover shifts border and fill tint, nothing else.",
+      "Don't set body copy, blurbs, or help text in Anton, and don't set comparable numerals in the body sans.",
+      "Don't widen the column past max-w-3xl or add a persistent sidebar; the desktop breathing room is intentional.",
+      "Don't remove the focus-visible Ember ring from any interactive element.",
+      "Don't show a raw team or award trademark as if official; artwork is an optional drop-in over emoji or Lucide fallbacks."
+    ]
+  }
+}
