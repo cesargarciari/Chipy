@@ -1,4 +1,4 @@
-import type { ClubOffer, GameOption, OptionView, TeamOffer } from '../types.js';
+import type { ClubOffer, GameOption, OptionView, TeamOffer, TeamRef } from '../types.js';
 import { contenderLabel } from './season-sim.js';
 
 /** Offered in the free-agency node once the player is retirement-eligible. */
@@ -81,14 +81,19 @@ export function clubOfferView(offer: ClubOffer): OptionView {
   };
 }
 
-/** The "sign a veteran deal back in the NBA" option, shown once value recovers. */
-export function nbaReturnView(salary: number): OptionView {
+/**
+ * One "sign a veteran deal back in the NBA" option per interested team, shown
+ * once market value recovers. `choiceId` lowercases the team id to satisfy the
+ * choice-id charset; the resolver upper-cases it back.
+ */
+export function nbaReturnTeamView(team: TeamRef, salary: number): OptionView {
   return {
-    id: 'nba_return',
-    label: 'BACK TO THE NBA',
-    blurb: `A team wants you back. ${money(salary)}/yr, prove it again.`,
+    id: `nba_return_${team.id.toLowerCase()}`,
+    label: `${team.city.toUpperCase()} ${team.name.toUpperCase()}`,
+    blurb: `They'll take a flyer on you: ${money(salary)}/yr, prove it all over again.`,
     effects: [{ key: 'money', label: 'MONEY', short: '$', delta: salary }],
-    tag: 'NBA',
+    tag: `NBA return · ${money(salary)}/yr`,
     watermark: 'NBA',
+    teamId: team.id,
   };
 }

@@ -1,4 +1,5 @@
 import { clamp, int, jitter, mulberry32, normalizeSeed, roundTo, type Rng } from '../rng.js';
+import { getTeam, TEAMS } from '../data/teams.js';
 import type { Position, Ratings, Role, SeasonStatLine, TeamResult, TeamWindow } from '../types.js';
 import type { SeasonEffect } from './effects.js';
 
@@ -19,6 +20,14 @@ export function derivedRng(seed: number | string, ...parts: Array<string | numbe
 export const GLAMOUR_TEAMS: ReadonlySet<string> = new Set(['LAL', 'GSW', 'NYK', 'BOS', 'MIA']);
 const GLAMOUR_EDGE = 0.06;
 
+/**
+ * The perennial cellar-dwellers: small-market, badly run, rebuilding on a loop.
+ * They start every season a tier down, so they live in the lottery unless the
+ * player himself drags them up.
+ */
+export const BOTTOM_TEAMS: ReadonlySet<string> = new Set(['SAC', 'WAS', 'BKN']);
+const BOTTOM_EDGE = -0.11;
+
 /** 0..1 strength for a team in a given season - a fixed base tier plus a per-season wobble. */
 export function teamStrengthFor(
   seed: number | string,
@@ -27,10 +36,37 @@ export function teamStrengthFor(
 ): number {
   const base = derivedRng(seed, 'team-base', teamId)();
   const wobble = derivedRng(seed, 'team-year', teamId, seasonIndex)();
-  const glam = GLAMOUR_TEAMS.has(teamId) ? GLAMOUR_EDGE : 0;
+  const standing = GLAMOUR_TEAMS.has(teamId)
+    ? GLAMOUR_EDGE
+    : BOTTOM_TEAMS.has(teamId)
+      ? BOTTOM_EDGE
+      : 0;
   // Centred a touch higher so the median team is a play-in / playoff club, not
   // a lottery one - most rosters around a real player are competitive.
-  return clamp(base * 0.5 + 0.33 + glam + (wobble - 0.5) * 0.44, 0.08, 0.96);
+  return clamp(base * 0.5 + 0.33 + standing + (wobble - 0.5) * 0.44, 0.06, 0.96);
+}
+
+/**
+ * Where the player's team finishes its own conference this season, 1 (best) ..
+ * 15 (worst). Every conference rival's roster strength is ranked against the
+ * player's team - and the player's own presence lifts his team (a superstar is
+ * worth a few seeds).
+ */
+export function conferenceSeed(
+  seed: number | string,
+  teamId: string,
+  seasonIndex: number,
+  playerImpact: number,
+): number {
+  const conf = getTeam(teamId).conference;
+  const lift = clamp(playerImpact / 20, 0, 1.4) * 0.06; // superstar ~ +0.08 (a couple of seeds)
+  const mine = teamStrengthFor(seed, teamId, seasonIndex) + lift;
+  let rank = 1;
+  for (const t of TEAMS) {
+    if (t.conference !== conf || t.id === teamId) continue;
+    if (teamStrengthFor(seed, t.id, seasonIndex) > mine) rank += 1;
+  }
+  return clamp(rank, 1, 15);
 }
 
 export function windowFromStrength(s: number): TeamWindow {
@@ -248,33 +284,41 @@ export function simulateSeason(rng: Rng, args: SeasonSimArgs): SeasonSimResult {
 // Playoffs
 // ---------------------------------------------------------------------------
 
+/**
+ * Turn a conference seed (1..15) into how far the team runs. Seeds 11-15 are in
+ * the lottery; 7-10 fight through the play-in; 1-6 are in the bracket and the
+ * deeper rounds scale hard with the seed - a 1-seed is a real title threat, a
+ * 6-seed almost never is - lifted by a superstar and by an open ring window.
+ */
 export function simulatePlayoffs(
   rng: Rng,
-  teamStrength: number,
-  playerImpact: number,
-  effect: SeasonEffect,
+  args: { seed: number; playerImpact: number; effect: SeasonEffect },
 ): TeamResult {
-  const boost = clamp(playerImpact / 20, 0, 1.4) * 0.1;
-  const p = clamp(teamStrength * (effect.teamMult ?? 1) + boost + jitter(rng, 1) / 60, 0.02, 0.98);
-  const roll = rng();
+  const { seed, playerImpact, effect } = args;
+  const star = clamp(playerImpact / 20, 0, 1.4); // 0 .. 1.4
+  const windowBoost = (effect.teamMult ?? 1) - 1; // ~0 .. 0.12 during a ring window
 
-  // The bubble: a middling team fights for a play-in spot. Winning it lands a
-  // first-round appearance; losing it is still a "play-in" season, not a
-  // lottery one. Only genuinely poor rosters miss out entirely.
-  if (p < 0.52) {
-    if (p >= 0.4) {
-      if (roll < 0.42) return 'first_round';
-      return roll < 0.86 ? 'play_in' : 'lottery';
-    }
-    if (roll < 0.24) return 'play_in';
-    return 'lottery';
+  if (seed >= 11) return 'lottery';
+
+  if (seed >= 7) {
+    // Play-in: 7-8 are favoured to punch into the bracket, 9-10 are long shots.
+    const winP = clamp(0.6 - (seed - 7) * 0.15 + star * 0.06 + windowBoost, 0.06, 0.9);
+    if (rng() < winP) return 'first_round';
+    return rng() < 0.55 ? 'play_in' : 'lottery';
   }
 
-  // A locked-in playoff team.
+  // Bracket, seeds 1-6. `p` is "title-calibre" - built from the seed, lifted by
+  // the player and a ring window, with a little variance.
+  const seedStrength = (7 - seed) / 6; // 1-seed 1.0 ... 6-seed ~0.17
+  const p = clamp(
+    seedStrength * 0.82 + star * 0.13 + windowBoost * 1.6 + jitter(rng, 1) / 46,
+    0.06,
+    0.99,
+  );
   const run = rng();
-  if (p > 0.83 && run < (p - 0.7) * 0.62) return 'champion';
-  if (p > 0.74 && run < (p - 0.58) * 0.68) return 'finals';
-  if (p > 0.63 && run < (p - 0.47) * 0.78) return 'conf_finals';
-  if (p > 0.55 && run < 0.5) return 'second_round';
+  if (p > 0.72 && run < (p - 0.6) * 0.6) return 'champion';
+  if (p > 0.59 && run < (p - 0.47) * 0.64) return 'finals';
+  if (p > 0.46 && run < (p - 0.34) * 0.74) return 'conf_finals';
+  if (p > 0.34 && run < 0.52) return 'second_round';
   return 'first_round';
 }

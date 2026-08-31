@@ -31,6 +31,13 @@ export const SCHOOLS: readonly SchoolRef[] = [
     perimeterDefense: 1,
   }),
   S('gonzaga', 'Gonzaga', 'blue_blood', 0.85, 0.8, 0.64, { finishing: 1, playmaking: 1 }),
+  S('indiana', 'Indiana', 'blue_blood', 0.82, 0.8, 0.6, { finishing: 1, midRange: 1 }),
+  S('michigan', 'Michigan', 'blue_blood', 0.82, 0.79, 0.61, { threePoint: 1, basketballIQ: 1 }),
+  S('houston', 'Houston', 'blue_blood', 0.86, 0.8, 0.58, {
+    perimeterDefense: 1,
+    interiorDefense: 1,
+  }),
+  S('purdue', 'Purdue', 'blue_blood', 0.83, 0.76, 0.62, { interiorDefense: 1, midRange: 1 }),
 
   // ---- Mid-majors: you are the whole offense -------------------------
   S('saint_marys', "Saint Mary's", 'mid_major', 0.62, 0.5, 0.82, { threePoint: 1, playmaking: 1 }),
@@ -48,6 +55,13 @@ export const SCHOOLS: readonly SchoolRef[] = [
   S('loyola_chi', 'Loyola Chicago', 'mid_major', 0.5, 0.42, 0.8, {
     basketballIQ: 1,
     perimeterDefense: 1,
+  }),
+  S('davidson', 'Davidson', 'mid_major', 0.5, 0.44, 0.88, { threePoint: 1, playmaking: 1 }),
+  S('creighton', 'Creighton', 'mid_major', 0.63, 0.52, 0.78, { threePoint: 1, basketballIQ: 1 }),
+  S('butler', 'Butler', 'mid_major', 0.6, 0.5, 0.8, { basketballIQ: 1, perimeterDefense: 1 }),
+  S('wichita_st', 'Wichita State', 'mid_major', 0.57, 0.5, 0.8, {
+    perimeterDefense: 1,
+    finishing: 1,
   }),
 
   // ---- Overseas: EuroLeague clubs, pro habits, low hype. Ids match the

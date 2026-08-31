@@ -24,8 +24,10 @@ describe('status tier', () => {
   it('climbs with overall and is lifted by accolades', () => {
     const base = { peakOverall: 80, mvps: 0, allNba: 0, allStars: 0, hype: 40 };
     expect(statusTier({ ...base, overall: 68 })).toBe('fringe');
-    expect(statusTier({ ...base, overall: 76 })).toBe('role_player');
-    expect(statusTier({ ...base, overall: 84 })).toBe('star');
+    expect(statusTier({ ...base, overall: 78 })).toBe('role_player');
+    expect(statusTier({ ...base, overall: 84 })).toBe('role_player');
+    expect(statusTier({ ...base, overall: 86 })).toBe('star');
+    expect(statusTier({ ...base, overall: 88 })).toBe('star');
     expect(statusTier({ ...base, overall: 90 })).toBe('superstar');
     expect(statusTier({ ...base, overall: 95, peakOverall: 95, mvps: 2 })).toBe('generational');
     // an ageing ex-MVP keeps superstar status even at a modest overall

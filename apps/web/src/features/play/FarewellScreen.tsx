@@ -1,6 +1,5 @@
 import type { PendingDecision } from '@chipy/engine';
 import { ChoiceCard } from '../../components/ChoiceCard.js';
-import { MomentsBanner } from './MomentsBanner.js';
 
 type Farewell = NonNullable<PendingDecision['farewell']>;
 
@@ -28,8 +27,6 @@ export function FarewellScreen({
           The legs are gone and the offers have dried up. How do you want to leave the game?
         </p>
       </div>
-
-      <MomentsBanner moments={preview.moments} />
 
       <div className="grid gap-3 sm:grid-cols-2">
         {options.map((o) => (

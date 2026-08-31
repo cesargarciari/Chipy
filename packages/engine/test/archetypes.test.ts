@@ -12,10 +12,10 @@ describe('archetypes', () => {
     expect(ARCHETYPE_DEFS.map((a) => a.id)).toEqual([...ARCHETYPE_IDS]);
   });
 
-  it('gives every position exactly four locked archetypes', () => {
+  it('gives every position several locked archetypes and buckets each one', () => {
     for (const pos of POSITIONS) {
       const list = archetypesFor(pos);
-      expect(list).toHaveLength(4);
+      expect(list.length).toBeGreaterThanOrEqual(4);
       expect(list.every((a) => a.position === pos)).toBe(true);
     }
     // Every archetype belongs to exactly one position bucket.

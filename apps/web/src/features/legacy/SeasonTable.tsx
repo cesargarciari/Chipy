@@ -1,7 +1,7 @@
 import type { CareerSummaryDto } from '@chipy/shared';
 import { useState } from 'react';
 import { awardArt } from '../../lib/art.js';
-import { moneyM, TEAM_RESULT_LABELS } from '../../lib/format.js';
+import { GRADE_TONE, moneyM, TEAM_RESULT_LABELS } from '../../lib/format.js';
 
 const ALL_STAR_ART = awardArt('all_star');
 
@@ -25,7 +25,7 @@ export function SeasonTable({ seasons }: { seasons: CareerSummaryDto['seasons'] 
 
       {open && (
         <div className="mt-3 overflow-x-auto">
-          <table className="w-full min-w-[580px] text-left text-xs">
+          <table className="w-full min-w-[640px] text-left text-xs">
             <thead className="text-ink-dim">
               <tr className="border-b border-court-700">
                 <th className="py-1.5 pr-2">#</th>
@@ -35,7 +35,9 @@ export function SeasonTable({ seasons }: { seasons: CareerSummaryDto['seasons'] 
                 <th className="pr-2 text-right">RPG</th>
                 <th className="pr-2 text-right">APG</th>
                 <th className="pr-2 text-right">Salary</th>
+                <th className="pr-2 text-right">Seed</th>
                 <th className="pr-2">Result</th>
+                <th className="pr-2 text-center">Grade</th>
                 <th>Honours</th>
               </tr>
             </thead>
@@ -51,11 +53,19 @@ export function SeasonTable({ seasons }: { seasons: CareerSummaryDto['seasons'] 
                   <td className="pr-2 text-right font-mono tabular-nums text-ink-dim">
                     {moneyM(s.salary)}
                   </td>
+                  <td className="pr-2 text-right font-mono tabular-nums text-ink-dim">
+                    {s.seed >= 1 ? `#${s.seed}` : '-'}
+                  </td>
                   <td
                     className={`pr-2 ${RESULT_TONE[s.teamResult] ?? 'text-ink-dim'}`}
                     title={s.recap}
                   >
                     {TEAM_RESULT_LABELS[s.teamResult]}
+                  </td>
+                  <td
+                    className={`pr-2 text-center font-display leading-none ${GRADE_TONE[s.grade]}`}
+                  >
+                    {s.grade}
                   </td>
                   <td className="text-ink-dim">
                     <span className="inline-flex items-center gap-1 align-middle">

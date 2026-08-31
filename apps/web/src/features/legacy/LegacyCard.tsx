@@ -1,5 +1,6 @@
 import type { CareerSummaryDto, ChoiceStat } from '@chipy/shared';
 import { Award, Trophy } from 'lucide-react';
+import { useRef } from 'react';
 import { RatingRadar } from '../../components/RatingRadar.js';
 import { Button } from '../../components/ui/button.js';
 import { Card, CardBody } from '../../components/ui/card.js';
@@ -16,6 +17,7 @@ import {
 } from '../../lib/format.js';
 import { FranchiseStandings } from './FranchiseStandings.js';
 import { SeasonTable } from './SeasonTable.js';
+import { ShareImageButton } from './ShareImageButton.js';
 import { ShareRow } from './ShareRow.js';
 import { TrophyShelf } from './TrophyShelf.js';
 
@@ -31,121 +33,139 @@ interface LegacyCardProps {
 
 export function LegacyCard({ summary, shareUrl, saving, saveError, onPlayAgain }: LegacyCardProps) {
   const { profile, legacy, careerTotals: ct, awards } = summary;
+  const shareCardRef = useRef<HTMLDivElement>(null);
 
   return (
     <div className="space-y-5">
-      <Card>
-        <CardBody className="space-y-6">
-          <header className="flex items-start justify-between gap-4">
-            <div>
-              <h2 className="text-3xl">
-                #{profile.jerseyNumber} {profile.name}
-              </h2>
-              <p className="text-sm text-ink-dim">
-                {profile.position} · {archetypeLabel(profile.archetype)} ·{' '}
-                {profile.handedness === 'left' ? 'Lefty' : 'Righty'} ·{' '}
-                {countryLabel(profile.country)}
-              </p>
-              <p className="mt-1 text-sm font-semibold text-amber">
-                {LEGACY_TIER_LABELS[legacy.tier]}
-              </p>
-            </div>
-            <div className="text-right">
-              <div className={`font-display text-6xl leading-none ${GRADE_TONE[legacy.grade]}`}>
-                {legacy.grade}
-              </div>
-              <div className="mt-1 font-mono text-xs text-ink-dim">{legacy.score} legacy</div>
-            </div>
-          </header>
-
-          <p className="text-sm text-ink">{legacy.verdict}</p>
-
-          <div className="flex flex-wrap gap-2 text-xs">
-            {legacy.hallOfFame && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-amber/15 px-2 py-1 font-semibold text-amber">
-                <Award size={12} /> Hall of Fame
-              </span>
-            )}
-            {legacy.jerseyRetired && legacy.jerseyRetiredBy && (
-              <span className="rounded-full bg-court-700 px-2 py-1 font-semibold text-ink-dim">
-                #{profile.jerseyNumber} retired by {teamName(legacy.jerseyRetiredBy)}
-              </span>
-            )}
-          </div>
-
-          <div className="grid gap-6 sm:grid-cols-[auto_1fr] sm:items-center">
-            <RatingRadar ratings={summary.finalRatings} />
-            <dl className="grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
-              <Stat label="Peak overall" value={String(summary.peakOverall)} />
-              <Stat label="Seasons" value={String(ct.seasons)} />
-              <Stat label="Draft" value={draftLabel(summary.draft)} />
-              <Stat label="First team" value={teamName(summary.rookieTeam.id)} />
-              <Stat label="Career" value={`${ct.ppg} / ${ct.rpg} / ${ct.apg}`} />
-              <Stat label="Points" value={ct.points.toLocaleString()} />
-              <Stat label="Career earnings" value={moneyM(summary.careerEarnings)} />
-              <Stat label="Peak salary" value={`${moneyM(summary.peakSalary)}/yr`} />
-            </dl>
-          </div>
-
-          {summary.college &&
-            (() => {
-              const intl = summary.college.tier === 'overseas';
-              // Group consecutive years at the same school into stints.
-              const stints: { school: string; from: number; to: number }[] = [];
-              summary.college.years.forEach((y, idx) => {
-                const last = stints.at(-1);
-                if (last && last.school === y.school) last.to = idx + 1;
-                else stints.push({ school: y.school, from: idx + 1, to: idx + 1 });
-              });
-              const y0 = summary.college.years[0];
-              return (
-                <div className="rounded-xl border border-court-700 bg-court-800/50 p-3 text-sm">
-                  <span className="text-xs uppercase tracking-wide text-ink-dim">
-                    {intl ? 'International' : 'College'}
-                  </span>
-                  <ul className="mt-1 space-y-0.5">
-                    {stints.map((st, i) => (
-                      <li key={i}>
-                        <span className="font-semibold">{st.school}</span>
-                        <span className="text-ink-dim">
-                          {' '}
-                          {st.from === st.to
-                            ? intl
-                              ? `· season ${st.from}`
-                              : `· year ${st.from}`
-                            : `· ${intl ? 'seasons' : 'years'} ${st.from}-${st.to}`}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                  <p className="mt-1 text-xs text-ink-dim">
-                    {summary.college.years.at(-1)?.result}
-                    {y0 &&
-                      ` · ${intl ? 'first season' : 'freshman year'} ${y0.stats.ppg}/${y0.stats.rpg}/${y0.stats.apg}`}
-                  </p>
+      <div ref={shareCardRef}>
+        <Card>
+          <CardBody className="space-y-6">
+            <header className="flex items-start justify-between gap-4">
+              <div className="min-w-0 space-y-1.5">
+                <h2 className="text-3xl leading-tight">
+                  #{profile.jerseyNumber} {profile.name}
+                </h2>
+                <div className="flex flex-wrap items-center gap-x-1.5 text-sm leading-snug text-ink-dim">
+                  <span>{profile.position}</span>
+                  <span aria-hidden>·</span>
+                  <span>{archetypeLabel(profile.archetype)}</span>
+                  <span aria-hidden>·</span>
+                  <span>{profile.handedness === 'left' ? 'Lefty' : 'Righty'}</span>
+                  <span aria-hidden>·</span>
+                  <span>{countryLabel(profile.country)}</span>
                 </div>
-              );
-            })()}
+                <p className="text-sm font-semibold leading-snug text-amber">
+                  {LEGACY_TIER_LABELS[legacy.tier]}
+                </p>
+              </div>
+              <div className="shrink-0 text-right">
+                <div className={`font-display text-6xl leading-none ${GRADE_TONE[legacy.grade]}`}>
+                  {legacy.grade}
+                </div>
+                <div className="mt-1 font-mono text-xs text-ink-dim">{legacy.score} legacy</div>
+              </div>
+            </header>
 
-          {(summary.shoeDeal || summary.perks.length > 0) && (
+            <p className="text-sm text-ink">{legacy.verdict}</p>
+
             <div className="flex flex-wrap gap-2 text-xs">
-              {summary.shoeDeal && (
-                <span className="rounded-full bg-amber/15 px-2 py-1 font-semibold text-amber">
-                  👟 Signature line with {summary.shoeDeal}
+              {legacy.hallOfFame && (
+                <span className="inline-flex items-center gap-1 rounded-full bg-amber/15 px-2 py-1 font-semibold text-amber">
+                  <Award size={12} /> Hall of Fame
                 </span>
               )}
-              {summary.perks.map((id) => (
-                <span
-                  key={id}
-                  className="rounded-full bg-court-700 px-2 py-1 font-semibold text-ink-dim"
-                >
-                  {perkLabel(id)}
+              {legacy.jerseyRetired && legacy.jerseyRetiredBy && (
+                <span className="rounded-full bg-court-700 px-2 py-1 font-semibold text-ink-dim">
+                  #{profile.jerseyNumber} retired by {teamName(legacy.jerseyRetiredBy)}
                 </span>
-              ))}
+              )}
             </div>
-          )}
-        </CardBody>
-      </Card>
+
+            <div className="grid gap-6 sm:grid-cols-[auto_1fr] sm:items-center">
+              <RatingRadar ratings={summary.finalRatings} />
+              <dl className="grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
+                <Stat label="Peak overall" value={String(summary.peakOverall)} />
+                <Stat label="Seasons" value={String(ct.seasons)} />
+                <Stat label="Draft" value={draftLabel(summary.draft)} />
+                <Stat label="First team" value={teamName(summary.rookieTeam.id)} />
+                <Stat label="Career" value={`${ct.ppg} / ${ct.rpg} / ${ct.apg}`} />
+                <Stat label="Points" value={ct.points.toLocaleString()} />
+                <Stat label="Career earnings" value={moneyM(summary.careerEarnings)} />
+                <Stat label="Peak salary" value={`${moneyM(summary.peakSalary)}/yr`} />
+              </dl>
+            </div>
+
+            {summary.college &&
+              (() => {
+                const intl = summary.college.tier === 'overseas';
+                // Group consecutive years at the same school into stints.
+                const stints: { school: string; from: number; to: number }[] = [];
+                summary.college.years.forEach((y, idx) => {
+                  const last = stints.at(-1);
+                  if (last && last.school === y.school) last.to = idx + 1;
+                  else stints.push({ school: y.school, from: idx + 1, to: idx + 1 });
+                });
+                const y0 = summary.college.years[0];
+                return (
+                  <div className="rounded-xl border border-court-700 bg-court-800/50 p-3 text-sm">
+                    <span className="text-xs uppercase tracking-wide text-ink-dim">
+                      {intl ? 'International' : 'College'}
+                    </span>
+                    <ul className="mt-1 space-y-0.5">
+                      {stints.map((st, i) => (
+                        <li key={i}>
+                          <span className="font-semibold">{st.school}</span>
+                          <span className="text-ink-dim">
+                            {' '}
+                            {st.from === st.to
+                              ? intl
+                                ? `· season ${st.from}`
+                                : `· year ${st.from}`
+                              : `· ${intl ? 'seasons' : 'years'} ${st.from}-${st.to}`}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                    <p className="mt-1 text-xs text-ink-dim">
+                      {summary.college.years.at(-1)?.result}
+                      {y0 &&
+                        ` · ${intl ? 'first season' : 'freshman year'} ${y0.stats.ppg}/${y0.stats.rpg}/${y0.stats.apg}`}
+                    </p>
+                  </div>
+                );
+              })()}
+
+            {(summary.shoeDeal || summary.perks.length > 0) && (
+              <div className="flex flex-wrap gap-2 text-xs">
+                {summary.shoeDeal && (
+                  <span className="rounded-full bg-amber/15 px-2 py-1 font-semibold text-amber">
+                    👟 Signature line with {summary.shoeDeal}
+                  </span>
+                )}
+                {summary.perks.map((id) => (
+                  <span
+                    key={id}
+                    className="rounded-full bg-court-700 px-2 py-1 font-semibold text-ink-dim"
+                  >
+                    {perkLabel(id)}
+                  </span>
+                ))}
+              </div>
+            )}
+
+            <div className="border-t border-court-800 pt-4">
+              <h3 className="mb-2 flex items-center gap-2 text-sm font-bold">
+                <Trophy size={14} className="text-amber" /> Trophy case
+              </h3>
+              <TrophyShelf awards={awards} />
+            </div>
+          </CardBody>
+        </Card>
+      </div>
+
+      <div className="flex justify-end">
+        <ShareImageButton targetRef={shareCardRef} />
+      </div>
 
       {summary.overseasSeasons.length > 0 && (
         <Card>
@@ -162,7 +182,8 @@ export function LegacyCard({ summary, shareUrl, saving, saveError, onPlayAgain }
                     <th className="pr-2">Club</th>
                     <th className="pr-2 text-right">PPG</th>
                     <th className="pr-2 text-right">Salary</th>
-                    <th>Finish</th>
+                    <th className="pr-2">Finish</th>
+                    <th className="text-center">Grade</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -178,11 +199,16 @@ export function LegacyCard({ summary, shareUrl, saving, saveError, onPlayAgain }
                         {moneyM(o.salary)}
                       </td>
                       <td
-                        className={
+                        className={`pr-2 ${
                           o.result === 'euroleague_champion' ? 'text-amber' : 'text-ink-dim'
-                        }
+                        }`}
                       >
                         {EURO_RESULT_LABELS[o.result]}
+                      </td>
+                      <td
+                        className={`text-center font-display leading-none ${GRADE_TONE[o.grade]}`}
+                      >
+                        {o.grade}
                       </td>
                     </tr>
                   ))}
@@ -246,15 +272,6 @@ export function LegacyCard({ summary, shareUrl, saving, saveError, onPlayAgain }
           </CardBody>
         </Card>
       )}
-
-      <Card>
-        <CardBody className="space-y-3">
-          <h3 className="flex items-center gap-2 font-bold">
-            <Trophy size={16} className="text-amber" /> Trophy case
-          </h3>
-          <TrophyShelf awards={awards} />
-        </CardBody>
-      </Card>
 
       <Card>
         <CardBody className="space-y-3">

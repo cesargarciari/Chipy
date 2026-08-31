@@ -112,6 +112,8 @@ export {
 } from './season/injuries.js';
 export { statusTier, statusRank, tradeChance } from './season/status.js';
 export { seasonRecap } from './season/recap.js';
+export { gradeSeason, gradeOverseasSeason } from './season/grade.js';
+export { conferenceSeed, GLAMOUR_TEAMS, BOTTOM_TEAMS } from './season/season-sim.js';
 export {
   buildPerkShop,
   perkHighlightKeys,

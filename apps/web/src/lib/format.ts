@@ -1,4 +1,5 @@
 import {
+  EURO_CLUBS,
   FRANCHISE_TIER_LABELS,
   getArchetype,
   getCountry,
@@ -37,8 +38,11 @@ export function archetypeLabel(id: ArchetypeId): string {
   return getArchetype(id).label;
 }
 
+const EURO_CLUB_NAMES = new Map(EURO_CLUBS.map((c) => [c.id, c.name]));
+
+/** NBA team label, or the EuroLeague club name for an overseas club id. */
 export function teamName(id: string): string {
-  return teamLabel(id);
+  return EURO_CLUB_NAMES.get(id) ?? teamLabel(id);
 }
 
 export function countryLabel(id: string): string {

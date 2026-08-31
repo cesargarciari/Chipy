@@ -66,14 +66,29 @@ interface GrowthArgs {
   effect: SeasonEffect;
   /** Sum of active lingering growth biases from past decisions, this season. */
   growthBias?: Partial<Record<RatingKey, number>>;
+  /** 0..1 - share of the season actually played. A year lost to injury barely develops. */
+  availability?: number;
 }
 
 export function growSeason(
   rng: Rng,
-  { ratings, athleticism, age, talent, archetype, effect, growthBias }: GrowthArgs,
+  {
+    ratings,
+    athleticism,
+    age,
+    talent,
+    archetype,
+    effect,
+    growthBias,
+    availability = 1,
+  }: GrowthArgs,
 ): { ratings: Ratings; athleticism: number; durabilityDelta: number } {
   const base = ageCurveDelta(age);
   const next = { ...ratings };
+
+  // You develop by playing - a season mostly lost to injury adds almost nothing,
+  // so a bad injury's flat OVR hit isn't quietly papered over by growth.
+  const play = clamp(availability, 0.12, 1);
 
   // Growth splits into a small component everyone gets and a large one only
   // genuine lottery-caliber talent gets - so role players plateau in the high
@@ -88,8 +103,8 @@ export function growSeason(
     let delta: number;
     if (base >= 0) {
       const w = archetype.growthWeights[key] ?? 0.78;
-      const baseGrowth = base * w * (0.2 + rng() * 0.75);
-      const talentGrowth = base * w * talentEdge * 3.7 * (0.5 + rng());
+      const baseGrowth = base * w * (0.2 + rng() * 0.75) * play;
+      const talentGrowth = base * w * talentEdge * 3.7 * (0.5 + rng()) * play;
       delta = baseGrowth + talentGrowth + decision + immediate;
     } else {
       const w = DECLINE_WEIGHT[key] ?? 0.8;

@@ -78,12 +78,12 @@
  * the rest of the shelf stays put. Opacity is untouched, so every trophy is
  * visible the whole time. */
 .trophy-group-stack > * + * {
-  margin-left: -1.4rem;
+  margin-left: -2.5rem;
   transition: margin-left 0.28s cubic-bezier(0.22, 1, 0.36, 1);
 }
 .trophy-group:hover .trophy-group-stack > * + *,
 .trophy-group:focus-visible .trophy-group-stack > * + * {
-  margin-left: 0.3rem;
+  margin-left: 0.4rem;
 }
 
 @media (prefers-reduced-motion: reduce) {

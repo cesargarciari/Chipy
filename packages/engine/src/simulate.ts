@@ -27,7 +27,7 @@ import {
   QUIET_GOODBYE_VIEW,
   RETIRE_VIEW,
   clubOfferView,
-  nbaReturnView,
+  nbaReturnTeamView,
   teamOfferView,
 } from './season/decisions.js';
 import { recomputeMarketValue, settleSeasonPay, tickValueMods } from './season/economy.js';
@@ -38,6 +38,7 @@ import {
   buildFranchiseStandings,
   franchiseProgress,
   franchiseTier,
+  overseasFranchiseRep,
   seasonFranchiseRep,
   tierRank,
 } from './season/franchise.js';
@@ -72,7 +73,9 @@ import { phaseFor } from './season/phase.js';
 import { pickScenario } from './season/scenario-select.js';
 import { SHOE_BRANDS } from './season/scenarios/shoe.js';
 import { findScenarioOption } from './season/scenarios/index.js';
+import { gradeOverseasSeason, gradeSeason } from './season/grade.js';
 import {
+  conferenceSeed,
   derivedRng,
   roleFor,
   simulatePlayoffs,
@@ -80,7 +83,7 @@ import {
   teamStrengthFor,
 } from './season/season-sim.js';
 import { statusRank, statusTier, tradeChance } from './season/status.js';
-import { freeAgencyOffers, landingOffers } from './season/teams-sim.js';
+import { freeAgencyOffers, landingOffers, nbaReturnTeams } from './season/teams-sim.js';
 import {
   ENGINE_VERSION,
   RATING_KEYS,
@@ -460,9 +463,19 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
     bank: state.bank,
     marketValue: state.marketValue,
     ownedPerks: [...state.ownedPerks, ...state.yearlyPerks],
-    franchiseTier: state.team ? (state.franchiseTierSeen[state.team.id] ?? 'none') : 'none',
-    franchiseSeasons: state.team ? (state.franchiseSeasons[state.team.id] ?? 0) : 0,
-    franchiseProgress: state.team ? franchiseProgress(state.franchiseScore[state.team.id] ?? 0) : 0,
+    // Idolatry tracks the current club whether it's an NBA team or a EuroLeague one.
+    franchiseTier: (() => {
+      const id = state.team?.id ?? state.club?.id;
+      return id ? (state.franchiseTierSeen[id] ?? 'none') : 'none';
+    })(),
+    franchiseSeasons: (() => {
+      const id = state.team?.id ?? state.club?.id;
+      return id ? (state.franchiseSeasons[id] ?? 0) : 0;
+    })(),
+    franchiseProgress: (() => {
+      const id = state.team?.id ?? state.club?.id;
+      return id ? franchiseProgress(state.franchiseScore[id] ?? 0) : 0;
+    })(),
     nationalTeam: nationalStanding(),
     statusTier: hudStatus,
     tradeChance: hudTradeChance,
@@ -572,8 +585,9 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
       });
       const returnPay = nbaReturnSalary(state.marketValue);
       const canReturn = state.marketValue >= 13 && state.age <= 33;
+      const returnTeams = canReturn ? nbaReturnTeams(seed, seasonNumber, 2) : [];
       const opts: OptionView[] = [clubOfferView(resign), ...others.map(clubOfferView)];
-      if (canReturn) opts.push(nbaReturnView(returnPay));
+      for (const t of returnTeams) opts.push(nbaReturnTeamView(t, returnPay));
       if (state.retirementEligible) opts.push(RETIRE_VIEW);
 
       const pick = expect(offerNodeId);
@@ -603,11 +617,9 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
         });
         break;
       }
-      if (pick.choiceId === 'nba_return') {
-        const back = weightedPick(
-          derivedRng(seed, 'nba-return', seasonNumber),
-          TEAMS.map((t) => [t, 1] as const),
-        );
+      if (pick.choiceId.startsWith('nba_return_')) {
+        const backId = pick.choiceId.slice('nba_return_'.length).toUpperCase();
+        const back = returnTeams.find((t) => t.id === backId) ?? getTeam(backId);
         state.league = 'nba';
         state.club = null;
         state.team = back;
@@ -625,6 +637,7 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
         const chosen = others.find((o) => o.choiceId === pick.choiceId);
         if (!chosen) throw new Error(`Unknown club offer "${pick.choiceId}"`);
         state.club = chosen.club;
+        state.seasonsWithTeam = 0;
         state.salary = chosen.salary;
         state.contractYearsLeft = chosen.years + 1;
         decisionHeadline = `You move to ${chosen.club.name} in ${chosen.club.country} (${money(
@@ -712,16 +725,20 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
       });
       scenarioId = scenario.id;
       const options = scenario.options.map((o) => optionView(o, state.ratings));
+      // On a farewell-tour season the exit is already scripted - no re-signing,
+      // no trade demand, no "retire now" button. It's a lap of honour.
+      const scripted = state.onFarewellTour || state.farewellChosen;
       // Star-and-up players on a settled roster can force their way out.
       const canDemandTrade =
         state.league === 'nba' &&
         state.team !== null &&
         !state.justTraded &&
         !contractYear &&
+        !scripted &&
         state.seasonIndex >= 2 &&
         statusRank(hudStatus) >= statusRank('star');
       if (canDemandTrade) options.push(DEMAND_TRADE_VIEW);
-      if (state.retirementEligible) options.push(RETIRE_VIEW);
+      if (state.retirementEligible && !scripted) options.push(RETIRE_VIEW);
       const decision: SeasonDecisionNode = {
         nodeId,
         kind: 'scenario',
@@ -787,9 +804,15 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
     }
 
     // ===== 3. Mid-season situation (~30% from season 3 on) =====
+    // NBA only - the mid-season pool is all NBA locker-room / front-office
+    // drama (a fight with the star, a benching, a trade demand). Overseas you
+    // ARE the club's marquee name, so none of it applies, and a farewell-tour
+    // season is a scripted lap of honour with no drama. The rng roll still burns
+    // so those seasons don't shift the stream for later NBA years.
     let midId: string | null = null;
     let midHeadline: string | null = null;
-    const midFires = seasonNumber >= 3 && rng() < 0.3;
+    const midFires =
+      seasonNumber >= 3 && rng() < 0.3 && state.league === 'nba' && !state.onFarewellTour;
     if (midFires) {
       const mid = pickMidseason(rng, {
         seasonNumber,
@@ -959,12 +982,14 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
     }
 
     // A "tense situation" / toxic-locker-room trade - rolled once against the
-    // same estimate the HUD shows (which already folds in low chemistry).
+    // same estimate the HUD shows (which already folds in low chemistry). Never
+    // on a farewell-tour season: you finish where you are.
     if (
       !effect.forceTrade &&
       !state.justTraded &&
       state.league === 'nba' &&
       state.team &&
+      !state.onFarewellTour &&
       state.seasonsWithTeam >= 2 &&
       rng() < hudTradeChance
     ) {
@@ -972,7 +997,7 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
     }
 
     let tradedThisSeason = false;
-    if (effect.forceTrade && state.league === 'nba' && state.team) {
+    if (effect.forceTrade && state.league === 'nba' && state.team && !state.onFarewellTour) {
       state.team = pickTradeTeam(rng, state.team.id);
       state.seasonsWithTeam = 0;
       tradedThisSeason = true;
@@ -994,8 +1019,10 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
 
     // A flat OVR hit (a surgery-grade injury, a locker-room blow-up) is spread
     // evenly across every rating so the overall really does drop by that much.
+    // Capped at 3 total, even if a bad injury and a bad-news week stack: no
+    // single season should gut a career.
     if (effect.overallHit && effect.overallHit > 0) {
-      const drop = effect.overallHit;
+      const drop = Math.min(effect.overallHit, 3);
       const r: Partial<Ratings> = { ...(effect.ratings ?? {}) };
       for (const k of RATING_KEYS) r[k] = (r[k] ?? 0) - drop;
       effect.ratings = r;
@@ -1046,6 +1073,7 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
       archetype,
       effect,
       growthBias,
+      availability: clamp(1 - (effect.injuredGames ?? 0) / 82, 0.12, 1),
     });
     state.ratings = grown.ratings;
     state.athleticism = grown.athleticism;
@@ -1091,6 +1119,12 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
         awards: osAwards,
         salary: state.salary,
         headline: midHeadline ? `${midHeadline} ${os.headline}` : os.headline,
+        grade: gradeOverseasSeason({
+          awards: osAwards,
+          result: os.result,
+          impact: os.impact,
+          gamesPlayed: os.stats.gp,
+        }),
       });
       const EURO_MOMENT: Partial<Record<string, string>> = {
         euroleague_champion: 'EUROLEAGUE CHAMPION',
@@ -1109,6 +1143,29 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
           subtitle: `Age ${state.age} · ${state.club!.name}, ${state.club!.country}`,
         });
       }
+      // ---- Idolatry with the overseas club (same standings as NBA teams) ---
+      const clubId = state.club!.id;
+      state.seasonsWithTeam += 1;
+      state.franchiseSeasons[clubId] = (state.franchiseSeasons[clubId] ?? 0) + 1;
+      if (os.result === 'euroleague_champion') {
+        state.franchiseRings[clubId] = (state.franchiseRings[clubId] ?? 0) + 1;
+      }
+      state.franchiseScore[clubId] =
+        (state.franchiseScore[clubId] ?? 0) +
+        overseasFranchiseRep({
+          awards: osAwards,
+          result: os.result,
+          seasonsWithClub: state.seasonsWithTeam,
+          played: os.stats.gp > 0,
+        });
+      const clubProvTier = franchiseTier(state.franchiseScore[clubId], {
+        rings: state.franchiseRings[clubId] ?? 0,
+        seasons: state.franchiseSeasons[clubId] ?? 0,
+        historic: state.peakOverall >= 90,
+      });
+      const clubSeenRank = tierRank(state.franchiseTierSeen[clubId] ?? 'none');
+      if (tierRank(clubProvTier) > clubSeenRank) state.franchiseTierSeen[clubId] = clubProvTier;
+
       if (os.stats.gp > 0) state.lastPlayedStats = os.stats;
       prevImpact = os.impact;
     } else {
@@ -1134,10 +1191,13 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
       });
       gamesMissed = sim.gamesMissed;
 
+      // Where the team landed in its conference this year (1-15), then how far
+      // that seed carries it in the bracket.
+      const confSeed = conferenceSeed(seed, state.team!.id, state.seasonIndex, sim.impact);
       const teamResult: TeamResult =
         sim.stats.gp === 0
           ? 'missed_season'
-          : simulatePlayoffs(rng, teamStrength, sim.impact, effect);
+          : simulatePlayoffs(rng, { seed: confSeed, playerImpact: sim.impact, effect });
 
       // Open (or refresh) the 5-season championship window on a title.
       if (teamResult === 'champion') state.ringWindowLeft = 5;
@@ -1212,6 +1272,14 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
         result: teamResult,
         missedGames: sim.gamesMissed,
       });
+      const grade = gradeSeason({
+        awards: seasonAwards,
+        teamResult,
+        seed: confSeed,
+        impact: sim.impact,
+        role,
+        gamesPlayed: sim.stats.gp,
+      });
 
       // ---- Big-moment detection -------------------------------------
       const pointsBefore = state.seasons.reduce((n, s) => n + s.stats.gp * s.stats.ppg, 0);
@@ -1237,6 +1305,8 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
         injuredGames: sim.gamesMissed,
         salary: state.salary,
         recap,
+        seed: confSeed,
+        grade,
       });
       const pointsAfter = pointsBefore + sim.stats.gp * sim.stats.ppg;
       for (const m of detectSeasonMoments({
@@ -1440,6 +1510,7 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
         state.league = 'overseas';
         state.club = chosen.club;
         state.team = null;
+        state.seasonsWithTeam = 0;
         state.salary = chosen.salary;
         state.contractYearsLeft = chosen.years + 1;
         state.retirementEligible = true;

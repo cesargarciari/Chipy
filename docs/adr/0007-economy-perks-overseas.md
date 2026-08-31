@@ -373,6 +373,110 @@ e2e now skips the perks button by `aria-label` rather than visible text.
 
 `ENGINE_VERSION` → `4.14.0`; packages → `0.4.14`. No schema changes.
 
+**Conference seeding, per-season grades, no more accolade banner, a shareable
+trophy card (v4.15).** `conferenceSeed(seed, teamId, seasonIndex, playerImpact)`
+ranks the player's team (its roster strength lifted by his own presence, ~2
+seeds for a superstar) against its 14 conference rivals - 1 (best) .. 15. That
+seed drives `simulatePlayoffs`, which was rebuilt to take `{ seed, playerImpact,
+effect }`: seeds 11-15 are the lottery, 7-10 fight the play-in, 1-6 are in the
+bracket and the deep rounds scale hard with the seed (a 1-seed wins ~15%, a
+3-seed ~1-2%, a 5-seed almost never). Every `SeasonRecord` gains `seed` and a
+`grade` (`gradeSeason` in `season/grade.ts`: baseline + award points + result +
+seed bonus + a production term, mapped S..D); overseas seasons get a `grade` too
+(`gradeOverseasSeason`). `SAC` / `WAS` / `BKN` join a `BOTTOM_TEAMS` set with a
+`-0.11` standing hit, so they live in the lottery unless the player drags them
+up. `overallFor`'s elite-rating bonus is capped at +4 (was +6) and the
+`statusTier` generational threshold moved to overall 94, so a genuine
+"generational" peak is rare (~1-2% of careers, down from ~8% peaking 92+). Web:
+`MomentsBanner` is deleted - the non-headline accolade / franchise / milestone
+cards no longer stack at the top of the next screen; the gala `MomentModal` still
+fires for the headline beats, and the "Last season" recap card now shows the
+seed + grade. The season-by-season table gains Seed and Grade columns. The
+`TrophyShelf` moves inside the top legacy summary card, and a `ShareImageButton`
+(`html-to-image`) renders that whole card to a downloadable PNG - "share your
+career as a picture".
+
+`ENGINE_VERSION` → `4.15.0`; packages → `0.4.15`. `seasonRecordSchema` gains
+`seed` (0-15) + `grade` (S..D); `overseasSeasonSchema` gains `grade`.
+
+**Overseas fixes + idolatry, a real return choice, farewell lock, clipboard
+image (v4.16).** Five bug fixes, mostly around the EuroLeague path. (1) The
+mid-season pool is now gated `state.league === 'nba'` (the rng roll still burns
+so a euro stint doesn't shift the stream) - it's all NBA locker-room drama, so a
+`msx_fight_trade` outcome could set `effect.forceTrade` while overseas and leave
+a "you were traded" line on a EuroLeague season. (2) Coming back from Europe now
+picks between two real NBA teams: `nbaReturnTeams(seed, seasonIndex, 2)` +
+`nbaReturnTeamView` replace the single blind `nba_return` option (choice id is
+`nba_return_<teamid>`, lowercased for the charset, upper-cased on resolve). (3) On
+a farewell-tour season the scenario node no longer carries `RETIRE_VIEW` or
+`DEMAND_TRADE_VIEW` and can't be free agency (`scripted = onFarewellTour ||
+farewellChosen`). (4) EuroLeague clubs now build idolatry exactly like NBA teams:
+`overseasFranchiseRep` (fixed franchise role + euro-result points) feeds
+`state.franchiseScore[clubId]` / `franchiseSeasons` / `franchiseRings`, so a club
+can reach `idol` / `legend` and shows in `summary.franchises` and the HUD
+(`buildPreview` idolatry fields fall back to `state.club?.id`; `seasonsWithTeam`
+resets on a club move / washout entry; web `teamName` resolves euro club ids via
+`EURO_CLUBS`). (5) The legacy share button copies the card **to the clipboard**
+(`html-to-image` `toBlob` + `ClipboardItem`) instead of downloading; the link
+button is relabelled "Copy link".
+
+`ENGINE_VERSION` → `4.16.0`; packages → `0.4.16`. No schema changes
+(`FranchiseStanding.teamId` was already an unconstrained string).
+
+**Softer off-court hits, injury OVR capped, higher star bar, no farewell trade
+(v4.17).** The drama midseason outcomes no longer gut a rating: `msx_burner_deny`
+and `msx_bday_out` drop from `overallHit` 3 / 1 to a flat **0.5** (a slight
+lingering dip, like the chemistry channel), and the shared `ownGameDips` helper
+only ever dents _this season's_ `impactMult`, never a permanent rating. Every
+surgery-grade injury's `ovrHit` is now `[2, 3]` (was `[3, 5]` ACL / `[3, 6]`
+Achilles+patellar), and the non-surgery ones (`dislocated shoulder`, `foot
+stress fracture`) lose their `ovrHit` entirely - a knock is a knock. A hard clamp
+in `simulate.ts` keeps any one season's _total_ flat OVR hit at 3, even when a
+bad injury and a bad-news week land together. To stop growth from quietly
+papering over a lost season, `growSeason` takes an `availability` (`1 −
+injuredGames / 82`, floored ~0.12) that scales the positive-growth terms - a
+year on the shelf now develops almost nothing, so a severe injury visibly costs
+~3 overall. `statusTier` thresholds move up: **star at overall 85** (was 81),
+**superstar at 89** (was 87), role player floor 74; `suitorCount` and the FA
+`star` flag follow, and the `msx_star_fight` / `msx_benched_4th` superstar
+exemption moves to `overall < 88`. The involuntary-trade roll and its
+application are both gated `!state.onFarewellTour`, and the mid-season channel is
+too - your farewell tour is a lap of honour, nobody moves you.
+
+`ENGINE_VERSION` → `4.17.0`; packages → `0.4.17`. No schema changes.
+
+**Honest defense chips, more builds, more schools (v4.18).** The card's defense
+promise now matches the tile it moves. `describeEffects` folds an option's raw
+`perimeterDefense` / `interiorDefense` deltas into a single `DEFENSE` chip whose
+`delta` is the change in `defenseRatingOf` (the `hi * 0.66 + lo * 0.34` blend the
+merged tile and the radar axis already use), not the naive sum of the two axis
+moves, so a "+7 to your two defense ratings" option that only lifts the blended
+tile by 5 now says `+5`. `overallFor` is deliberately left as the per-position
+weighted average: a big bump to one rating is meant to only nudge the overall
+(the weights sum to 1), and the earlier experiment that ran the overall through
+the same 0.66 blend inflated the grade population, so it was reverted. The
+create-a-player archetype pool grows from 20 to 30 (six per position): a Curry
+build (`sharpshooting_pg`: threes, playmaking, IQ), a Ja build (`pace_setter`:
+finishing and a big `athBias`), plus `pure_sniper`, `two_way_two_guard`,
+`all_around_wing`, `perimeter_stopper`, `combo_forward`, `energy_forward`,
+`mobile_big`, and `skilled_center`. `ArchetypeDef` gains an optional `athBias`
+number added inside `rollStartingAthleticism`, so explosive comps start springier
+(the ceiling on that roll moves 97 → 99). Each new archetype's `ratingBias` net
+sum sits inside the range the existing 20 already spanned, so the random-strategy
+population is unchanged (S ~7%, generational peak ~6%, ring ~29%). `data/schools`
+adds four blue-bloods (Indiana, Michigan, Houston, Purdue) and four mid-majors
+(Davidson, Creighton, Butler, Wichita State), 14 of each. Web-only: the jersey
+number is a typed field defaulting to `0` rather than an auto-incrementing roll;
+the trophy case overlaps its plaques at rest and fans them out on hover; and the
+clipboard career card fixes two `html-to-image` export bugs (the header nation
+and career tier no longer collide, and the radar axis labels use explicit hex
+instead of unresolved CSS custom properties, so they render white).
+
+`ENGINE_VERSION` → `4.18.0`; packages → `0.4.18`. No breaking schema changes: the
+`archetype` enum (`z.enum(ARCHETYPE_IDS)`) widens with the ten new ids and old
+summaries still validate; `athBias` is an internal `ArchetypeDef` field, not a
+DTO.
+
 ## Consequences
 
 - The legacy score/grade bands were re-tuned (perks and the mid-season pool lift

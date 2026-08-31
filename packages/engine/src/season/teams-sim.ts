@@ -114,6 +114,23 @@ export function landingOffers({ seed, overall, market, draft }: OfferArgs): Team
   });
 }
 
+/**
+ * The NBA teams that would take a chance on a EuroLeague returnee. Weighted
+ * toward rebuilders with a roster spot open; deterministic for `(seed,
+ * seasonIndex)` so the two options replay identically.
+ */
+export function nbaReturnTeams(seed: number | string, seasonIndex: number, count = 2): TeamRef[] {
+  const rng = derivedRng(seed, 'nba-return', seasonIndex);
+  return sampleTeams(
+    rng,
+    (t) => {
+      const strength = teamStrengthFor(seed, t.id, seasonIndex);
+      return strength < 0.48 ? 1.5 : strength < 0.62 ? 1 : 0.45;
+    },
+    count,
+  );
+}
+
 export interface FreeAgencyArgs {
   seed: number | string;
   seasonIndex: number;
@@ -131,10 +148,10 @@ export interface FreeAgencyArgs {
  * most of the league in the room.
  */
 export function suitorCount(rng: Rng, overall: number): number {
-  if (overall >= 91) return int(rng, 16, 20); // generational
-  if (overall >= 87) return int(rng, 12, 17); // superstar
-  if (overall >= 84) return int(rng, 7, 8); // star
-  if (overall >= 79) return int(rng, 4, 5); // solid starter
+  if (overall >= 94) return int(rng, 16, 20); // generational
+  if (overall >= 89) return int(rng, 12, 17); // superstar
+  if (overall >= 85) return int(rng, 7, 8); // star
+  if (overall >= 80) return int(rng, 4, 5); // solid starter
   return 2; // role player - just the incumbent + one look
 }
 
@@ -153,7 +170,7 @@ export function freeAgencyOffers({
   marketValue,
 }: FreeAgencyArgs): TeamOffer[] {
   const rng = derivedRng(seed, 'fa', seasonIndex);
-  const star = overall >= 84;
+  const star = overall >= 85;
   const count = suitorCount(rng, overall);
 
   const others = sampleTeams(

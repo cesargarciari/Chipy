@@ -45,11 +45,11 @@ interface InjuryType {
 }
 
 /**
- * The catalogue. Minor knocks are common and cost a handful of games; the
- * surgery-grade knee/achilles injuries at the bottom are season-ending, take a
- * chunk of your athleticism *and* two-plus OVR points for good, and carry a
- * real career-ending chance. Nothing is impossible - a healthy 24-year-old can
- * still tear an ACL, just rarely.
+ * The catalogue. Minor knocks are common and cost a handful of games and,
+ * at worst, a point or two of athleticism / durability - never a chunk of your
+ * overall. Only the surgery-grade knee/achilles injuries at the bottom take a
+ * flat 2-3 OVR for good and carry a real career-ending chance. Nothing is
+ * impossible - a healthy 24-year-old can still tear an ACL, just rarely.
  */
 export const INJURY_CATALOG: readonly InjuryType[] = [
   { type: 'jammed finger', severity: 'knock', weight: 15, games: [1, 4] },
@@ -68,7 +68,6 @@ export const INJURY_CATALOG: readonly InjuryType[] = [
     weight: 4,
     games: [12, 28],
     durHit: [1, 3],
-    ovrHit: [1, 2],
   },
   {
     type: 'foot stress fracture',
@@ -77,7 +76,6 @@ export const INJURY_CATALOG: readonly InjuryType[] = [
     games: [22, 42],
     athHit: [1, 3],
     durHit: [1, 3],
-    ovrHit: [1, 2],
   },
   {
     type: 'torn meniscus',
@@ -96,7 +94,7 @@ export const INJURY_CATALOG: readonly InjuryType[] = [
     games: [82, 82],
     athHit: [3, 6],
     durHit: [3, 6],
-    ovrHit: [3, 5],
+    ovrHit: [2, 3],
     seasonEnding: true,
     endBase: 0.08,
   },
@@ -107,7 +105,7 @@ export const INJURY_CATALOG: readonly InjuryType[] = [
     games: [82, 82],
     athHit: [4, 8],
     durHit: [3, 7],
-    ovrHit: [3, 6],
+    ovrHit: [2, 3],
     seasonEnding: true,
     endBase: 0.16,
   },
@@ -118,7 +116,7 @@ export const INJURY_CATALOG: readonly InjuryType[] = [
     games: [82, 82],
     athHit: [4, 8],
     durHit: [4, 8],
-    ovrHit: [3, 6],
+    ovrHit: [2, 3],
     seasonEnding: true,
     endBase: 0.2,
   },

@@ -7,6 +7,13 @@ const RADIUS = 84;
 const RING_STEPS = [0.25, 0.5, 0.75, 1];
 const AXES = DISPLAY_AXES;
 
+// Explicit hex, not CSS vars / utility classes - `html-to-image` doesn't resolve
+// custom properties inside the exported SVG, so the labels came out black.
+const GRID = '#2a2a31'; // court-700
+const LABEL = '#a1a1ad'; // ink-dim
+const ACCENT = '#f97316'; // amber
+const ACCENT_FILL = 'rgba(249, 115, 22, 0.28)';
+
 function point(index: number, magnitude: number): [number, number] {
   const angle = (Math.PI * 2 * index) / AXES.length - Math.PI / 2;
   return [
@@ -37,31 +44,16 @@ export function RatingRadar({ ratings }: { ratings: Ratings }) {
           key={step}
           points={polygon(AXES.map(() => step))}
           fill="none"
-          stroke="var(--color-court-700)"
+          stroke={GRID}
           strokeWidth={1}
         />
       ))}
       {AXES.map((_, i) => {
         const [x, y] = point(i, 1);
-        return (
-          <line
-            key={i}
-            x1={CENTER}
-            y1={CENTER}
-            x2={x}
-            y2={y}
-            stroke="var(--color-court-700)"
-            strokeWidth={1}
-          />
-        );
+        return <line key={i} x1={CENTER} y1={CENTER} x2={x} y2={y} stroke={GRID} strokeWidth={1} />;
       })}
 
-      <polygon
-        points={polygon(magnitudes)}
-        fill="color-mix(in srgb, var(--color-amber) 28%, transparent)"
-        stroke="var(--color-amber)"
-        strokeWidth={2}
-      />
+      <polygon points={polygon(magnitudes)} fill={ACCENT_FILL} stroke={ACCENT} strokeWidth={2} />
 
       {AXES.map((axis, i) => {
         const [x, y] = point(i, 1.18);
@@ -72,7 +64,9 @@ export function RatingRadar({ ratings }: { ratings: Ratings }) {
             y={y}
             textAnchor="middle"
             dominantBaseline="middle"
-            className="fill-ink-dim text-[9px] font-semibold"
+            fill={LABEL}
+            fontSize={9}
+            fontWeight={600}
           >
             {axis.short}
           </text>

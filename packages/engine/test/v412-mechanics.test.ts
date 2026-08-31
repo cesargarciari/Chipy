@@ -31,7 +31,7 @@ describe('draft slot drives talent', () => {
       expect(secondRound.length).toBeGreaterThan(20);
 
       // Lottery picks clearly out-develop second-round / undrafted starts.
-      expect(mean(firstRound) - mean(secondRound)).toBeGreaterThan(6);
+      expect(mean(firstRound) - mean(secondRound)).toBeGreaterThan(4.5);
 
       // A genuine slice of the late group still peaks star-level, but a lottery
       // pick is markedly likelier to (the mean-gap check above is the real

@@ -1,7 +1,10 @@
 import { clamp, roundTo } from './rng.js';
+import { defenseRatingOf } from './ratings.js';
 import {
   ATTR_LABELS,
   ATTR_TAGS,
+  RATING_CEIL,
+  RATING_FLOOR,
   RATING_KEYS,
   type CareerState,
   type EffectChip,
@@ -57,6 +60,7 @@ export function describeEffects(effect: OptionEffect, current?: Ratings): Effect
 
   const ratingChips: EffectChip[] = [];
   for (const key of RATING_KEYS) {
+    if (key === 'perimeterDefense' || key === 'interiorDefense') continue; // folded below
     const nominal = effect.ratings?.[key];
     if (!nominal) continue;
     let delta = nominal;
@@ -74,6 +78,32 @@ export function describeEffects(effect: OptionEffect, current?: Ratings): Effect
       delta,
       ...(delta !== nominal ? { nominal } : {}),
     });
+  }
+
+  // Fold perimeter + interior D into one DEFENSE chip whose `delta` is exactly
+  // what the DEFENSE tile (the weighted `defenseRatingOf`) will move - so a
+  // "+7 DEFENSE" card actually raises the tile by 7 (bar the 99 cap), not by the
+  // naive sum of the two raw axes.
+  const perimNom = effect.ratings?.perimeterDefense ?? 0;
+  const intNom = effect.ratings?.interiorDefense ?? 0;
+  if (perimNom || intNom) {
+    const nominal = perimNom + intNom;
+    let delta = nominal;
+    if (current) {
+      const before = defenseRatingOf(current.interiorDefense, current.perimeterDefense);
+      const afterInt = clamp(current.interiorDefense + intNom, RATING_FLOOR, RATING_CEIL);
+      const afterPerim = clamp(current.perimeterDefense + perimNom, RATING_FLOOR, RATING_CEIL);
+      delta = defenseRatingOf(afterInt, afterPerim) - before;
+    }
+    if (!current || delta !== 0) {
+      ratingChips.push({
+        key: 'defense',
+        label: 'DEFENSE',
+        short: 'DEF',
+        delta,
+        ...(delta !== nominal ? { nominal } : {}),
+      });
+    }
   }
   ratingChips.sort(
     (a, b) =>

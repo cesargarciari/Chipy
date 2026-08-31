@@ -46,7 +46,7 @@ export function ShareRow({
         }}
       >
         {copied ? <Check size={16} /> : <Copy size={16} />}
-        {copied ? 'Copied' : 'Copy'}
+        {copied ? 'Copied' : 'Copy link'}
       </Button>
     </div>
   );

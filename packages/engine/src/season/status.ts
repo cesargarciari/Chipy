@@ -29,13 +29,13 @@ export interface StatusArgs {
  */
 export function statusTier(a: StatusArgs): StatusTier {
   let tier: StatusTier =
-    a.overall >= 92
+    a.overall >= 94
       ? 'generational'
-      : a.overall >= 87
+      : a.overall >= 89
         ? 'superstar'
-        : a.overall >= 81
+        : a.overall >= 85
           ? 'star'
-          : a.overall >= 73
+          : a.overall >= 74
             ? 'role_player'
             : 'fringe';
 

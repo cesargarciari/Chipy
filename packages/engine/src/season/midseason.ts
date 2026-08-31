@@ -20,7 +20,7 @@ export const MIDSEASON_SCENARIOS: Scenario[] = [
       minSeason: 3,
       weight: 1.2,
       role: ['fringe', 'bench', 'rotation', 'starter'],
-      predicate: (ctx) => ctx.overall < 86 && !ctx.hasAward('mvp') && !ctx.hasAward('all_nba_1'),
+      predicate: (ctx) => ctx.overall < 88 && !ctx.hasAward('mvp') && !ctx.hasAward('all_nba_1'),
     },
     title: 'IT GOT PHYSICAL IN PRACTICE',
     prompt: "You and the team's best player had to be pulled apart.",
@@ -72,7 +72,7 @@ export const MIDSEASON_SCENARIOS: Scenario[] = [
       minSeason: 2,
       weight: 1,
       role: ['fringe', 'bench', 'rotation', 'starter'],
-      predicate: (ctx) => ctx.overall < 86 && !ctx.hasAward('mvp') && !ctx.hasAward('all_nba_1'),
+      predicate: (ctx) => ctx.overall < 88 && !ctx.hasAward('mvp') && !ctx.hasAward('all_nba_1'),
     },
     title: 'BENCHED IN THE FOURTH',
     prompt: 'The coach rode the other unit to the win on national TV.',
@@ -411,14 +411,14 @@ function frontOfficeCold(a: ResolveArgs): Partial<MidResolution> {
   };
 }
 
-/** A groggy stretch or a nagging distraction - a real hit to your play. */
-function ownGameDips(a: ResolveArgs, ovr = 0): Partial<MidResolution> {
+/**
+ * A groggy stretch or a nagging distraction. It only dents *this season's*
+ * production (`impactMult`) - off-court noise never permanently guts a rating.
+ */
+function ownGameDips(a: ResolveArgs): Partial<MidResolution> {
   return {
-    effect: ovr > 0 ? { overallHit: ovr } : { impactMult: 1 - (0.03 + 0.05 * a.m) },
-    note:
-      ovr > 0
-        ? `It costs you a real step - about ${ovr} off your overall.`
-        : 'It nags at your game the rest of the year.',
+    effect: { impactMult: 1 - (0.03 + 0.05 * a.m) },
+    note: 'It nags at your game the rest of the year.',
   };
 }
 
@@ -532,8 +532,8 @@ export const MIDSEASON_OUTCOMES: Record<string, OutcomeFn> = {
   // Teammate's birthday
   msx_bday_out: (a) => ({
     chemistryDelta: Math.round(12 + 6 * a.m),
-    effect: { overallHit: 1 },
-    note: 'The room loves you for it - a groggy week takes a slight edge off your game.',
+    effect: { overallHit: 0.5 },
+    note: 'The room loves you for it - a groggy week nicks your game, nothing lasting.',
   }),
   msx_bday_home: (a) => ({
     chemistryDelta: -Math.round(8 + 4 * a.m),
@@ -545,9 +545,9 @@ export const MIDSEASON_OUTCOMES: Record<string, OutcomeFn> = {
     note: 'You come clean. The locker room ices you out - trade talk starts within the week.',
   }),
   msx_burner_deny: (a) => ({
-    effect: { overallHit: 3 },
+    effect: { overallHit: 0.5 },
     chemistryDelta: -Math.round(10 * a.m),
-    note: 'Nobody believes you. It gnaws at your game all year - about 3 off your overall.',
+    note: 'Nobody believes you. It nags at you all year - a slight, lingering dip, no more.',
   }),
 };
 

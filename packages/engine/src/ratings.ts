@@ -77,14 +77,19 @@ export function emptyRatings(fill = 0): Ratings {
 
 export function overallFor(position: Position, ratings: Ratings): number {
   const weights = POSITION_WEIGHTS[position];
+  // A per-position weighted average of the eight skills - so a big bump to one
+  // rating only nudges the overall (weights sum to 1). The card's per-axis chips
+  // predict the *tile* change, not this overall.
   const raw = RATING_KEYS.reduce((sum, key) => sum + ratings[key] * weights[key], 0);
-  // Being genuinely elite at your craft counts for a bit more than the average implies.
+  // Being genuinely elite at your craft counts for a bit more than the average
+  // implies - but the top-end bonus is capped so a 92+ overall (a genuine
+  // "generational" tier) stays rare rather than routine.
   let eliteBonus = 0;
   for (const key of RATING_KEYS) {
     if (ratings[key] >= 88) eliteBonus += 1;
     if (ratings[key] >= 94) eliteBonus += 1;
   }
-  return clamp(Math.round(raw + Math.min(eliteBonus, 6)), RATING_FLOOR, RATING_CEIL);
+  return clamp(Math.round(raw + Math.min(eliteBonus, 4)), RATING_FLOOR, RATING_CEIL);
 }
 
 /**
@@ -119,8 +124,8 @@ export function rollStartingRatings(rng: Rng, archetypeId: ArchetypeId): Ratings
   }, {} as Ratings);
 }
 
-export function rollStartingAthleticism(rng: Rng, position: Position): number {
-  return clamp(72 + POSITION_ATHLETICISM_BIAS[position] + jitter(rng, 9), 45, 97);
+export function rollStartingAthleticism(rng: Rng, position: Position, athBias = 0): number {
+  return clamp(72 + POSITION_ATHLETICISM_BIAS[position] + athBias + jitter(rng, 9), 45, 99);
 }
 
 export function rollStartingDurability(rng: Rng): number {

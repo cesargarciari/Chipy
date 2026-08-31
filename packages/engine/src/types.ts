@@ -3,7 +3,7 @@
  * existing `(seed, profile, choices)` tuple. Stored on every `CareerSummary` so
  * the API can tell whether a persisted career predates the current rules.
  */
-export const ENGINE_VERSION = '4.14.0';
+export const ENGINE_VERSION = '4.18.0';
 
 export const POSITIONS = ['PG', 'SG', 'SF', 'PF', 'C'] as const;
 export type Position = (typeof POSITIONS)[number];
@@ -126,26 +126,36 @@ export const ARCHETYPE_IDS = [
   'scoring_pg',
   'two_way_pg',
   'combo_guard',
+  'sharpshooting_pg',
+  'pace_setter',
   // SG
   'movement_shooter',
   'slashing_wing',
   'three_and_d_guard',
   'shot_creator',
+  'pure_sniper',
+  'two_way_two_guard',
   // SF
   'point_forward',
   'three_and_d_wing',
   'three_level_wing',
   'athletic_finisher',
+  'all_around_wing',
+  'perimeter_stopper',
   // PF
   'stretch_four',
   'two_way_forward',
   'post_bully',
   'glass_cleaner',
+  'combo_forward',
+  'energy_forward',
   // C
   'rim_protector',
   'stretch_five',
   'back_to_basket_hub',
   'lob_threat',
+  'mobile_big',
+  'skilled_center',
 ] as const;
 export type ArchetypeId = (typeof ARCHETYPE_IDS)[number];
 
@@ -166,6 +176,8 @@ export interface ArchetypeDef {
   ratingBias: Partial<Ratings>;
   growthWeights: Partial<Record<RatingKey, number>>;
   awardAffinity: AwardAffinity;
+  /** Points added to the starting athleticism roll - explosive builds start springier. */
+  athBias?: number;
 }
 
 // ---------------------------------------------------------------------------
@@ -398,6 +410,8 @@ export interface OverseasSeason {
   /** $M for this season. */
   salary: number;
   headline: string;
+  /** This one season graded on accolades + club success + production. */
+  grade: GradeLetter;
 }
 
 export interface ClubOffer {
@@ -519,6 +533,10 @@ export interface SeasonRecord {
   salary: number;
   /** A one-line, randomly-flavoured account of how the season / playoffs went. */
   recap: string;
+  /** Where the team finished its conference, 1 (best) .. 15 (worst). */
+  seed: number;
+  /** This one season graded on accolades + team success + production. */
+  grade: GradeLetter;
 }
 
 export interface CareerTotals {

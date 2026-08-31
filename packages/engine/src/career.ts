@@ -1,3 +1,4 @@
+import { getArchetype } from './archetypes.js';
 import {
   overallFor,
   rollStartingAthleticism,
@@ -15,7 +16,11 @@ export const START_AGE = 19;
 export function createInitialState(rng: Rng, profile: PlayerProfile): CareerState {
   const ratings = rollStartingRatings(rng, profile.archetype);
   const overall = overallFor(profile.position, ratings);
-  const athleticism = rollStartingAthleticism(rng, profile.position);
+  const athleticism = rollStartingAthleticism(
+    rng,
+    profile.position,
+    getArchetype(profile.archetype).athBias,
+  );
   const durability = rollStartingDurability(rng);
   const hype = rollStartingHype(rng, overall, profile.market);
   const draftStock = rollStartingDraftStock(rng, overall, hype);

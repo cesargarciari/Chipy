@@ -89,7 +89,7 @@ describe('<LegacyCard />', () => {
     Object.assign(navigator, { clipboard: { writeText } });
 
     render(<LegacyCard summary={summary} shareUrl="https://chipy.test/c/abcdefghijkl" />);
-    await userEvent.click(screen.getByRole('button', { name: /copy/i }));
+    await userEvent.click(screen.getByRole('button', { name: /copy link/i }));
     expect(writeText).toHaveBeenCalledWith('https://chipy.test/c/abcdefghijkl');
   });
 });

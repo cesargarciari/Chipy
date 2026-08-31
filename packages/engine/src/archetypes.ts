@@ -1,9 +1,14 @@
 import { ARCHETYPE_IDS, type ArchetypeDef, type ArchetypeId, type Position } from './types.js';
 
 /**
- * The 20 position-locked archetypes. `ratingBias` is added to a flat 58
+ * The 30 position-locked archetypes. `ratingBias` is added to a flat 62
  * baseline; `growthWeights` scale the yearly age-curve delta per rating (a key
- * left out defaults to 0.8 in `growSeason`, so specialists stay specialists).
+ * left out defaults to 0.78 in `growSeason`, so specialists stay specialists);
+ * `athBias` nudges the starting athleticism roll so explosive builds start
+ * springier. The `comps` name real players so a pick reads as a real style, and
+ * the biases actually follow it - choose the Curry build and you start (and
+ * grow) as a shooter; choose the Ja build and you start bouncy and finish over
+ * the rim.
  */
 const DEFS: Record<ArchetypeId, ArchetypeDef> = {
   // ---- PG -----------------------------------------------------------------
@@ -55,7 +60,7 @@ const DEFS: Record<ArchetypeId, ArchetypeDef> = {
     id: 'combo_guard',
     label: 'Combo Guard',
     position: 'PG',
-    comps: 'Ja · Westbrook · Anthony Edwards',
+    comps: 'Westbrook · Anthony Edwards · Derrick Rose',
     blurb: 'Downhill athlete who plays above the rim and pushes the pace.',
     ratingBias: {
       finishing: 16,
@@ -68,11 +73,61 @@ const DEFS: Record<ArchetypeId, ArchetypeDef> = {
     growthWeights: {
       finishing: 1.4,
       playmaking: 1.2,
-      threePoint: 1.2,
+      threePoint: 1.0,
       midRange: 1.1,
       rebounding: 1.0,
     },
     awardAffinity: { scoring: 1.3, playmaking: 1.0, defense: 0.5, rebounding: 0.5 },
+    athBias: 7,
+  },
+  sharpshooting_pg: {
+    id: 'sharpshooting_pg',
+    label: 'Sharpshooting Lead Guard',
+    position: 'PG',
+    comps: 'Curry · Damian Lillard · Trae Young',
+    blurb: 'Pulls up from the logo, runs the offense, and warps a defense off the ball.',
+    ratingBias: {
+      threePoint: 22,
+      playmaking: 12,
+      basketballIQ: 10,
+      midRange: 6,
+      interiorDefense: -10,
+      rebounding: -6,
+      perimeterDefense: -4,
+    },
+    growthWeights: {
+      threePoint: 1.6,
+      playmaking: 1.3,
+      basketballIQ: 1.2,
+      midRange: 1.1,
+      finishing: 0.9,
+    },
+    awardAffinity: { scoring: 1.5, playmaking: 1.2, defense: 0.2, rebounding: 0.2 },
+  },
+  pace_setter: {
+    id: 'pace_setter',
+    label: 'Pace Setter',
+    position: 'PG',
+    comps: "Ja Morant · De'Aaron Fox · Russell Westbrook",
+    blurb: 'Fastest end-to-end on the floor - a blur in transition, a menace at the rim.',
+    ratingBias: {
+      finishing: 20,
+      playmaking: 12,
+      rebounding: 4,
+      midRange: 2,
+      threePoint: -8,
+      basketballIQ: -4,
+      interiorDefense: -4,
+    },
+    growthWeights: {
+      finishing: 1.5,
+      playmaking: 1.3,
+      perimeterDefense: 1.0,
+      threePoint: 0.9,
+      rebounding: 1.0,
+    },
+    awardAffinity: { scoring: 1.3, playmaking: 1.2, defense: 0.4, rebounding: 0.4 },
+    athBias: 9,
   },
 
   // ---- SG -----------------------------------------------------------------
@@ -108,6 +163,50 @@ const DEFS: Record<ArchetypeId, ArchetypeDef> = {
       perimeterDefense: 0.9,
     },
     awardAffinity: { scoring: 1.3, playmaking: 0.6, defense: 0.6, rebounding: 0.3 },
+    athBias: 6,
+  },
+  pure_sniper: {
+    id: 'pure_sniper',
+    label: 'Pure Sniper',
+    position: 'SG',
+    comps: 'JJ Redick · Duncan Robinson · Buddy Hield',
+    blurb:
+      'One elite skill, taken to its limit: catch, rise, splash. Everything else is secondary.',
+    ratingBias: {
+      threePoint: 24,
+      midRange: 10,
+      basketballIQ: 4,
+      playmaking: -6,
+      finishing: -4,
+      interiorDefense: -8,
+      rebounding: -6,
+    },
+    growthWeights: { threePoint: 1.7, midRange: 1.2, basketballIQ: 0.9, perimeterDefense: 0.8 },
+    awardAffinity: { scoring: 1.3, playmaking: 0.2, defense: 0.3, rebounding: 0.1 },
+  },
+  two_way_two_guard: {
+    id: 'two_way_two_guard',
+    label: 'Two-Way Two-Guard',
+    position: 'SG',
+    comps: 'Anthony Edwards · Donovan Mitchell · Dwyane Wade',
+    blurb: 'Explosive off two feet, gets his own bucket, and picks up the other team’s best guard.',
+    ratingBias: {
+      finishing: 14,
+      perimeterDefense: 12,
+      threePoint: 8,
+      midRange: 6,
+      playmaking: 4,
+      interiorDefense: -2,
+    },
+    growthWeights: {
+      finishing: 1.3,
+      perimeterDefense: 1.3,
+      threePoint: 1.2,
+      midRange: 1.1,
+      playmaking: 1.0,
+    },
+    awardAffinity: { scoring: 1.2, playmaking: 0.6, defense: 1.1, rebounding: 0.3 },
+    athBias: 6,
   },
   three_and_d_guard: {
     id: 'three_and_d_guard',
@@ -232,6 +331,56 @@ const DEFS: Record<ArchetypeId, ArchetypeDef> = {
       interiorDefense: 1.1,
     },
     awardAffinity: { scoring: 0.9, playmaking: 0.4, defense: 1.0, rebounding: 1.0 },
+    athBias: 7,
+  },
+  all_around_wing: {
+    id: 'all_around_wing',
+    label: 'All-Around Wing',
+    position: 'SF',
+    comps: 'Jimmy Butler · Paul George · Jaylen Brown',
+    blurb: 'Scores three ways and defends two positions, but the paint is not his to protect.',
+    ratingBias: {
+      perimeterDefense: 10,
+      finishing: 8,
+      threePoint: 8,
+      midRange: 6,
+      playmaking: 6,
+      basketballIQ: 6,
+      rebounding: 2,
+      interiorDefense: -6,
+    },
+    growthWeights: {
+      finishing: 1.1,
+      threePoint: 1.2,
+      midRange: 1.1,
+      perimeterDefense: 1.2,
+      playmaking: 1.1,
+      basketballIQ: 1.1,
+    },
+    awardAffinity: { scoring: 1.1, playmaking: 0.7, defense: 1.1, rebounding: 0.5 },
+  },
+  perimeter_stopper: {
+    id: 'perimeter_stopper',
+    label: 'Perimeter Stopper',
+    position: 'SF',
+    comps: 'Herb Jones · Andre Iguodala · Dillon Brooks',
+    blurb: 'Takes the toughest matchup every night, spots up in the corner, asks for nothing back.',
+    ratingBias: {
+      perimeterDefense: 22,
+      basketballIQ: 8,
+      threePoint: 8,
+      rebounding: 6,
+      interiorDefense: 4,
+      finishing: -2,
+      playmaking: -4,
+    },
+    growthWeights: {
+      perimeterDefense: 1.6,
+      threePoint: 1.2,
+      basketballIQ: 1.1,
+      rebounding: 1.0,
+    },
+    awardAffinity: { scoring: 0.4, playmaking: 0.3, defense: 1.6, rebounding: 0.6 },
   },
 
   // ---- PF -----------------------------------------------------------------
@@ -311,6 +460,43 @@ const DEFS: Record<ArchetypeId, ArchetypeDef> = {
     },
     growthWeights: { rebounding: 1.4, interiorDefense: 1.2, finishing: 1.1, perimeterDefense: 0.9 },
     awardAffinity: { scoring: 0.6, playmaking: 0.2, defense: 1.1, rebounding: 1.5 },
+  },
+  combo_forward: {
+    id: 'combo_forward',
+    label: 'Combo Forward',
+    position: 'PF',
+    comps: 'Julius Randle · Tobias Harris · LaMarcus Aldridge',
+    blurb: 'Bullies smaller fours in the post, steps out for the midrange, cleans the glass.',
+    ratingBias: {
+      finishing: 12,
+      midRange: 12,
+      rebounding: 10,
+      threePoint: 6,
+      interiorDefense: 2,
+      playmaking: 2,
+      perimeterDefense: -4,
+    },
+    growthWeights: { finishing: 1.2, midRange: 1.3, rebounding: 1.2, threePoint: 1.1 },
+    awardAffinity: { scoring: 1.2, playmaking: 0.5, defense: 0.5, rebounding: 1.0 },
+  },
+  energy_forward: {
+    id: 'energy_forward',
+    label: 'Energy Forward',
+    position: 'PF',
+    comps: 'Kenneth Faried · Montrezl Harrell · JaMychal Green',
+    blurb: 'All motor - offensive boards, rim runs, weakside blocks. Never takes a play off.',
+    ratingBias: {
+      rebounding: 18,
+      finishing: 16,
+      interiorDefense: 8,
+      perimeterDefense: 4,
+      threePoint: -12,
+      midRange: -8,
+      playmaking: -6,
+    },
+    growthWeights: { rebounding: 1.3, finishing: 1.3, interiorDefense: 1.1, perimeterDefense: 1.0 },
+    awardAffinity: { scoring: 0.7, playmaking: 0.2, defense: 1.0, rebounding: 1.3 },
+    athBias: 8,
   },
 
   // ---- C ----------------------------------------------------------------
@@ -398,6 +584,57 @@ const DEFS: Record<ArchetypeId, ArchetypeDef> = {
     },
     growthWeights: { finishing: 1.3, rebounding: 1.2, interiorDefense: 1.2, perimeterDefense: 0.9 },
     awardAffinity: { scoring: 0.8, playmaking: 0.2, defense: 1.2, rebounding: 1.4 },
+    athBias: 6,
+  },
+  mobile_big: {
+    id: 'mobile_big',
+    label: 'Mobile Big',
+    position: 'C',
+    comps: 'Anthony Davis · Bam Adebayo · Chet Holmgren',
+    blurb: 'Switches onto guards, anchors the paint, and hands the ball out of the short roll.',
+    ratingBias: {
+      interiorDefense: 16,
+      rebounding: 12,
+      perimeterDefense: 10,
+      finishing: 10,
+      basketballIQ: 6,
+      playmaking: 4,
+      threePoint: -6,
+    },
+    growthWeights: {
+      interiorDefense: 1.4,
+      perimeterDefense: 1.2,
+      rebounding: 1.2,
+      finishing: 1.1,
+      playmaking: 1.1,
+    },
+    awardAffinity: { scoring: 0.8, playmaking: 0.6, defense: 1.5, rebounding: 1.2 },
+    athBias: 5,
+  },
+  skilled_center: {
+    id: 'skilled_center',
+    label: 'Skilled Center',
+    position: 'C',
+    comps: 'Al Horford · Nikola Vučević · Jonas Valančiūnas',
+    blurb: 'Slower feet, sharper mind: spaces the floor, walls up the paint, makes every rotation.',
+    ratingBias: {
+      interiorDefense: 12,
+      rebounding: 12,
+      threePoint: 10,
+      basketballIQ: 8,
+      midRange: 6,
+      finishing: 4,
+      perimeterDefense: -8,
+    },
+    growthWeights: {
+      threePoint: 1.3,
+      basketballIQ: 1.2,
+      interiorDefense: 1.1,
+      rebounding: 1.1,
+      midRange: 1.1,
+    },
+    awardAffinity: { scoring: 0.9, playmaking: 0.4, defense: 1.0, rebounding: 1.1 },
+    athBias: -4,
   },
 };
 

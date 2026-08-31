@@ -1,4 +1,11 @@
-import type { AwardId, FranchiseStanding, FranchiseTier, Role, TeamResult } from '../types.js';
+import type {
+  AwardId,
+  EuroResult,
+  FranchiseStanding,
+  FranchiseTier,
+  Role,
+  TeamResult,
+} from '../types.js';
 
 export const FRANCHISE_TIER_LABELS: Record<FranchiseTier, string> = {
   none: 'Passing through',
@@ -66,6 +73,35 @@ export function seasonFranchiseRep(a: SeasonRepArgs): number {
   for (const id of a.awards) pts += AWARD_REP[id] ?? 0;
   // Loyalty compounds - a few years in one place and the city adopts you.
   if (a.seasonsWithTeam >= 4) pts += Math.min(a.seasonsWithTeam - 3, 6) * 2;
+  return pts;
+}
+
+const EURO_RESULT_REP: Record<EuroResult, number> = {
+  euroleague_champion: 16,
+  euroleague_final_four: 7,
+  domestic_title: 6,
+  euro_playoffs: 2,
+  euro_missed: 0,
+};
+
+export interface OverseasRepArgs {
+  awards: readonly AwardId[];
+  result: EuroResult;
+  /** Consecutive seasons with this club, including the one just played. */
+  seasonsWithClub: number;
+  played: boolean;
+}
+
+/**
+ * Rep earned with an overseas club for one season - you're always the marquee
+ * name there, so the role term is fixed high and the club silverware carries
+ * its own weight.
+ */
+export function overseasFranchiseRep(a: OverseasRepArgs): number {
+  if (!a.played) return 2;
+  let pts = 6 + ROLE_REP.franchise + EURO_RESULT_REP[a.result];
+  for (const id of a.awards) pts += AWARD_REP[id] ?? 0;
+  if (a.seasonsWithClub >= 3) pts += Math.min(a.seasonsWithClub - 2, 6) * 2;
   return pts;
 }
 

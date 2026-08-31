@@ -23,7 +23,10 @@ export function CreatePlayer() {
   const [name, setName] = useState('');
   const [position, setPosition] = useState<Position>('PG');
   const [archetype, setArchetype] = useState<ArchetypeId>(archetypesFor('PG')[0]!.id);
-  const [jerseyNumber, setJerseyNumber] = useState(() => 1 + Math.floor(randomSeed() % 30));
+  // Typed freely; defaults to 0. An empty field reads as 0.
+  const [jersey, setJersey] = useState('0');
+  const jerseyNumber =
+    jersey === '' ? 0 : Math.max(0, Math.min(99, Math.trunc(Number(jersey) || 0)));
   const [country, setCountry] = useState('USA');
   const [handedness, setHandedness] = useState<'left' | 'right'>('right');
   const [error, setError] = useState<{ field: string; message: string } | null>(null);
@@ -87,10 +90,19 @@ export function CreatePlayer() {
               <span className="text-xs uppercase tracking-wide text-ink-dim">Jersey #</span>
               <input
                 type="number"
+                inputMode="numeric"
                 min={0}
                 max={99}
-                value={jerseyNumber}
-                onChange={(e) => setJerseyNumber(Math.max(0, Math.min(99, Number(e.target.value))))}
+                value={jersey}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  if (v === '') return setJersey('');
+                  const n = Math.trunc(Number(v));
+                  if (Number.isFinite(n)) setJersey(String(Math.max(0, Math.min(99, n))));
+                }}
+                onBlur={() => {
+                  if (jersey === '') setJersey('0');
+                }}
                 className="w-20 rounded-lg border border-court-600 bg-court-800 px-3 py-2.5 text-center text-ink outline-none focus:border-amber"
                 aria-label="Jersey number"
               />

@@ -134,6 +134,8 @@ export const seasonRecordSchema = z.object({
   injuredGames: z.number().int().min(0).max(82),
   salary: money,
   recap: z.string(),
+  seed: z.number().int().min(0).max(15),
+  grade: z.enum(['S', 'A', 'B', 'C', 'D']),
 });
 
 export const overseasSeasonSchema = z.object({
@@ -146,6 +148,7 @@ export const overseasSeasonSchema = z.object({
   awards: z.array(awardIdSchema),
   salary: money,
   headline: z.string(),
+  grade: z.enum(['S', 'A', 'B', 'C', 'D']),
 });
 
 export const injuryEntrySchema = z.object({

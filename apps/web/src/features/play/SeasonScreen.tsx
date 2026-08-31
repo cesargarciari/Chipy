@@ -4,10 +4,9 @@ import { ChoiceCard } from '../../components/ChoiceCard.js';
 import { MomentModal, isHeadlineMoment } from '../../components/MomentModal.js';
 import { Card, CardBody } from '../../components/ui/card.js';
 import { clubCrest, teamLogo } from '../../lib/art.js';
-import { TEAM_RESULT_LABELS, teamName } from '../../lib/format.js';
+import { GRADE_TONE, TEAM_RESULT_LABELS, teamName } from '../../lib/format.js';
 import { AwardChips } from './AwardChips.js';
 import { CareerHud } from './CareerHud.js';
-import { MomentsBanner } from './MomentsBanner.js';
 import { PerksDrawer } from './PerksDrawer.js';
 import { ScenarioFrame } from './ScenarioFrame.js';
 import { StatLine } from './StatLine.js';
@@ -29,7 +28,6 @@ export function SeasonScreen({
   const { preview, decision, shop } = season;
   const last = preview.lastSeason;
   const headlineMoments = preview.moments.filter(isHeadlineMoment);
-  const bannerMoments = preview.moments.filter((m) => !isHeadlineMoment(m));
   const where =
     preview.league === 'overseas'
       ? (preview.club?.name ?? 'overseas')
@@ -61,17 +59,19 @@ export function SeasonScreen({
 
       <MomentModal key={preview.seasonNumber} moments={headlineMoments} />
 
-      <MomentsBanner moments={bannerMoments} />
-
       <CareerHud preview={preview} highlight={highlight} />
 
       {last ? (
         <Card>
           <CardBody className="space-y-3">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between gap-2">
               <h3 className="font-bold">Last season - {teamName(last.teamId)}</h3>
-              <span className="text-xs uppercase tracking-wide text-ink-dim">
-                {TEAM_RESULT_LABELS[last.teamResult]}
+              <span className="inline-flex items-center gap-2 text-xs uppercase tracking-wide text-ink-dim">
+                {last.seed >= 1 && <span>#{last.seed} seed</span>}
+                <span>{TEAM_RESULT_LABELS[last.teamResult]}</span>
+                <span className={`font-display text-base leading-none ${GRADE_TONE[last.grade]}`}>
+                  {last.grade}
+                </span>
               </span>
             </div>
             <p className="text-sm text-ink">{last.recap}</p>

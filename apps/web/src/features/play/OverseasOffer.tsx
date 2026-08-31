@@ -3,7 +3,6 @@ import { useState } from 'react';
 import { ChoiceCard } from '../../components/ChoiceCard.js';
 import { MomentModal, isHeadlineMoment } from '../../components/MomentModal.js';
 import { CareerHud } from './CareerHud.js';
-import { MomentsBanner } from './MomentsBanner.js';
 import { PerksDrawer } from './PerksDrawer.js';
 
 type OverseasOfferData = NonNullable<PendingDecision['overseasOffer']>;
@@ -34,9 +33,7 @@ export function OverseasOffer({
 }) {
   const [highlight, setHighlight] = useState<readonly string[] | undefined>(undefined);
   const copy = COPY[overseasOffer.reason];
-  const moments = overseasOffer.preview.moments;
-  const headlineMoments = moments.filter(isHeadlineMoment);
-  const bannerMoments = moments.filter((m) => !isHeadlineMoment(m));
+  const headlineMoments = overseasOffer.preview.moments.filter(isHeadlineMoment);
 
   return (
     <div className="space-y-4">
@@ -47,8 +44,6 @@ export function OverseasOffer({
       </div>
 
       <MomentModal key={overseasOffer.preview.seasonNumber} moments={headlineMoments} />
-
-      <MomentsBanner moments={bannerMoments} />
 
       <CareerHud preview={overseasOffer.preview} highlight={highlight} />
 

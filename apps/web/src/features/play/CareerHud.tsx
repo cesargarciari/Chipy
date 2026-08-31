@@ -107,7 +107,7 @@ export function CareerHud({
 
       {(preview.franchiseTier !== 'none' || preview.nationalTeam.tier !== 'none') && (
         <div className="grid gap-2 sm:grid-cols-2">
-          {preview.league === 'nba' && preview.team && preview.franchiseTier !== 'none' && (
+          {preview.franchiseTier !== 'none' && (
             <IdolatryBar
               label="Club idolatry"
               tier={preview.franchiseTier}
