@@ -67,6 +67,7 @@ describe('overseas: return to the NBA offers a choice of two teams', () => {
               ).id;
             if (p.kind === 'landing') return p.landing!.offers[0]!.id;
             if (p.kind === 'midseason') return p.midseason!.decision.options[0]!.id;
+            if (p.kind === 'finals') return p.finals!.game.options[0]!.id;
             if (p.kind === 'chemistry') return p.chemistry!.decision.options[1]!.id;
             if (p.kind === 'farewell') return 'quiet_goodbye';
             return firstNonRetire(p.season!.decision.options);
@@ -114,6 +115,7 @@ describe('farewell tour is a scripted lap', () => {
               ).id;
             if (p.kind === 'landing') return p.landing!.offers[0]!.id;
             if (p.kind === 'midseason') return p.midseason!.decision.options[0]!.id;
+            if (p.kind === 'finals') return p.finals!.game.options[0]!.id;
             if (p.kind === 'chemistry') return p.chemistry!.decision.options[1]!.id;
             if (p.kind === 'overseas_offer') return firstNonRetire(p.overseasOffer!.options);
             return firstNonRetire(p.season!.decision.options);
@@ -153,6 +155,7 @@ describe('overseas clubs build idolatry', () => {
               ).id;
             if (p.kind === 'landing') return p.landing!.offers[0]!.id;
             if (p.kind === 'midseason') return p.midseason!.decision.options[0]!.id;
+            if (p.kind === 'finals') return p.finals!.game.options[0]!.id;
             if (p.kind === 'chemistry') return p.chemistry!.decision.options[1]!.id;
             if (p.kind === 'farewell') return 'farewell_tour';
             return firstNonRetire(p.season!.decision.options);

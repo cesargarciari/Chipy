@@ -34,8 +34,9 @@ const SHORT: Partial<Record<AwardId, string>> = {
   oly_bronze: 'Olympic Bronze',
 };
 
-/** How many trophies to actually draw in a stack before it just gets silly. */
-const MAX_IN_STACK = 5;
+/** How many trophies to actually draw in a stack before it just gets silly. The
+ * `xN` caption carries the exact count, so the stack only has to read as "a lot". */
+const MAX_IN_STACK = 4;
 
 interface TrophyShelfProps {
   awards: Partial<Record<AwardId, number>>;
@@ -58,7 +59,7 @@ export function TrophyShelf({ awards }: TrophyShelfProps) {
   return (
     <div className="space-y-4">
       {shelf.length > 0 && (
-        <div className="trophy-shelf flex flex-wrap items-end gap-5 rounded-xl border border-court-700 bg-gradient-to-b from-court-800/70 to-court-900 px-4 pb-3 pt-5">
+        <div className="trophy-shelf flex flex-nowrap items-end gap-5 overflow-x-auto rounded-xl border border-court-700 bg-gradient-to-b from-court-800/70 to-court-900 px-4 pb-3 pt-5">
           {shelf.map((id) => {
             const count = awards[id] ?? 0;
             const src = awardArt(id)!;

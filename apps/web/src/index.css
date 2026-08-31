@@ -76,14 +76,16 @@
 /* Horizontal trophy case on the legacy screen. Within one award, the copies
  * overlap at rest and ease apart when you hover (or focus) that award alone -
  * the rest of the shelf stays put. Opacity is untouched, so every trophy is
- * visible the whole time. */
+ * visible the whole time. The shelf itself never wraps (it scrolls): a wrapping
+ * shelf re-flowed mid-hover as a big stack fanned out, which slid the hovered
+ * stack out from under the cursor and set off a jitter loop. */
 .trophy-group-stack > * + * {
   margin-left: -2.5rem;
   transition: margin-left 0.28s cubic-bezier(0.22, 1, 0.36, 1);
 }
 .trophy-group:hover .trophy-group-stack > * + *,
 .trophy-group:focus-visible .trophy-group-stack > * + * {
-  margin-left: 0.4rem;
+  margin-left: -1rem;
 }
 
 @media (prefers-reduced-motion: reduce) {

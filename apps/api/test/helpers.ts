@@ -106,11 +106,13 @@ export function createCareerBody(
                 ? p.chemistry!.decision.options.map((o) => o.id)
                 : p.kind === 'midseason'
                   ? p.midseason!.decision.options.map((o) => o.id)
-                  : p.kind === 'overseas_offer'
-                    ? p.overseasOffer!.options.map((o) => o.id)
-                    : p.kind === 'farewell'
-                      ? p.farewell!.options.map((o) => o.id)
-                      : p.season!.decision.options.map((o) => o.id);
+                  : p.kind === 'finals'
+                    ? p.finals!.game.options.map((o) => o.id)
+                    : p.kind === 'overseas_offer'
+                      ? p.overseasOffer!.options.map((o) => o.id)
+                      : p.kind === 'farewell'
+                        ? p.farewell!.options.map((o) => o.id)
+                        : p.season!.decision.options.map((o) => o.id);
     let idx = overrides.strategy === 'last' ? opts.length - 1 : 0;
     if (opts[idx] === 'retire' && opts.length > 1) idx = (idx + 1) % opts.length;
     if (p.kind === 'college_year') {

@@ -115,6 +115,7 @@ describe('modest-overall veterans sign short deals', () => {
           ).id;
         else if (pend.kind === 'landing') id = pend.landing!.offers[0]!.id;
         else if (pend.kind === 'midseason') id = pend.midseason!.decision.options[0]!.id;
+        else if (pend.kind === 'finals') id = pend.finals!.game.options[0]!.id;
         else if (pend.kind === 'chemistry') id = pend.chemistry!.decision.options[1]!.id;
         else if (pend.kind === 'overseas_offer') id = pend.overseasOffer!.options[0]!.id;
         else if (pend.kind === 'farewell') id = 'quiet_goodbye';

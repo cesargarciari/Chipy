@@ -58,7 +58,7 @@ export function SeasonTable({ seasons }: { seasons: CareerSummaryDto['seasons'] 
                   </td>
                   <td
                     className={`pr-2 ${RESULT_TONE[s.teamResult] ?? 'text-ink-dim'}`}
-                    title={s.recap}
+                    title={s.finalsHeadline ?? s.recap}
                   >
                     {TEAM_RESULT_LABELS[s.teamResult]}
                   </td>

@@ -1,5 +1,8 @@
 node_modules
 .claude
+.github/agents
+.github/hooks
+.github/skills
 dist
 build
 coverage

@@ -74,6 +74,9 @@ export function SeasonScreen({
                 </span>
               </span>
             </div>
+            {last.finalsHeadline && (
+              <p className="text-sm font-semibold text-amber">{last.finalsHeadline}</p>
+            )}
             <p className="text-sm text-ink">{last.recap}</p>
             {(last.midseasonHeadline ?? last.eventHeadline) && (
               <p className="text-sm text-ink-dim">{last.midseasonHeadline ?? last.eventHeadline}</p>

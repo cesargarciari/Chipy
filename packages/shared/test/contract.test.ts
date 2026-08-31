@@ -22,11 +22,13 @@ function autoPlay(seed: string, profile: PlayerProfile): CareerSummary {
                 ? p.chemistry!.decision.options.map((o) => o.id)
                 : p.kind === 'midseason'
                   ? p.midseason!.decision.options.map((o) => o.id)
-                  : p.kind === 'overseas_offer'
-                    ? p.overseasOffer!.options.map((o) => o.id)
-                    : p.kind === 'farewell'
-                      ? p.farewell!.options.map((o) => o.id)
-                      : p.season!.decision.options.map((o) => o.id);
+                  : p.kind === 'finals'
+                    ? p.finals!.game.options.map((o) => o.id)
+                    : p.kind === 'overseas_offer'
+                      ? p.overseasOffer!.options.map((o) => o.id)
+                      : p.kind === 'farewell'
+                        ? p.farewell!.options.map((o) => o.id)
+                        : p.season!.decision.options.map((o) => o.id);
     let id = opts.find((o) => o !== 'retire') ?? opts[0]!;
     if (p.kind === 'college_year') id = opts.find((o) => o.startsWith('cy_declare')) ?? id;
     choices.push({ nodeId: p.nodeId, choiceId: id });

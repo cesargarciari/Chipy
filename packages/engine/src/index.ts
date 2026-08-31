@@ -113,6 +113,17 @@ export {
 export { statusTier, statusRank, tradeChance } from './season/status.js';
 export { seasonRecap } from './season/recap.js';
 export { gradeSeason, gradeOverseasSeason } from './season/grade.js';
+export {
+  FINALS_SCENARIOS,
+  buildFinalsGame,
+  resolveFinals,
+  finalsEdge,
+  finalsCorrectCount,
+  type FinalsScenario,
+  type FinalsPlay,
+  type FinalsGameView,
+  type FinalsResolution,
+} from './season/finals.js';
 export { conferenceSeed, GLAMOUR_TEAMS, BOTTOM_TEAMS } from './season/season-sim.js';
 export {
   buildPerkShop,

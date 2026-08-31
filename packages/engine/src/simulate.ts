@@ -75,6 +75,12 @@ import { SHOE_BRANDS } from './season/scenarios/shoe.js';
 import { findScenarioOption } from './season/scenarios/index.js';
 import { gradeOverseasSeason, gradeSeason } from './season/grade.js';
 import {
+  buildFinalsGame,
+  finalsEdge,
+  resolveFinals,
+  type FinalsGameView,
+} from './season/finals.js';
+import {
   conferenceSeed,
   derivedRng,
   roleFor,
@@ -170,6 +176,7 @@ export interface PendingDecision {
     | 'season'
     | 'midseason'
     | 'chemistry'
+    | 'finals'
     | 'overseas_offer'
     | 'farewell';
   prologue?: PrologueNodeView;
@@ -180,6 +187,8 @@ export interface PendingDecision {
   midseason?: { decision: SeasonDecisionNode; preview: SeasonPreview };
   /** A locker-room question - rolls on its own, so it can share a season with a mid-season one. */
   chemistry?: { decision: SeasonDecisionNode; preview: SeasonPreview };
+  /** The one decisive Finals possession, posed only when a career reaches the NBA Finals. */
+  finals?: { game: FinalsGameView; preview: SeasonPreview };
   /** The pre-retirement send-off choice: `farewell_tour` vs `quiet_goodbye`. */
   farewell?: { options: OptionView[]; preview: SeasonPreview };
   overseasOffer?: {
@@ -1194,10 +1203,49 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
       // Where the team landed in its conference this year (1-15), then how far
       // that seed carries it in the bracket.
       const confSeed = conferenceSeed(seed, state.team!.id, state.seasonIndex, sim.impact);
-      const teamResult: TeamResult =
+      const playoffResult: TeamResult =
         sim.stats.gp === 0
           ? 'missed_season'
           : simulatePlayoffs(rng, { seed: confSeed, playerImpact: sim.impact, effect });
+
+      // Reaching the Finals is a possession the player calls, not a coin flip.
+      // How good the team was decides how many of the three plays actually win
+      // it. The mini-game runs off a derived stream and resolves from the choice
+      // alone - it never touches the main RNG, so a career that never reached a
+      // Finals still replays byte for byte.
+      let teamResult: TeamResult = playoffResult;
+      let finalsHeadline: string | null = null;
+      if (playoffResult === 'champion' || playoffResult === 'finals') {
+        const finalsNodeId = `finals${seasonNumber}`;
+        const edge = finalsEdge({
+          teamStrength,
+          playerImpact: sim.impact,
+          ringWindow: state.ringWindowLeft,
+        });
+        const game = buildFinalsGame(derivedRng(seed, 'finals', seasonNumber));
+        const pick = expect(finalsNodeId);
+        if (!pick) {
+          return {
+            status: 'awaiting_choice',
+            pending: {
+              nodeId: finalsNodeId,
+              kind: 'finals',
+              finals: { game, preview: buildPreview(seasonNumber, overallAfter, contractYear) },
+            },
+          };
+        }
+        const fr = resolveFinals(game.scenarioId, pick.choiceId, edge);
+        teamResult = fr.won ? 'champion' : 'finals';
+        finalsHeadline = fr.won
+          ? `NBA Finals: ${fr.outcome}`
+          : `NBA Finals, and it falls short: ${fr.outcome}`;
+        state.timeline.push({
+          nodeId: finalsNodeId,
+          choiceId: pick.choiceId,
+          stage: `Age ${state.age}`,
+          headline: finalsHeadline,
+        });
+      }
 
       // Open (or refresh) the 5-season championship window on a title.
       if (teamResult === 'champion') state.ringWindowLeft = 5;
@@ -1297,6 +1345,7 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
         eventHeadline: evt.headline,
         midseasonId: midId,
         midseasonHeadline: midHeadline,
+        finalsHeadline,
         stats: sim.stats,
         teamResult,
         awards: seasonAwards,

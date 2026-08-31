@@ -42,3 +42,6 @@ pnpm-debug.log*
 
 # DynamoDB Local data
 .dynamodb/
+
+.claude/skills
+.github/skills

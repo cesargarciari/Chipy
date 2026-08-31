@@ -477,6 +477,37 @@ instead of unresolved CSS custom properties, so they render white).
 summaries still validate; `athBias` is an internal `ArchetypeDef` field, not a
 DTO.
 
+**The Finals as a possession, coherent honours, trophy-shelf fix (v4.19).** A
+career that reaches the NBA Finals no longer flips a coin for the ring: it calls
+one decisive possession. `season/finals.ts` holds four real late-game scenarios
+(trapped at the logo, defending a three-point lead, an elbow iso, a sideline
+out-of-bounds set), each with three plays ranked by soundness and each play
+carrying its own `good` and `bad` line. `finalsEdge({ teamStrength, playerImpact,
+ringWindow })` scores how strong the team was, 0..1; `finalsCorrectCount` gives a
+genuine favourite (`>= 0.66`) two winning plays and everyone else one, so a
+coin-flip pick still loses a Finals more often than not unless the team really
+was the best in the league. `simulate.ts` runs the existing `simulatePlayoffs`
+unchanged; only when it returns `champion` or `finals` does the engine pose a new
+`kind: 'finals'` pending node (`finals{n}`), then map the chosen play to
+`champion` (its `good` line) or `finals` (its `bad` line). `buildFinalsGame` runs
+off `derivedRng(seed, 'finals', n)` and `resolveFinals` is pure, so the main RNG
+stream is untouched and a career that never reached a Finals replays byte for
+byte. `SeasonRecord` gains `finalsHeadline: string | null` (the web leads the
+"Last season" card with it and the season table shows it on hover). `resolveAwards`
+now closes with a coherence pass: an MVP is forced to First Team All-NBA (any
+Second / Third pick stripped), a DPOY to First Team All-Defense, and a
+superstar-or-better All-Star is guaranteed no worse than Second Team (a
+generational year takes First 70% of the time; the merit path still earns First
+on its own). Web: the trophy shelf no longer wraps (it scrolls) and a stack fans
+apart only to `margin-left: -1rem` on hover, killing the reflow loop where a
+big All-Star stack slid out from under the cursor and jittered; `MAX_IN_STACK`
+drops 5 to 4 (the `xN` caption carries the exact count).
+
+`ENGINE_VERSION` → `4.19.0`; packages → `0.4.19`. Schema: `seasonRecordSchema`
+gains `finalsHeadline: z.string().nullable()` (old summaries predate it and key
+off the version); the `choiceSelectionSchema` node-id pattern learns `finals\d`.
+Distribution drift is mild and intended: S ~8%, ring ~30%, generational peak ~6%.
+
 ## Consequences
 
 - The legacy score/grade bands were re-tuned (perks and the mid-season pool lift

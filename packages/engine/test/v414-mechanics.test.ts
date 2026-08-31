@@ -113,6 +113,7 @@ describe('maxed attributes drop off option cards', () => {
         ).id;
       else if (p.kind === 'landing') id = p.landing!.offers[0]!.id;
       else if (p.kind === 'midseason') id = p.midseason!.decision.options[0]!.id;
+      else if (p.kind === 'finals') id = p.finals!.game.options[0]!.id;
       else if (p.kind === 'chemistry') id = p.chemistry!.decision.options[1]!.id;
       else if (p.kind === 'overseas_offer') id = p.overseasOffer!.options[0]!.id;
       else if (p.kind === 'farewell') id = 'quiet_goodbye';

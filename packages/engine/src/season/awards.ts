@@ -167,5 +167,30 @@ export function resolveAwards(args: AwardArgs): AwardId[] {
     if (impact >= 19 + rng() * 3 && rng() < 0.6) out.push('finals_mvp');
   }
 
+  // Keep the honours coherent. The All-NBA / All-Defense teams are the peer
+  // read on a season, so they can't contradict the individual trophies:
+  //  - an MVP is First Team All-NBA, full stop
+  //  - a superstar-tier All-Star almost always lands on one of the top two teams
+  //  - a DPOY is First Team All-Defense
+  const setAllNba = (team: 'all_nba_1' | 'all_nba_2') => {
+    for (const t of ['all_nba_1', 'all_nba_2', 'all_nba_3'] as const) {
+      const i = out.indexOf(t);
+      if (i >= 0) out.splice(i, 1);
+    }
+    out.push(team);
+  };
+  if (out.includes('mvp')) {
+    setAllNba('all_nba_1');
+  } else if (elite && isAllStar && !out.includes('all_nba_1') && !out.includes('all_nba_2')) {
+    // A generational season is nearly always First Team; a plain superstar is
+    // guaranteed no worse than Second (the merit path above still earns 1st).
+    setAllNba(status === 'generational' && rng() < 0.7 ? 'all_nba_1' : 'all_nba_2');
+  }
+  if (out.includes('dpoy') && !out.includes('all_defense_1')) {
+    const i = out.indexOf('all_defense_2');
+    if (i >= 0) out.splice(i, 1);
+    out.push('all_defense_1');
+  }
+
   return out;
 }

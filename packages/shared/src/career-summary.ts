@@ -126,6 +126,7 @@ export const seasonRecordSchema = z.object({
   eventHeadline: z.string(),
   midseasonId: z.string().nullable(),
   midseasonHeadline: z.string().nullable(),
+  finalsHeadline: z.string().nullable(),
   stats: seasonStatLineSchema,
   teamResult: teamResultSchema,
   awards: z.array(awardIdSchema),

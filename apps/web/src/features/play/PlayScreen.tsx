@@ -6,6 +6,7 @@ import { ChemistryScreen } from './ChemistryScreen.js';
 import { CollegePick } from './CollegePick.js';
 import { CollegeYear } from './CollegeYear.js';
 import { FarewellScreen } from './FarewellScreen.js';
+import { FinalsScreen } from './FinalsScreen.js';
 import { LandingSpot } from './LandingSpot.js';
 import { MidseasonScreen } from './MidseasonScreen.js';
 import { OverseasOffer } from './OverseasOffer.js';
@@ -55,6 +56,7 @@ export function PlayScreen() {
       )}
       {p.kind === 'midseason' && <MidseasonScreen midseason={p.midseason!} onChoose={onChoose} />}
       {p.kind === 'chemistry' && <ChemistryScreen chemistry={p.chemistry!} onChoose={onChoose} />}
+      {p.kind === 'finals' && <FinalsScreen finals={p.finals!} onChoose={onChoose} />}
       {p.kind === 'farewell' && <FarewellScreen farewell={p.farewell!} onChoose={onChoose} />}
       {p.kind === 'overseas_offer' && (
         <OverseasOffer

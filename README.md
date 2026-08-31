@@ -144,6 +144,11 @@ The API creates the local table on boot. To (re)create it manually:
    rivals for a **1–15 seed**, and that seed drives the bracket — a 1-seed is a
    real title threat, a 5-seed almost never is. Perennial cellar teams (Kings,
    Wizards, Nets) start every year a tier down and mostly pick in the lottery.
+   Reach the **NBA Finals** and you call one decisive possession yourself: three
+   real plays (split the trap and kick, back down to your spot, switch everything
+   and give up a two…), each with a good and a bad ending. How good your team was
+   sets how many are right — a true favorite has two, everyone else has one —
+   so pick well and lift the trophy, pick wrong and the shot rims out.
    Each season also gets its own **grade (S–D)** from accolades, seed, and team
    result, plus a **randomly-flavoured recap** — "lost the first round in a
    heartbreaking five, a buzzer-beater on the road ending it", "won it all,
@@ -286,8 +291,11 @@ owners — ship your own stylised marks if you publish.
   your stronger and weaker end, so a two-axis bump shows the smaller blended
   gain), a typed **jersey number** (0 by default), a trophy case that overlaps at
   rest and fans out on hover, a fixed **copy-as-image** career card (the header
-  and radar labels no longer scramble), and a wider school pool (14 blue-bloods,
-  14 mid-majors)
+  and radar labels no longer scramble), a wider school pool (14 blue-bloods,
+  14 mid-majors), a **playable NBA Finals** — one decisive possession, three
+  real plays, a favorite gets two right answers and everyone else one — and
+  **coherent honours** (an MVP is always All-NBA First Team, a DPOY always
+  All-Defensive First Team, a superstar never below Second)
 - **M2 — AWS deploy (cheapest):** Terraform modules, remote state, GitHub Actions
   deploy via AWS OIDC, CloudWatch dashboard + Budgets alarm
 - **M3 — depth:** salary-cap rules & sign-and-trades, multi-player trades, named

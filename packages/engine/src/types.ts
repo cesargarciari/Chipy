@@ -3,7 +3,7 @@
  * existing `(seed, profile, choices)` tuple. Stored on every `CareerSummary` so
  * the API can tell whether a persisted career predates the current rules.
  */
-export const ENGINE_VERSION = '4.18.0';
+export const ENGINE_VERSION = '4.19.0';
 
 export const POSITIONS = ['PG', 'SG', 'SF', 'PF', 'C'] as const;
 export type Position = (typeof POSITIONS)[number];
@@ -523,6 +523,8 @@ export interface SeasonRecord {
   /** Interactive mid-season situation, if one fired this year. */
   midseasonId: string | null;
   midseasonHeadline: string | null;
+  /** How the Finals possession the player called played out, if they reached one. */
+  finalsHeadline: string | null;
   stats: SeasonStatLine;
   teamResult: TeamResult;
   awards: AwardId[];

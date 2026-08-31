@@ -36,6 +36,8 @@ function pendingOptionIds(
       return p.midseason!.decision.options.map((o) => o.id);
     case 'chemistry':
       return p.chemistry!.decision.options.map((o) => o.id);
+    case 'finals':
+      return p.finals!.game.options.map((o) => o.id);
     case 'overseas_offer':
       return p.overseasOffer!.options.map((o) => o.id);
     case 'farewell':
