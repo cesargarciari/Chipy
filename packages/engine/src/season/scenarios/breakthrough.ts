@@ -3,9 +3,9 @@ import type { Scenario } from '../scenario-types.js';
 /**
  * The one-per-career leap. Every option is `rare` (the client renders it gold)
  * and - because rare options skip the global rating slowdown - actually lands
- * its full `+12` (trimmed only by the 99 cap). Rare: it turns up for roughly one
- * career in ten, at most once, and only for a player who has already carved out
- * a role.
+ * its full `+12` (trimmed only by the 99 cap). Uncommon: it turns up for roughly
+ * one career in six, at most once, and only for a player who has already carved
+ * out a role. (At weight 0.3 it was ~1-in-10 and most players never saw it.)
  */
 export const breakthroughScenarios: Scenario[] = [
   {
@@ -13,9 +13,9 @@ export const breakthroughScenarios: Scenario[] = [
     theme: 'training',
     gate: {
       once: true,
-      weight: 0.3,
+      weight: 0.55,
       minSeason: 3,
-      maxSeason: 13,
+      maxSeason: 14,
       role: ['rotation', 'starter', 'franchise'],
     },
     title: 'IT ALL CLICKS',

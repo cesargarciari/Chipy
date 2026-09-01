@@ -501,22 +501,44 @@ generational year takes First 70% of the time; the merit path still earns First
 on its own). Web: the trophy shelf no longer wraps (it scrolls) and a stack fans
 apart only to `margin-left: -1rem` on hover, killing the reflow loop where a
 big All-Star stack slid out from under the cursor and jittered; `MAX_IN_STACK`
-drops 5 to 4 (the `xN` caption carries the exact count); the shelf allow-list
-adds `mip` and `sixth_man` now that their trophy art exists, so they render as
-graphics instead of text chips. The DEFENSE effect chip is fixed to read as a
-straight number: it is one tile (the weighted-average `defenseRatingOf`), so a
-`+2` to each defensive rating moves it `+2`, never `+4`. `describeEffects` now
-computes the chip's `nominal` from the same blend as its `delta` (so the two
-match unless the 99 cap genuinely trims the move, exactly like every other
-chip), instead of carrying the raw sum of the two axes as a struck-through
-"promise" the tile could never keep.
+drops 5 to 4 (the `xN` caption carries the exact count).
 
 `ENGINE_VERSION` → `4.19.0`; packages → `0.4.19`. Schema: `seasonRecordSchema`
 gains `finalsHeadline: z.string().nullable()` (old summaries predate it and key
 off the version); the `choiceSelectionSchema` node-id pattern learns `finals\d`.
-The DEFENSE-chip and trophy-art changes are display-only (no replay or schema
-impact). Distribution drift is mild and intended: S ~8%, ring ~30%, generational
-peak ~6%.
+Distribution drift is mild and intended: S ~8%, ring ~30%, generational peak ~6%.
+
+**Straight DEFENSE chip, new trophy art, a findable breakthrough (v4.20).** The
+DEFENSE effect chip now reads as a straight number. It is one tile (the
+weighted-average `defenseRatingOf`), so a `+2` to each defensive rating moves it
+`+2`, never `+4`. `describeEffects` computes the chip's `nominal` from the same
+blend as its `delta`, so the two match (no strike-through) unless the 99 cap
+genuinely trims the move, exactly like every other chip; before, it carried the
+raw sum of the two axes as a struck-out "promise" the tile could never keep. The
+trophy case is normalized: the shelf gap widens (`gap-5` to `gap-7`), every
+trophy renders in a fixed `h-14 w-14` box with a `p-1` inset (so an art with less
+transparent padding stops looking oversized), and the groups and stacks are
+`shrink-0` so a single trophy like Clutch POY can no longer bleed onto its
+neighbour. Its hover is now a subtle breathe, not a fan-out, and runs on
+`transform` rather than an animated `margin`: the overlap is a static
+`-1.75rem` margin, and hover nudges copies 2 through 4 out by `translateX` of
+`0.5rem` / `1rem` / `1.5rem` (well inside the `gap-7`), so the group's box never
+resizes, the shelf holds still, and nothing thrashes layout. The allow-list gains
+`mip`
+and `sixth_man` now that their art exists (they were rendering as text chips),
+and the season-by-season table swaps the `champion` emoji for `ring.png` (only
+there; the shelf and the gala reveal keep `champion.png`).
+`scn_breakthrough`, the once-a-career gold `+12`, was turning up
+for only ~1 career in 10 so most players never saw it: `weight` 0.3 to 0.55 and
+`maxSeason` 13 to 14 lift it to ~1 in 6. It stays `once` and still needs a player
+who has earned a role, and since a lone `+12` to one rating only nudges the
+overall the population grades barely move (S still ~8%).
+
+`ENGINE_VERSION` → `4.20.0`; packages → `0.4.20`. No schema change. The DEFENSE
+chip and the two art swaps are display-only; the breakthrough-weight change
+shifts scenario selection, so a career saved under an earlier version replays
+against the new pool (hence the version bump), but the summary shape is
+unchanged.
 
 ## Consequences
 

@@ -74,18 +74,27 @@
 }
 
 /* Horizontal trophy case on the legacy screen. Within one award, the copies
- * overlap at rest and ease apart when you hover (or focus) that award alone -
- * the rest of the shelf stays put. Opacity is untouched, so every trophy is
- * visible the whole time. The shelf itself never wraps (it scrolls): a wrapping
- * shelf re-flowed mid-hover as a big stack fanned out, which slid the hovered
- * stack out from under the cursor and set off a jitter loop. */
+ * overlap at rest via a static negative margin. On hover/focus of that award
+ * alone they ease apart a touch - but only via `transform`, so the group's box
+ * never resizes: the rest of the shelf holds still, nothing thrashes layout, and
+ * the move stays GPU-composited. Opacity is untouched, so every trophy stays
+ * visible. The shelf itself never wraps (it scrolls). MAX_IN_STACK caps the
+ * copies at 4, so nth-child(2..4) covers every trophy that moves. */
 .trophy-group-stack > * + * {
-  margin-left: -2.5rem;
-  transition: margin-left 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+  margin-left: -1.75rem;
+  transition: transform 0.24s cubic-bezier(0.22, 1, 0.36, 1);
 }
-.trophy-group:hover .trophy-group-stack > * + *,
-.trophy-group:focus-visible .trophy-group-stack > * + * {
-  margin-left: -1rem;
+.trophy-group:hover .trophy-group-stack > *:nth-child(2),
+.trophy-group:focus-visible .trophy-group-stack > *:nth-child(2) {
+  transform: translateX(0.5rem);
+}
+.trophy-group:hover .trophy-group-stack > *:nth-child(3),
+.trophy-group:focus-visible .trophy-group-stack > *:nth-child(3) {
+  transform: translateX(1rem);
+}
+.trophy-group:hover .trophy-group-stack > *:nth-child(4),
+.trophy-group:focus-visible .trophy-group-stack > *:nth-child(4) {
+  transform: translateX(1.5rem);
 }
 
 @media (prefers-reduced-motion: reduce) {

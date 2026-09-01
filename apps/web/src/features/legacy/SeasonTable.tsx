@@ -4,6 +4,7 @@ import { awardArt } from '../../lib/art.js';
 import { GRADE_TONE, moneyM, TEAM_RESULT_LABELS } from '../../lib/format.js';
 
 const ALL_STAR_ART = awardArt('all_star');
+const RING_ART = awardArt('ring');
 
 const RESULT_TONE: Record<string, string> = {
   champion: 'text-amber',
@@ -82,11 +83,19 @@ export function SeasonTable({ seasons }: { seasons: CareerSummaryDto['seasons'] 
                           <span className="text-amber">★</span>
                         ))}
                       {s.awards.includes('mvp') && <span className="text-amber">MVP</span>}
-                      {s.awards.includes('champion') && (
-                        <span className="text-amber" title="Champion">
-                          🏆
-                        </span>
-                      )}
+                      {s.awards.includes('champion') &&
+                        (RING_ART ? (
+                          <img
+                            src={RING_ART}
+                            alt="Champion"
+                            title="Champion"
+                            className="inline-block h-4 w-4 object-contain"
+                          />
+                        ) : (
+                          <span className="text-amber" title="Champion">
+                            🏆
+                          </span>
+                        ))}
                       {s.awards.includes('dpoy') && <span className="text-sky-400">DPOY</span>}
                     </span>
                   </td>

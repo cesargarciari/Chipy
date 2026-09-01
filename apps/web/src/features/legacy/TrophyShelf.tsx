@@ -63,7 +63,7 @@ export function TrophyShelf({ awards }: TrophyShelfProps) {
   return (
     <div className="space-y-4">
       {shelf.length > 0 && (
-        <div className="trophy-shelf flex flex-nowrap items-end gap-5 overflow-x-auto rounded-xl border border-court-700 bg-gradient-to-b from-court-800/70 to-court-900 px-4 pb-3 pt-5">
+        <div className="trophy-shelf flex flex-nowrap items-end gap-7 overflow-x-auto rounded-xl border border-court-700 bg-gradient-to-b from-court-800/70 to-court-900 px-5 pb-3 pt-5">
           {shelf.map((id) => {
             const count = awards[id] ?? 0;
             const src = awardArt(id)!;
@@ -71,18 +71,18 @@ export function TrophyShelf({ awards }: TrophyShelfProps) {
             return (
               <div
                 key={id}
-                className="trophy-group flex flex-col items-center rounded-lg outline-none focus-visible:ring-1 focus-visible:ring-amber/60"
+                className="trophy-group flex shrink-0 flex-col items-center rounded-lg outline-none focus-visible:ring-1 focus-visible:ring-amber/60"
                 title={label}
                 aria-label={label}
                 tabIndex={0}
               >
-                <div className="trophy-group-stack flex items-end">
+                <div className="trophy-group-stack flex shrink-0 items-end">
                   {Array.from({ length: Math.min(count, MAX_IN_STACK) }).map((_, k) => (
                     <img
                       key={k}
                       src={src}
                       alt=""
-                      className="h-16 w-16 object-contain drop-shadow-[0_4px_10px_rgba(0,0,0,0.5)]"
+                      className="h-14 w-14 shrink-0 object-contain p-1 drop-shadow-[0_4px_10px_rgba(0,0,0,0.5)]"
                     />
                   ))}
                 </div>

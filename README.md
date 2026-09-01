@@ -283,7 +283,7 @@ owners — ship your own stylised marks if you publish.
   end so a real stopper clears 85, per-career **randomised prologue** options,
   age that tracks extra college years, performance-driven **fame** (no longer a
   trainable stat), a slow rating economy where option cards show the exact gain
-  after the 99-cap (a maxed stat drops off the card) plus a **rare** ~1-in-10
+  after the 99-cap (a maxed stat drops off the card) plus an **uncommon** ~1-in-6
   once-a-career gold `+12`, a persistent stat strip + money bar, **30 comp-driven
   archetypes** (six per position, a Curry and a Ja build among them) whose
   real-player comps bias your starting ratings, growth curve, and athleticism,

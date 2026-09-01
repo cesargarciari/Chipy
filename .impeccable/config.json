@@ -1,3 +1,42 @@
 {
-  "buildPath": "code"
+  "buildPath": "code",
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "design-system-font-size",
+        "value": "10px",
+        "createdAt": "2026-09-01T04:35:03.110Z",
+        "reason": "pre-existing trophy-case caption style, shipped before impeccable tooling; not a new design decision"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#f7e3a1",
+        "createdAt": "2026-09-01T04:35:40.763Z",
+        "reason": "pre-existing .text-gold-gradient foil stop, shipped v4.11 before impeccable tooling"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#f5c04e",
+        "createdAt": "2026-09-01T04:35:40.790Z",
+        "reason": "pre-existing .text-gold-gradient foil stop, shipped v4.11 before impeccable tooling"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#b8860b",
+        "createdAt": "2026-09-01T04:35:40.815Z",
+        "reason": "pre-existing .text-gold-gradient foil stop, shipped v4.11 before impeccable tooling"
+      },
+      {
+        "rule": "gradient-text",
+        "value": "*",
+        "files": [
+          "apps/web/src/index.css"
+        ],
+        "createdAt": "2026-09-01T04:35:40.842Z",
+        "reason": "pre-existing .text-gold-gradient gala-badge effect, shipped v4.11 before impeccable tooling"
+      }
+    ]
+  }
 }
