@@ -501,12 +501,22 @@ generational year takes First 70% of the time; the merit path still earns First
 on its own). Web: the trophy shelf no longer wraps (it scrolls) and a stack fans
 apart only to `margin-left: -1rem` on hover, killing the reflow loop where a
 big All-Star stack slid out from under the cursor and jittered; `MAX_IN_STACK`
-drops 5 to 4 (the `xN` caption carries the exact count).
+drops 5 to 4 (the `xN` caption carries the exact count); the shelf allow-list
+adds `mip` and `sixth_man` now that their trophy art exists, so they render as
+graphics instead of text chips. The DEFENSE effect chip is fixed to read as a
+straight number: it is one tile (the weighted-average `defenseRatingOf`), so a
+`+2` to each defensive rating moves it `+2`, never `+4`. `describeEffects` now
+computes the chip's `nominal` from the same blend as its `delta` (so the two
+match unless the 99 cap genuinely trims the move, exactly like every other
+chip), instead of carrying the raw sum of the two axes as a struck-through
+"promise" the tile could never keep.
 
 `ENGINE_VERSION` → `4.19.0`; packages → `0.4.19`. Schema: `seasonRecordSchema`
 gains `finalsHeadline: z.string().nullable()` (old summaries predate it and key
 off the version); the `choiceSelectionSchema` node-id pattern learns `finals\d`.
-Distribution drift is mild and intended: S ~8%, ring ~30%, generational peak ~6%.
+The DEFENSE-chip and trophy-art changes are display-only (no replay or schema
+impact). Distribution drift is mild and intended: S ~8%, ring ~30%, generational
+peak ~6%.
 
 ## Consequences
 

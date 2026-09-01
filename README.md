@@ -293,9 +293,12 @@ owners — ship your own stylised marks if you publish.
   rest and fans out on hover, a fixed **copy-as-image** career card (the header
   and radar labels no longer scramble), a wider school pool (14 blue-bloods,
   14 mid-majors), a **playable NBA Finals** — one decisive possession, three
-  real plays, a favorite gets two right answers and everyone else one — and
+  real plays, a favorite gets two right answers and everyone else one —
   **coherent honours** (an MVP is always All-NBA First Team, a DPOY always
-  All-Defensive First Team, a superstar never below Second)
+  All-Defensive First Team, a superstar never below Second), a **DEFENSE effect
+  chip that reads straight** (it's one averaged tile, so +2 to each defensive
+  rating moves it +2, shown clean instead of struck through), and **Most Improved
+  / Sixth Man trophy art** on the shelf
 - **M2 — AWS deploy (cheapest):** Terraform modules, remote state, GitHub Actions
   deploy via AWS OIDC, CloudWatch dashboard + Budgets alarm
 - **M3 — depth:** salary-cap rules & sign-and-trades, multi-player trades, named

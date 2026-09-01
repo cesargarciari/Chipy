@@ -32,6 +32,37 @@ describe('describeEffects', () => {
     );
     expect(chips.map((c) => c.key)).toEqual(['finishing']);
   });
+
+  it('shows DEFENSE as the tile move (an average of the two D bumps), never their sum', () => {
+    // +4 to each D at 60/60: DEFENSE is a weighted average, so the tile moves +4.
+    const even = describeEffects(
+      { ratings: { interiorDefense: 4, perimeterDefense: 4 } },
+      ratingsAt(60),
+    );
+    const def = even.find((c) => c.key === 'defense')!;
+    expect(def).toMatchObject({ short: 'DEF', delta: 4 });
+    expect(def.nominal).toBeUndefined(); // nothing trimmed - a straight number, no strikethrough
+
+    // A lopsided bump into the weaker end moves the blended tile less, but the
+    // number stays clean - no "pulled down" nominal.
+    const lopsided = describeEffects(
+      { ratings: { interiorDefense: 6 } },
+      { ...ratingsAt(60), perimeterDefense: 88 },
+    );
+    const d2 = lopsided.find((c) => c.key === 'defense')!;
+    expect(d2.delta).toBeGreaterThan(0);
+    expect(d2.delta).toBeLessThan(6);
+    expect(d2.nominal).toBeUndefined();
+  });
+
+  it('keeps a trimmed DEFENSE nominal only when the 99 cap actually bites', () => {
+    const chips = describeEffects(
+      { ratings: { interiorDefense: 8, perimeterDefense: 8 } },
+      { ...ratingsAt(96), interiorDefense: 98, perimeterDefense: 98 },
+    );
+    const def = chips.find((c) => c.key === 'defense')!;
+    expect(def.nominal).toBeGreaterThan(def.delta);
+  });
 });
 
 describe('optionView', () => {

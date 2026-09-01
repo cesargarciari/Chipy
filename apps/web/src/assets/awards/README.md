@@ -14,10 +14,10 @@ automatically (`src/lib/art.ts`, via `import.meta.glob`).
 `oly_gold` `oly_silver` `oly_bronze` `wc_gold` `wc_silver` `wc_bronze`
 `euroleague_mvp` `euroleague_champion` (plus any `kind: "ring"` moment).
 
-Present now: `champion` `clutch_poy` `dpoy` `finals_mvp` `mvp` `oly_bronze`
-`oly_gold` `oly_silver` `roy`
-**Still needed: `mip.png`, `sixth_man.png`** (and optionally the `wc_*` /
-`euroleague_*` set — they fall back to 🥇/🏆 for now).
+Present now: `champion` `clutch_poy` `dpoy` `finals_mvp` `mip` `mvp` `oly_bronze`
+`oly_gold` `oly_silver` `roy` `sixth_man`
+**Still needed:** optionally the `wc_*` / `euroleague_*` set — they fall back to
+🥇/🏆 for now.
 
 Edit `HEADLINE_AWARDS` in `src/components/MomentModal.tsx` to change the set.
 

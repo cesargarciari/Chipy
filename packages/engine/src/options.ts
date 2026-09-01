@@ -80,20 +80,30 @@ export function describeEffects(effect: OptionEffect, current?: Ratings): Effect
     });
   }
 
-  // Fold perimeter + interior D into one DEFENSE chip whose `delta` is exactly
-  // what the DEFENSE tile (the weighted `defenseRatingOf`) will move - so a
-  // "+7 DEFENSE" card actually raises the tile by 7 (bar the 99 cap), not by the
-  // naive sum of the two raw axes.
+  // Perimeter + interior D show as one DEFENSE tile - the weighted *average*
+  // `defenseRatingOf`, not a sum - so the chip predicts that tile's move. A
+  // rating tile can only ever shift by an average of its inputs, so `+2` to each
+  // D moves DEFENSE by `+2`, never `+4`. `nominal` is only set when the 99 cap
+  // genuinely trims the move (same rule as every other chip), so the number the
+  // player sees is straight, not "pulled down".
   const perimNom = effect.ratings?.perimeterDefense ?? 0;
   const intNom = effect.ratings?.interiorDefense ?? 0;
   if (perimNom || intNom) {
-    const nominal = perimNom + intNom;
-    let delta = nominal;
+    const blend = (i: number, p: number) => 0.66 * Math.max(i, p) + 0.34 * Math.min(i, p);
+    let delta: number;
+    let uncapped: number;
     if (current) {
       const before = defenseRatingOf(current.interiorDefense, current.perimeterDefense);
-      const afterInt = clamp(current.interiorDefense + intNom, RATING_FLOOR, RATING_CEIL);
-      const afterPerim = clamp(current.perimeterDefense + perimNom, RATING_FLOOR, RATING_CEIL);
-      delta = defenseRatingOf(afterInt, afterPerim) - before;
+      const cappedInt = clamp(current.interiorDefense + intNom, RATING_FLOOR, RATING_CEIL);
+      const cappedPerim = clamp(current.perimeterDefense + perimNom, RATING_FLOOR, RATING_CEIL);
+      delta = defenseRatingOf(cappedInt, cappedPerim) - before;
+      uncapped =
+        Math.round(blend(current.interiorDefense + intNom, current.perimeterDefense + perimNom)) -
+        before;
+    } else {
+      // No current ratings (a preview): the tile move sits between the two bumps,
+      // so their mean is the honest estimate.
+      delta = uncapped = Math.round((intNom + perimNom) / 2);
     }
     if (!current || delta !== 0) {
       ratingChips.push({
@@ -101,7 +111,7 @@ export function describeEffects(effect: OptionEffect, current?: Ratings): Effect
         label: 'DEFENSE',
         short: 'DEF',
         delta,
-        ...(delta !== nominal ? { nominal } : {}),
+        ...(uncapped !== delta ? { nominal: uncapped } : {}),
       });
     }
   }
