@@ -63,7 +63,7 @@ export function TrophyShelf({ awards }: TrophyShelfProps) {
   return (
     <div className="space-y-4">
       {shelf.length > 0 && (
-        <div className="trophy-shelf flex flex-nowrap items-end gap-7 overflow-x-auto rounded-xl border border-court-700 bg-gradient-to-b from-court-800/70 to-court-900 px-5 pb-3 pt-5">
+        <div className="trophy-shelf flex flex-wrap items-end gap-x-7 gap-y-5 rounded-xl border border-court-700 bg-gradient-to-b from-court-800/70 to-court-900 px-5 pb-4 pt-5">
           {shelf.map((id) => {
             const count = awards[id] ?? 0;
             const src = awardArt(id)!;

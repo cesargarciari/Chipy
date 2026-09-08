@@ -78,8 +78,10 @@
  * alone they ease apart a touch - but only via `transform`, so the group's box
  * never resizes: the rest of the shelf holds still, nothing thrashes layout, and
  * the move stays GPU-composited. Opacity is untouched, so every trophy stays
- * visible. The shelf itself never wraps (it scrolls). MAX_IN_STACK caps the
- * copies at 4, so nth-child(2..4) covers every trophy that moves. */
+ * visible. The shelf wraps to as many rows as it needs (a shared screenshot has
+ * to show every award, not scroll) - safe now that hover can't resize a group.
+ * MAX_IN_STACK caps the copies at 4, so nth-child(2..4) covers every one that
+ * moves. */
 .trophy-group-stack > * + * {
   margin-left: -1.75rem;
   transition: transform 0.24s cubic-bezier(0.22, 1, 0.36, 1);

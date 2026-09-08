@@ -286,9 +286,11 @@ export function simulateSeason(rng: Rng, args: SeasonSimArgs): SeasonSimResult {
 
 /**
  * Turn a conference seed (1..15) into how far the team runs. Seeds 11-15 are in
- * the lottery; 7-10 fight through the play-in; 1-6 are in the bracket and the
- * deeper rounds scale hard with the seed - a 1-seed is a real title threat, a
- * 6-seed almost never is - lifted by a superstar and by an open ring window.
+ * the lottery; 7-10 fight through the play-in; 1-6 are in the bracket, where
+ * every round threshold scales with the seed: a 1-seed almost always makes a
+ * deep run (a first-round exit is a genuine upset, ~5% not ~50%), a 6-seed
+ * usually goes out early. A superstar and an open ring window lift the whole
+ * curve.
  */
 export function simulatePlayoffs(
   rng: Rng,
@@ -307,18 +309,25 @@ export function simulatePlayoffs(
     return rng() < 0.55 ? 'play_in' : 'lottery';
   }
 
-  // Bracket, seeds 1-6. `p` is "title-calibre" - built from the seed, lifted by
-  // the player and a ring window, with a little variance.
+  // Bracket, seeds 1-6. `q` is "how good this team really is", 0..1: mostly the
+  // seed, lifted by a star carrying them and by a ring window, with a little
+  // variance. Every cumulative round threshold rises with `q`, so a strong seed
+  // rarely bows out in the first two rounds and a weak one rarely survives them.
   const seedStrength = (7 - seed) / 6; // 1-seed 1.0 ... 6-seed ~0.17
-  const p = clamp(
-    seedStrength * 0.82 + star * 0.13 + windowBoost * 1.6 + jitter(rng, 1) / 46,
+  const q = clamp(
+    seedStrength * 0.82 + star * 0.15 + windowBoost * 1.6 + jitter(rng, 1) / 46,
     0.06,
     0.99,
   );
   const run = rng();
-  if (p > 0.72 && run < (p - 0.6) * 0.6) return 'champion';
-  if (p > 0.59 && run < (p - 0.47) * 0.64) return 'finals';
-  if (p > 0.46 && run < (p - 0.34) * 0.74) return 'conf_finals';
-  if (p > 0.34 && run < 0.52) return 'second_round';
+  // Cumulative thresholds (champ <= finals <= conf_finals <= second_round), each
+  // rising with q. The Finals-reaching odds match the old model (a 1-seed ~30%,
+  // a 3-seed ~13%); what changes is the tail: the deeper rounds now absorb the
+  // probability that used to dump every strong seed into a first-round exit, so a
+  // 1-seed goes out in round one ~4% (was ~48%) and a 3-seed ~18%.
+  if (run < clamp(q * 0.43 - 0.205, 0, 0.3)) return 'champion';
+  if (run < clamp(q * 0.59 - 0.256, 0, 0.4)) return 'finals';
+  if (run < clamp(q * 0.82 - 0.05, 0, 0.86)) return 'conf_finals';
+  if (run < clamp(0.4 + q * 0.62, 0, 0.965)) return 'second_round';
   return 'first_round';
 }

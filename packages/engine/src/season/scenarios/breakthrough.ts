@@ -42,7 +42,10 @@ export const breakthroughScenarios: Scenario[] = [
         id: 'brk_defense',
         label: 'A LOCKDOWN SWITCH',
         blurb: 'You start erasing the other team’s best option, one through five.',
-        effect: { ratings: { perimeterDefense: 7, interiorDefense: 5 } },
+        // Both D ratings move the full +12: the DEFENSE tile is their weighted
+        // average, so a lopsided split would only lift it ~+6 and this leap would
+        // read as half the size of the others.
+        effect: { ratings: { perimeterDefense: 12, interiorDefense: 12 } },
         rare: true,
         stance: { tag: 'Breakthrough', awardMult: { defense: 1.08 } },
       },
