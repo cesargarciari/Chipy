@@ -123,10 +123,7 @@ resource "aws_iam_role" "github_deploy" {
   max_session_duration = 3600
 }
 
-# Broad by service, not by resource: a Terraform deploy role touches a lot, and a
-# perfectly least-privilege policy here is a maintenance sink. Scope it down once
-# the resource set is stable. Notably absent: no `*:Delete*` on data stores it
-# should never remove, and no org/account-level actions.
+
 data "aws_iam_policy_document" "github_deploy" {
   statement {
     sid    = "State"
@@ -176,6 +173,7 @@ data "aws_iam_policy_document" "github_deploy" {
       "cloudwatch:PutMetricAlarm", "cloudwatch:DeleteAlarms",
       "cloudwatch:DescribeAlarms", "cloudwatch:ListTagsForResource", "cloudwatch:TagResource",
       "budgets:ViewBudget", "budgets:ModifyBudget",
+      "budgets:ListTagsForResource", "budgets:TagResource", "budgets:UntagResource",
       "acm:RequestCertificate", "acm:DescribeCertificate", "acm:DeleteCertificate",
       "acm:ListCertificates", "acm:ListTagsForCertificate", "acm:AddTagsToCertificate",
       "route53:CreateHostedZone", "route53:DeleteHostedZone", "route53:GetHostedZone",
