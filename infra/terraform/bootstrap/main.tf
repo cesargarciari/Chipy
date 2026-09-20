@@ -151,6 +151,7 @@ data "aws_iam_policy_document" "github_deploy" {
       "dynamodb:UpdateTimeToLive",
       "s3:CreateBucket", "s3:DeleteBucket", "s3:PutBucketPolicy", "s3:GetBucketPolicy",
       "s3:DeleteBucketPolicy", "s3:ListBucket",
+      "s3:PutObject", "s3:GetObject", "s3:DeleteObject",
       "s3:PutBucketPublicAccessBlock", "s3:GetBucketPublicAccessBlock",
       "s3:PutEncryptionConfiguration", "s3:GetEncryptionConfiguration",
       "s3:PutBucketOwnershipControls", "s3:GetBucketOwnershipControls",
