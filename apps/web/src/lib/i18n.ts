@@ -126,7 +126,7 @@ const en: Dictionary = {
   createPlayer: {
     title: 'Create your prospect',
     name: 'Name',
-    namePlaceholder: 'e.g. Marcus Vale',
+    namePlaceholder: 'e.g. LeGoat',
     jersey: 'Jersey #',
     bornIn: 'Born in',
     shootingHand: 'Shooting hand',
@@ -226,7 +226,7 @@ const es: Dictionary = {
   createPlayer: {
     title: 'Crea tu prospecto',
     name: 'Nombre',
-    namePlaceholder: 'ej. Marcus Vale',
+    namePlaceholder: 'ej. LeGoat',
     jersey: 'Número',
     bornIn: 'Nacido en',
     shootingHand: 'Mano hábil',
