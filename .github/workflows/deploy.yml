@@ -19,12 +19,6 @@ env:
   AWS_REGION: ca-central-1
   TF_VERSION: 1.9.8
   TF_DIR: infra/terraform
-  # Set these as GitHub repo *variables* (Settings -> Secrets and variables ->
-  # Actions -> Variables). Leave DOMAIN_NAME unset to stay on *.cloudfront.net.
-  # If DOMAIN_NAME is set: fill EITHER route53_zone_id (Route 53 hosts the
-  # zone) OR acm_certificate_arn (DNS lives elsewhere, e.g. Cloudflare) -
-  # leaving both empty here while DOMAIN_NAME is set makes Terraform try to
-  # create a brand-new Route 53 zone it doesn't need.
   TF_VAR_domain_name: ${{ vars.DOMAIN_NAME }}
   TF_VAR_route53_zone_id: ${{ vars.ROUTE53_ZONE_ID }}
   TF_VAR_acm_certificate_arn: ${{ vars.ACM_CERTIFICATE_ARN }}
@@ -66,6 +60,20 @@ jobs:
       - run: pnpm --filter "@chipy/web..." build
         env:
           VITE_API_URL: '' # same-origin: CloudFront serves /api/*
+
+      - name: DEBUG - print OIDC token claims (temporary, remove once fixed)
+        run: |
+          curl -sS -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=sts.amazonaws.com" -o /tmp/token.json
+          python3 -c "
+          import json, base64
+          tok = json.load(open('/tmp/token.json'))['value']
+          payload = tok.split('.')[1]
+          payload += '=' * (-len(payload) % 4)
+          claims = json.loads(base64.urlsafe_b64decode(payload))
+          for k in ['sub','aud','iss','repository','repository_owner','ref','event_name','actor','workflow_ref']:
+              print(f'{k}: {claims.get(k)}')
+          "
 
       - uses: aws-actions/configure-aws-credentials@v4
         with:

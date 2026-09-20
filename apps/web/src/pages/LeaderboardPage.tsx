@@ -19,7 +19,7 @@ export function LeaderboardPage() {
         {isLoading && <p className="text-sm text-ink-dim">Loading…</p>}
         {isError && (
           <p className="text-sm text-ink-dim">
-            Leaderboard is offline right now. Start the API to see rankings.
+            Leaderboard is offline right now. Try again later.
           </p>
         )}
         {data && data.entries.length === 0 && (
