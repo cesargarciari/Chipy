@@ -8,6 +8,7 @@ import {
   type ArchetypeId,
   type Position,
 } from '@chipy/engine';
+import { ChevronDown } from 'lucide-react';
 import { useMemo, useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '../../lib/cn.js';
@@ -75,7 +76,7 @@ export function CreatePlayer() {
                 }}
                 placeholder="e.g. Marcus Vale"
                 className={cn(
-                  'w-full rounded-lg border bg-court-800 px-3 py-2.5 text-ink outline-none focus:border-amber',
+                  'w-full rounded-lg border bg-court-800 px-3 py-2.5 text-ink caret-amber outline-none focus:border-amber',
                   error?.field === 'name' ? 'border-rose-500' : 'border-court-600',
                 )}
                 maxLength={24}
@@ -103,7 +104,7 @@ export function CreatePlayer() {
                 onBlur={() => {
                   if (jersey === '') setJersey('0');
                 }}
-                className="w-20 rounded-lg border border-court-600 bg-court-800 px-3 py-2.5 text-center text-ink outline-none focus:border-amber"
+                className="w-20 rounded-lg border border-court-600 bg-court-800 px-3 py-2.5 text-center text-ink caret-amber outline-none [-moz-appearance:textfield] focus:border-amber [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                 aria-label="Jersey number"
               />
             </label>
@@ -112,18 +113,24 @@ export function CreatePlayer() {
           <div className="grid gap-4 sm:grid-cols-[1fr_auto]">
             <label className="block space-y-1.5">
               <span className="text-xs uppercase tracking-wide text-ink-dim">Born in</span>
-              <select
-                value={country}
-                onChange={(e) => setCountry(e.target.value)}
-                className="w-full rounded-lg border border-court-600 bg-court-800 px-3 py-2.5 text-ink outline-none focus:border-amber"
-                aria-label="Country"
-              >
-                {COUNTRIES.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.flag} {c.name}
-                  </option>
-                ))}
-              </select>
+              <div className="relative">
+                <select
+                  value={country}
+                  onChange={(e) => setCountry(e.target.value)}
+                  className="w-full appearance-none rounded-lg border border-court-600 bg-court-800 px-3 py-2.5 pr-9 text-ink outline-none focus:border-amber"
+                  aria-label="Country"
+                >
+                  {COUNTRIES.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.flag} {c.name}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown
+                  aria-hidden
+                  className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-dim"
+                />
+              </div>
             </label>
 
             <div className="space-y-1.5">
@@ -138,7 +145,7 @@ export function CreatePlayer() {
                       'rounded-lg border px-4 py-2.5 text-sm font-semibold capitalize transition-colors',
                       h === handedness
                         ? 'border-amber bg-amber/10 text-ink'
-                        : 'border-court-600 text-ink-dim hover:text-ink',
+                        : 'border-court-600 text-ink-dim hover:border-amber hover:bg-amber/4 hover:text-ink',
                     )}
                   >
                     {h === 'left' ? 'Lefty' : 'Righty'}
@@ -148,49 +155,54 @@ export function CreatePlayer() {
             </div>
           </div>
 
-          <div className="space-y-1.5">
-            <span className="text-xs uppercase tracking-wide text-ink-dim">Position</span>
-            <div className="flex flex-wrap gap-2">
-              {POSITIONS.map((p) => (
-                <button
-                  key={p}
-                  type="button"
-                  onClick={() => pickPosition(p)}
-                  className={cn(
-                    'rounded-lg border px-4 py-2 text-sm font-semibold transition-colors',
-                    p === position
-                      ? 'border-amber bg-amber/10 text-ink'
-                      : 'border-court-600 text-ink-dim hover:text-ink',
-                  )}
-                >
-                  {p}
-                </button>
-              ))}
+          {/* Position and archetype sit in one tight cluster (space-y-3): the
+              archetype list is a direct function of the position picked right
+              above it, so they read as one decision, not two unrelated rows. */}
+          <div className="space-y-3">
+            <div className="space-y-1.5">
+              <span className="text-xs uppercase tracking-wide text-ink-dim">Position</span>
+              <div className="flex flex-wrap gap-2">
+                {POSITIONS.map((p) => (
+                  <button
+                    key={p}
+                    type="button"
+                    onClick={() => pickPosition(p)}
+                    className={cn(
+                      'rounded-lg border px-4 py-2.5 text-sm font-semibold transition-colors',
+                      p === position
+                        ? 'border-amber bg-amber/10 text-ink'
+                        : 'border-court-600 text-ink-dim hover:border-amber hover:bg-amber/4 hover:text-ink',
+                    )}
+                  >
+                    {p}
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
 
-          <div className="space-y-2">
-            <span className="text-xs uppercase tracking-wide text-ink-dim">
-              Archetype ({position})
-            </span>
-            <div className="grid gap-2 sm:grid-cols-2">
-              {archetypes.map((a) => (
-                <button
-                  key={a.id}
-                  type="button"
-                  onClick={() => setArchetype(a.id)}
-                  className={cn(
-                    'rounded-xl border p-3 text-left transition-colors',
-                    a.id === archetype
-                      ? 'border-amber bg-amber/5'
-                      : 'border-court-600 hover:border-court-500',
-                  )}
-                >
-                  <span className="block text-sm font-bold text-ink">{a.label}</span>
-                  <span className="mt-0.5 block text-xs text-amber-soft">{a.comps}</span>
-                  <span className="mt-1 block text-xs text-ink-dim">{a.blurb}</span>
-                </button>
-              ))}
+            <div className="space-y-1.5">
+              <span className="text-xs uppercase tracking-wide text-ink-dim">
+                Archetype ({position})
+              </span>
+              <div className="grid gap-2 sm:grid-cols-2">
+                {archetypes.map((a) => (
+                  <button
+                    key={a.id}
+                    type="button"
+                    onClick={() => setArchetype(a.id)}
+                    className={cn(
+                      'rounded-xl border p-3 text-left transition-colors',
+                      a.id === archetype
+                        ? 'border-amber bg-amber/5'
+                        : 'border-court-600 hover:border-amber hover:bg-amber/4',
+                    )}
+                  >
+                    <span className="block text-sm font-bold text-ink">{a.label}</span>
+                    <span className="mt-0.5 block text-xs text-amber-soft">{a.comps}</span>
+                    <span className="mt-1 block text-xs text-ink-dim">{a.blurb}</span>
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 

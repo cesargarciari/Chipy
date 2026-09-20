@@ -47,7 +47,7 @@ variable "alert_email" {
 }
 
 variable "lambda_reserved_concurrency" {
-  description = "Hard cap on concurrent API executions (bounds cost / blast radius)"
+  description = "Hard cap on concurrent API executions (bounds cost / blast radius). Set to 0 if `terraform apply` fails with 'decreases account's UnreservedConcurrentExecution below its minimum value' - your account's regional Lambda concurrency quota is still the low new-account default (check with `aws lambda get-account-settings`); 0 skips reserving any and lets the function share the account pool. Raise the quota later (Service Quotas console, or `aws service-quotas request-service-quota-increase`) and set this back to a positive number to restore the cap."
   type        = number
   default     = 5
 }

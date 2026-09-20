@@ -24,7 +24,7 @@ variable "lambda_zip_hash" {
 }
 
 variable "reserved_concurrency" {
-  description = "Hard cap on concurrent executions - bounds cost and blast radius"
+  description = "Hard cap on concurrent executions - bounds cost and blast radius. 0 = unmanaged (required on accounts whose total regional Lambda concurrency quota is still the low new-account default; AWS requires >=10 to stay unreserved account-wide, so any positive value fails until that quota is raised). Check yours with `aws lambda get-account-settings`."
   type        = number
   default     = 5
 }

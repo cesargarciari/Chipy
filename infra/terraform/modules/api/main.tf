@@ -61,9 +61,14 @@ resource "aws_lambda_function" "this" {
   runtime          = "nodejs22.x"
   architectures    = ["arm64"]
 
-  memory_size                    = var.memory_size
-  timeout                        = var.timeout_seconds
-  reserved_concurrent_executions = var.reserved_concurrency
+  memory_size = var.memory_size
+  timeout     = var.timeout_seconds
+  # 0 (or less) omits the argument entirely, i.e. no reservation: some AWS
+  # accounts start with a very low total concurrency quota (new accounts often
+  # get just 10 in a region), and Lambda requires >=10 to stay unreserved
+  # account-wide, so reserving anything positive fails until that quota is
+  # raised. A positive value here is a real hard cap once your quota allows it.
+  reserved_concurrent_executions = var.reserved_concurrency > 0 ? var.reserved_concurrency : null
 
   environment {
     variables = merge(
