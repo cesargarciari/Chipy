@@ -371,10 +371,6 @@ export const MIDSEASON_SCENARIOS: Scenario[] = [
   },
 ];
 
-// ---------------------------------------------------------------------------
-// Outcomes - how each option lands, resolved against the player's status
-// ---------------------------------------------------------------------------
-
 export interface MidResolveCtx {
   role: Role;
   phase: CareerPhase;
@@ -569,8 +565,6 @@ export function resolveMidseason(rng: Rng, optionId: string, ctx: MidResolveCtx)
     note: out.note ?? 'It blows over in a week.',
   };
 }
-
-// ---------------------------------------------------------------------------
 
 let index: Map<string, { scenario: Scenario; optionId: string }> | null = null;
 

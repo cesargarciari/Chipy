@@ -66,8 +66,6 @@ function windowPitch(window: TeamWindow, team: TeamRef, role: Role): string {
   return `${team.city} is ${w}. ${r}`;
 }
 
-// ---------------------------------------------------------------------------
-
 export interface OfferArgs {
   seed: number | string;
   overall: number;

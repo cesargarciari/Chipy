@@ -1649,8 +1649,6 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
   return { status: 'complete', summary: buildSummary(args, state, ci) };
 }
 
-// ---------------------------------------------------------------------------
-
 function buildSummary(args: RunCareerArgs, state: CareerState, consumed: number): CareerSummary {
   const totals = buildCareerTotals(state.seasons);
 

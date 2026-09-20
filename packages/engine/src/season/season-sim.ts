@@ -8,10 +8,6 @@ export function derivedRng(seed: number | string, ...parts: Array<string | numbe
   return mulberry32(normalizeSeed(`${seed}::${parts.join(':')}`));
 }
 
-// ---------------------------------------------------------------------------
-// Team strength
-// ---------------------------------------------------------------------------
-
 /**
  * The glamour franchises: free agents want to play there, ownership spends, and
  * a real player joining almost always finds talent already in the building. They
@@ -94,10 +90,6 @@ export function contenderLabel(odds: number): string {
   return 'Rebuild';
 }
 
-// ---------------------------------------------------------------------------
-// Role
-// ---------------------------------------------------------------------------
-
 const ROLE_ORDER: Role[] = ['fringe', 'bench', 'rotation', 'starter', 'franchise'];
 
 function roleFromOverall(overall: number): Role {
@@ -142,10 +134,6 @@ export function roleFor(args: {
   }
   return role;
 }
-
-// ---------------------------------------------------------------------------
-// Stat line
-// ---------------------------------------------------------------------------
 
 const MPG_TARGET: Record<Role, number> = {
   franchise: 35,
@@ -279,10 +267,6 @@ export function simulateSeason(rng: Rng, args: SeasonSimArgs): SeasonSimResult {
     defImpact: roundTo(defImpact, 2),
   };
 }
-
-// ---------------------------------------------------------------------------
-// Playoffs
-// ---------------------------------------------------------------------------
 
 /**
  * Turn a conference seed (1..15) into how far the team runs. Seeds 11-15 are in

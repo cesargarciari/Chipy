@@ -116,10 +116,6 @@ export interface CountryRef {
   pedigree: number;
 }
 
-// ---------------------------------------------------------------------------
-// Archetypes (position-locked)
-// ---------------------------------------------------------------------------
-
 export const ARCHETYPE_IDS = [
   // PG
   'floor_general',
@@ -179,10 +175,6 @@ export interface ArchetypeDef {
   /** Points added to the starting athleticism roll - explosive builds start springier. */
   athBias?: number;
 }
-
-// ---------------------------------------------------------------------------
-// The one option model (prologue, college, season scenarios all use it)
-// ---------------------------------------------------------------------------
 
 /** Deterministic, player-visible effect of choosing an option - shown as chips. */
 export interface OptionEffect {
@@ -251,10 +243,6 @@ export interface OptionView {
   teamId?: string;
 }
 
-// ---------------------------------------------------------------------------
-// Profile / inputs
-// ---------------------------------------------------------------------------
-
 export type Handedness = 'left' | 'right';
 
 export interface PlayerProfile {
@@ -273,10 +261,6 @@ export interface ChoiceSelection {
   choiceId: string;
 }
 
-// ---------------------------------------------------------------------------
-// Prologue scenario nodes (high school, recruiting)
-// ---------------------------------------------------------------------------
-
 export interface PrologueNode {
   id: 'highschool' | 'recruiting';
   stage: string;
@@ -292,10 +276,6 @@ export interface PrologueNodeView {
   prompt: string;
   options: OptionView[];
 }
-
-// ---------------------------------------------------------------------------
-// College
-// ---------------------------------------------------------------------------
 
 export type SchoolTier = 'blue_blood' | 'mid_major' | 'overseas';
 
@@ -335,10 +315,6 @@ export interface College {
   tier: SchoolTier;
   years: CollegeSeason[];
 }
-
-// ---------------------------------------------------------------------------
-// Economy · perks · overseas
-// ---------------------------------------------------------------------------
 
 export type League = 'nba' | 'overseas';
 
@@ -422,10 +398,6 @@ export interface ClubOffer {
   pitch: string;
 }
 
-// ---------------------------------------------------------------------------
-// Offers (landing spot, free agency)
-// ---------------------------------------------------------------------------
-
 export interface TeamOffer {
   choiceId: string;
   team: TeamRef;
@@ -440,10 +412,6 @@ export interface TeamOffer {
   pitch: string;
 }
 
-// ---------------------------------------------------------------------------
-// Season decision node (public view)
-// ---------------------------------------------------------------------------
-
 export interface SeasonDecisionNode {
   nodeId: string;
   kind: 'scenario' | 'free_agency' | 'midseason' | 'chemistry';
@@ -455,10 +423,6 @@ export interface SeasonDecisionNode {
   prompt: string;
   options: OptionView[];
 }
-
-// ---------------------------------------------------------------------------
-// Awards
-// ---------------------------------------------------------------------------
 
 export const AWARD_IDS = [
   'roy',
@@ -491,10 +455,6 @@ export const AWARD_IDS = [
 export type AwardId = (typeof AWARD_IDS)[number];
 
 export type AwardTally = Partial<Record<AwardId, number>>;
-
-// ---------------------------------------------------------------------------
-// Season & career records
-// ---------------------------------------------------------------------------
 
 export interface SeasonStatLine {
   gp: number;
@@ -576,10 +536,6 @@ export interface Legacy {
   verdict: string;
 }
 
-// ---------------------------------------------------------------------------
-// Franchise standing (how much one team's fans love you)
-// ---------------------------------------------------------------------------
-
 export type FranchiseTier = 'none' | 'known' | 'favorite' | 'cornerstone' | 'idol' | 'legend';
 
 export interface FranchiseStanding {
@@ -600,10 +556,6 @@ export interface NationalStanding {
   tier: FranchiseTier;
   progress: number;
 }
-
-// ---------------------------------------------------------------------------
-// Career moments - the big end-of-season beats that get their own display
-// ---------------------------------------------------------------------------
 
 export type MomentKind =
   | 'award'
@@ -642,10 +594,6 @@ export interface TimelineEntry {
   stage: string;
   headline: string;
 }
-
-// ---------------------------------------------------------------------------
-// Live simulation state
-// ---------------------------------------------------------------------------
 
 export interface GrowthBias {
   ratings: Partial<Record<RatingKey, number>>;
@@ -724,10 +672,6 @@ export interface CareerState {
   growthBiases: GrowthBias[];
   lastPlayedStats: SeasonStatLine | null;
 }
-
-// ---------------------------------------------------------------------------
-// Output
-// ---------------------------------------------------------------------------
 
 export interface CareerSummary {
   engineVersion: string;

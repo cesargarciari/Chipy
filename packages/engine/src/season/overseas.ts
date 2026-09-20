@@ -13,10 +13,6 @@ import type {
 import { mergeEffects, type SeasonEffect } from './effects.js';
 import { derivedRng, simulateSeason } from './season-sim.js';
 
-// ---------------------------------------------------------------------------
-// Offers
-// ---------------------------------------------------------------------------
-
 /** Which EuroLeague tier your NBA market value maps onto (0.5 fringe … 0.95 giant). */
 function targetPrestige(marketValue: number): number {
   return clamp(0.52 + (marketValue - 6) * 0.02, 0.5, 0.95);
@@ -89,10 +85,6 @@ export function euroResignOffer(
 export function nbaReturnSalary(marketValue: number): number {
   return roundTo(clamp(marketValue * 0.5, 2.5, 9), 1);
 }
-
-// ---------------------------------------------------------------------------
-// Overseas season sim
-// ---------------------------------------------------------------------------
 
 export interface OverseasSimArgs {
   ratings: Ratings;
