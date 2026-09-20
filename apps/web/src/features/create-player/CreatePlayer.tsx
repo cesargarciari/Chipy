@@ -67,9 +67,9 @@ export function CreatePlayer() {
       <CardBody>
         <CardTitle>{t.createPlayer.title}</CardTitle>
         <form className="mt-6 space-y-6" onSubmit={onSubmit} noValidate>
-          <div className="grid gap-4 sm:grid-cols-[1fr_auto]">
+          <div className="grid grid-cols-[1fr_auto] gap-3 sm:gap-4">
             <label className="block space-y-1.5">
-              <span className="text-xs uppercase tracking-wide text-ink-dim">
+              <span className="block text-xs uppercase tracking-wide text-ink-dim">
                 {t.createPlayer.name}
               </span>
               <input
@@ -91,8 +91,8 @@ export function CreatePlayer() {
               )}
             </label>
 
-            <label className="block space-y-1.5">
-              <span className="text-xs uppercase tracking-wide text-ink-dim">
+            <label className="block w-16 space-y-1.5 sm:w-20">
+              <span className="block text-xs uppercase tracking-wide text-ink-dim">
                 {t.createPlayer.jersey}
               </span>
               <input
@@ -110,7 +110,7 @@ export function CreatePlayer() {
                 onBlur={() => {
                   if (jersey === '') setJersey('0');
                 }}
-                className="w-20 rounded-lg border border-court-600 bg-court-800 px-3 py-2.5 text-center text-ink caret-amber outline-none [-moz-appearance:textfield] focus:border-amber [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                className="w-full rounded-lg border border-court-600 bg-court-800 px-3 py-2.5 text-center text-ink caret-amber outline-none [-moz-appearance:textfield] focus:border-amber [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                 aria-label="Jersey number"
               />
             </label>

@@ -22,7 +22,6 @@ export interface Dictionary {
     resume: string;
     keepPlaying: string;
     startYourCareer: string;
-    noSignup: string;
     arc: readonly [string, string, string];
     sampleCallLabel: string;
     sampleCall: {
@@ -108,7 +107,7 @@ const en: Dictionary = {
     resume: 'Resume your career',
     keepPlaying: 'Keep playing',
     startYourCareer: 'Start your career',
-    noSignup: 'No sign up. Runs entirely in your browser.',
+
     arc: ['Build a prospect', 'One call every offseason', 'A jersey in the rafters'],
     sampleCallLabel: 'A sample call',
     sampleCall: {
@@ -198,7 +197,6 @@ const es: Dictionary = {
     resume: 'Reanudar tu carrera',
     keepPlaying: 'Seguir jugando',
     startYourCareer: 'Comienza tu carrera',
-    noSignup: 'Sin registro. Todo corre en tu navegador.',
     arc: ['Crea un prospecto', 'Una decisión cada verano', 'Una camiseta en el techo'],
     sampleCallLabel: 'Una decisión de ejemplo',
     sampleCall: {
