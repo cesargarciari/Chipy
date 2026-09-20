@@ -47,9 +47,9 @@ variable "alert_email" {
 }
 
 variable "lambda_reserved_concurrency" {
-  description = "Hard cap on concurrent API executions (bounds cost / blast radius). Set to 0 if `terraform apply` fails with 'decreases account's UnreservedConcurrentExecution below its minimum value' - your account's regional Lambda concurrency quota is still the low new-account default (check with `aws lambda get-account-settings`); 0 skips reserving any and lets the function share the account pool. Raise the quota later (Service Quotas console, or `aws service-quotas request-service-quota-increase`) and set this back to a positive number to restore the cap."
+  description = "Hard cap on concurrent API executions (bounds cost / blast radius). Defaults to 0 (unmanaged, shares the account's concurrency pool) because a new account's regional Lambda concurrency quota is only 10 (check with `aws lambda get-account-settings`), and CI has no tfvars file to override this - only the shell's local terraform.tfvars can. Raise the quota later (Service Quotas console, or `aws service-quotas request-service-quota-increase`) and set this to a positive number to restore the cap, in both terraform.tfvars and CI (add a TF_VAR_lambda_reserved_concurrency env var in deploy.yml)."
   type        = number
-  default     = 5
+  default     = 0
 }
 
 variable "log_retention_days" {
