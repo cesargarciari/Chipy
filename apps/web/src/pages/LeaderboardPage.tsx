@@ -18,9 +18,7 @@ export function LeaderboardPage() {
 
         {isLoading && <p className="text-sm text-ink-dim">Loading…</p>}
         {isError && (
-          <p className="text-sm text-ink-dim">
-            Leaderboard is offline right now. Try again later.
-          </p>
+          <p className="text-sm text-ink-dim">Leaderboard is offline right now. Try again later.</p>
         )}
         {data && data.entries.length === 0 && (
           <p className="text-sm text-ink-dim">No careers yet this month - be the first.</p>
