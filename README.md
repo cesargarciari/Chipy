@@ -26,16 +26,16 @@ local-first now, deployed to AWS at near-zero cost later.
 
 ## Stack
 
-| Layer           | Choice                                                                                     |
-| --------------- | ------------------------------------------------------------------------------------------ |
-| Language / repo | TypeScript (strict, ESM), pnpm + Turborepo monorepo                                        |
-| Simulation      | `@chipy/engine` — pure, deterministic, zero runtime deps beyond `zod`; Vitest + fast-check |
-| Contract        | `@chipy/shared` — one set of zod schemas for the HTTP API, used by both apps               |
-| Web             | Vite + React 19, Tailwind v4, Zustand, TanStack Query, React Router                        |
-| API             | Fastify 5, `fastify-type-provider-zod`, pino; Lambda-ready (`@fastify/aws-lambda`)         |
-| Data            | DynamoDB (on-demand) single-table via `@aws-sdk/lib-dynamodb`; DynamoDB Local for dev      |
-| Infra (M2)      | Terraform → S3 + CloudFront, API Gateway HTTP API + Lambda, DynamoDB, CloudWatch           |
-| CI              | GitHub Actions: typecheck · lint · test · build · Playwright                               |
+| Layer           | Choice                                                                                             |
+| --------------- | -------------------------------------------------------------------------------------------------- |
+| Language / repo | TypeScript (strict, ESM), pnpm + Turborepo monorepo                                                |
+| Simulation      | `@chipy/engine` — pure, deterministic, zero runtime deps beyond `zod`; Vitest + fast-check         |
+| Contract        | `@chipy/shared` — one set of zod schemas for the HTTP API, used by both apps                       |
+| Web             | Vite + React 19, Tailwind v4, Zustand, TanStack Query, React Router                                |
+| API             | Fastify 5, `fastify-type-provider-zod`, pino; Lambda-ready (`@fastify/aws-lambda`)                 |
+| Data            | DynamoDB (on-demand) single-table via `@aws-sdk/lib-dynamodb`; DynamoDB Local for dev              |
+| Infra (M2)      | Terraform → S3 + CloudFront, Lambda (Function URL, no API Gateway), DynamoDB, CloudWatch; ~$0 idle |
+| CI              | GitHub Actions: typecheck · lint · test · build · Playwright                                       |
 
 See [`docs/architecture.md`](docs/architecture.md), [`docs/cost.md`](docs/cost.md),
 and the [ADRs](docs/adr/).

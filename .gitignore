@@ -4,6 +4,7 @@ node_modules/
 
 # Build output
 dist/
+dist-lambda/
 build/
 *.tsbuildinfo
 
@@ -28,12 +29,16 @@ test-results/
 !.vscode/extensions.json
 !.vscode/settings.json
 
-# Local infra state
+# Local infra state (the .terraform.lock.hcl IS committed - it pins providers)
 infra/terraform/**/.terraform/
 infra/terraform/**/*.tfstate
 infra/terraform/**/*.tfstate.*
 infra/terraform/**/*.tfvars
 !infra/terraform/**/*.tfvars.example
+infra/terraform/**/backend.hcl
+!infra/terraform/**/backend.hcl.example
+infra/terraform/**/tfplan
+infra/terraform/.build/
 
 # Logs
 *.log

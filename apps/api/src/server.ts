@@ -3,8 +3,6 @@ import cors from '@fastify/cors';
 import helmet from '@fastify/helmet';
 import rateLimit from '@fastify/rate-limit';
 import sensible from '@fastify/sensible';
-import swagger from '@fastify/swagger';
-import swaggerUi from '@fastify/swagger-ui';
 import { apiErrorSchema } from '@chipy/shared';
 import Fastify, { type FastifyInstance } from 'fastify';
 import {
@@ -49,6 +47,10 @@ export async function buildServer(opts: BuildServerOptions = {}): Promise<Fastif
   await app.register(rateLimit, { max: 120, timeWindow: '1 minute' });
 
   if (!config.isProduction) {
+    // Dev-only. Imported lazily so the two swagger packages can be marked
+    // external and dropped from the production Lambda bundle (see build-lambda.mjs).
+    const { default: swagger } = await import('@fastify/swagger');
+    const { default: swaggerUi } = await import('@fastify/swagger-ui');
     await app.register(swagger, {
       openapi: {
         info: { title: 'Chipy API', version: '0.1.0', description: 'NBA career simulator API' },

@@ -1,13 +1,16 @@
 # module: observability
 
-Milestone 2:
+The cheap guardrails (Milestone 2). No dashboard, no idle cost.
 
-- CloudWatch dashboard: Lambda invocations / errors / p95 duration, API Gateway
-  4xx/5xx, DynamoDB throttles + consumed capacity
-- Alarms → SNS topic (email subscription):
-  - Lambda error rate > 2% for 5 min
-  - API Gateway 5xx > 5 in 5 min
-  - DynamoDB `ThrottledRequests` > 0
-- **AWS Budgets**: monthly cost alarm at `monthly_budget_usd` (and at 50% / 80%)
+- `aws_budgets_budget` - a **$5/month** account ceiling (`monthly_budget_usd`).
+  Emails at 50% / 80% actual and 100% forecast when `alert_email` is set. This is
+  the backstop against every "why is my bill $40" surprise.
+- `aws_sns_topic` + optional email subscription for alarm fan-out.
+- `aws_cloudwatch_metric_alarm` **lambda-errors** - Lambda `Errors` > N (default 5) in 5 minutes.
+- `aws_cloudwatch_metric_alarm` **lambda-throttles** - Lambda `Throttles` >= 1,
+  i.e. the reserved-concurrency cap is being hit (a spike, or a client loop).
 
-Outputs: `dashboard_name`, `sns_topic_arn`.
+Outputs: `alerts_topic_arn`.
+
+Cost at idle: **~$0** (Budgets: first 2 budgets free; alarms: first 10 free;
+SNS email: first 1,000 notifications free).

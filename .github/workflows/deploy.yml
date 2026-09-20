@@ -1,0 +1,93 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    paths: ['infra/**', 'apps/**', 'packages/**', '.github/workflows/deploy.yml']
+  workflow_dispatch:
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+permissions:
+  id-token: write # OIDC -> assume the AWS deploy role
+  contents: read
+
+env:
+  AWS_REGION: ca-central-1
+  TF_VERSION: 1.9.8
+  TF_DIR: infra/terraform
+  # Set these as GitHub repo *variables* (Settings -> Secrets and variables ->
+  # Actions -> Variables). Leave DOMAIN_NAME unset to stay on *.cloudfront.net.
+  TF_VAR_domain_name: ${{ vars.DOMAIN_NAME }}
+  TF_VAR_route53_zone_id: ${{ vars.ROUTE53_ZONE_ID }}
+  TF_VAR_alert_email: ${{ vars.ALERT_EMAIL }}
+
+jobs:
+  # PRs: format + validate only, no credentials, no plan against real state.
+  validate:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+          terraform_wrapper: false # so `terraform output -raw` pipes cleanly
+      - run: terraform -chdir=${{ env.TF_DIR }} fmt -check -recursive
+      - run: terraform -chdir=${{ env.TF_DIR }} init -backend=false
+      - run: terraform -chdir=${{ env.TF_DIR }} validate
+      - run: terraform -chdir=${{ env.TF_DIR }}/bootstrap init -backend=false
+      - run: terraform -chdir=${{ env.TF_DIR }}/bootstrap validate
+
+  # main: build, apply, ship the SPA.
+  deploy:
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      # Lambda bundle (dist-lambda/index.mjs) + SPA build (apps/web/dist).
+      - run: pnpm --filter "@chipy/api..." build
+      - run: pnpm --filter @chipy/api build:lambda
+      - run: pnpm --filter "@chipy/web..." build
+        env:
+          VITE_API_URL: '' # same-origin: CloudFront serves /api/*
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+          terraform_wrapper: false # so `terraform output -raw` pipes cleanly
+
+      - name: Terraform apply
+        run: |
+          terraform -chdir=${{ env.TF_DIR }} init \
+            -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}" \
+            -backend-config="region=${{ env.AWS_REGION }}" \
+            -backend-config="dynamodb_table=${{ secrets.TF_LOCK_TABLE }}"
+          terraform -chdir=${{ env.TF_DIR }} apply -input=false -auto-approve
+
+      - name: Publish the SPA
+        run: |
+          BUCKET=$(terraform -chdir=${{ env.TF_DIR }} output -raw site_bucket)
+          DIST=$(terraform -chdir=${{ env.TF_DIR }} output -raw cloudfront_distribution_id)
+          # Hashed assets: cache forever. Everything else (index.html): no-cache.
+          aws s3 sync apps/web/dist "s3://$BUCKET" --delete \
+            --cache-control "public,max-age=31536000,immutable" \
+            --exclude "index.html" --exclude "*.map"
+          aws s3 sync apps/web/dist "s3://$BUCKET" \
+            --cache-control "no-cache" --exclude "*" --include "index.html"
+          aws cloudfront create-invalidation --distribution-id "$DIST" --paths "/*"

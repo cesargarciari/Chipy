@@ -15,9 +15,12 @@
 
 - **Local (Milestone 1):** `docker compose` runs the API, the web app, and
   DynamoDB Local. `pnpm dev` runs API + web with hot reload against DynamoDB Local.
-- **AWS (Milestone 2):** SPA on S3 + CloudFront; API on Lambda behind an API
-  Gateway HTTP API; the real DynamoDB table. CloudFront routes `/api/*` to the
-  API origin so the browser stays same-origin.
+- **AWS (Milestone 2):** SPA on S3 + CloudFront; API on Lambda via a **Function
+  URL** (no API Gateway); the real DynamoDB table. One CloudFront distribution
+  serves the SPA and routes `/api/*` to the Function URL over Origin Access
+  Control, so the browser stays same-origin and the URL is not callable
+  anonymously. Idle cost ~$0. See [`adr/0008-cheapest-viable-aws.md`](adr/0008-cheapest-viable-aws.md)
+  and [`cost.md`](cost.md).
 
 ## Packages
 

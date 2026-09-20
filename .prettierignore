@@ -5,6 +5,7 @@ node_modules
 .github/hooks
 .github/skills
 dist
+dist-lambda
 build
 coverage
 playwright-report
