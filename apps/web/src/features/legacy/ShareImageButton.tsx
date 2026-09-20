@@ -6,7 +6,7 @@ import { Button } from '../../components/ui/button.js';
 /**
  * Renders the referenced node to a PNG and writes it to the clipboard, so the
  * career card can be pasted straight into a chat or a post (the way Copero /
- * El Idolo do it). Captured at 2x on the app's near-black background.
+ * El Idolo do it
  */
 export function ShareImageButton({ targetRef }: { targetRef: RefObject<HTMLElement | null> }) {
   const [state, setState] = useState<'idle' | 'busy' | 'done' | 'error'>('idle');
@@ -16,11 +16,9 @@ export function ShareImageButton({ targetRef }: { targetRef: RefObject<HTMLEleme
     if (!node) return;
     setState('busy');
     try {
-      const blob = await toBlob(node, {
-        pixelRatio: 2,
-        cacheBust: true,
-        backgroundColor: '#0a0a0b',
-      });
+      const opts = { pixelRatio: 2, cacheBust: true, backgroundColor: '#0a0a0b' };
+      await toBlob(node, opts);
+      const blob = await toBlob(node, opts);
       if (!blob) throw new Error('no image produced');
       if (!('clipboard' in navigator) || typeof ClipboardItem === 'undefined') {
         throw new Error('clipboard images not supported here');
