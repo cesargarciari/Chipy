@@ -36,6 +36,12 @@
         ],
         "createdAt": "2026-09-01T04:35:40.842Z",
         "reason": "pre-existing .text-gold-gradient gala-badge effect, shipped v4.11 before impeccable tooling"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "9px",
+        "createdAt": "2026-09-20T03:40:55.173Z",
+        "reason": "matches the pre-existing tile-label text-[9px] already used in this same component (RatingStrip); the new tick badge reuses that exact scale for visual consistency, not a new arbitrary size"
       }
     ]
   }

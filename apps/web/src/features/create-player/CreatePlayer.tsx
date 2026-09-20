@@ -12,6 +12,7 @@ import { ChevronDown } from 'lucide-react';
 import { useMemo, useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '../../lib/cn.js';
+import { useT } from '../../lib/i18n.js';
 import { firstFriendlyError } from '../../lib/validation.js';
 import { Button } from '../../components/ui/button.js';
 import { Card, CardBody, CardTitle } from '../../components/ui/card.js';
@@ -19,6 +20,7 @@ import { useCareerRun } from '../../store/career.js';
 
 export function CreatePlayer() {
   const navigate = useNavigate();
+  const t = useT();
   const start = useCareerRun((s) => s.start);
 
   const [name, setName] = useState('');
@@ -63,18 +65,20 @@ export function CreatePlayer() {
   return (
     <Card>
       <CardBody>
-        <CardTitle>Create your prospect</CardTitle>
+        <CardTitle>{t.createPlayer.title}</CardTitle>
         <form className="mt-6 space-y-6" onSubmit={onSubmit} noValidate>
           <div className="grid gap-4 sm:grid-cols-[1fr_auto]">
             <label className="block space-y-1.5">
-              <span className="text-xs uppercase tracking-wide text-ink-dim">Name</span>
+              <span className="text-xs uppercase tracking-wide text-ink-dim">
+                {t.createPlayer.name}
+              </span>
               <input
                 value={name}
                 onChange={(e) => {
                   setName(e.target.value);
                   if (error?.field === 'name') setError(null);
                 }}
-                placeholder="e.g. Marcus Vale"
+                placeholder={t.createPlayer.namePlaceholder}
                 className={cn(
                   'w-full rounded-lg border bg-court-800 px-3 py-2.5 text-ink caret-amber outline-none focus:border-amber',
                   error?.field === 'name' ? 'border-rose-500' : 'border-court-600',
@@ -88,7 +92,9 @@ export function CreatePlayer() {
             </label>
 
             <label className="block space-y-1.5">
-              <span className="text-xs uppercase tracking-wide text-ink-dim">Jersey #</span>
+              <span className="text-xs uppercase tracking-wide text-ink-dim">
+                {t.createPlayer.jersey}
+              </span>
               <input
                 type="number"
                 inputMode="numeric"
@@ -112,7 +118,9 @@ export function CreatePlayer() {
 
           <div className="grid gap-4 sm:grid-cols-[1fr_auto]">
             <label className="block space-y-1.5">
-              <span className="text-xs uppercase tracking-wide text-ink-dim">Born in</span>
+              <span className="text-xs uppercase tracking-wide text-ink-dim">
+                {t.createPlayer.bornIn}
+              </span>
               <div className="relative">
                 <select
                   value={country}
@@ -134,7 +142,9 @@ export function CreatePlayer() {
             </label>
 
             <div className="space-y-1.5">
-              <span className="text-xs uppercase tracking-wide text-ink-dim">Shooting hand</span>
+              <span className="text-xs uppercase tracking-wide text-ink-dim">
+                {t.createPlayer.shootingHand}
+              </span>
               <div className="flex gap-2">
                 {(['left', 'right'] as const).map((h) => (
                   <button
@@ -148,7 +158,7 @@ export function CreatePlayer() {
                         : 'border-court-600 text-ink-dim hover:border-amber hover:bg-amber/4 hover:text-ink',
                     )}
                   >
-                    {h === 'left' ? 'Lefty' : 'Righty'}
+                    {h === 'left' ? t.createPlayer.lefty : t.createPlayer.righty}
                   </button>
                 ))}
               </div>
@@ -160,7 +170,9 @@ export function CreatePlayer() {
               above it, so they read as one decision, not two unrelated rows. */}
           <div className="space-y-3">
             <div className="space-y-1.5">
-              <span className="text-xs uppercase tracking-wide text-ink-dim">Position</span>
+              <span className="text-xs uppercase tracking-wide text-ink-dim">
+                {t.createPlayer.position}
+              </span>
               <div className="flex flex-wrap gap-2">
                 {POSITIONS.map((p) => (
                   <button
@@ -182,7 +194,7 @@ export function CreatePlayer() {
 
             <div className="space-y-1.5">
               <span className="text-xs uppercase tracking-wide text-ink-dim">
-                Archetype ({position})
+                {t.createPlayer.archetypeLabel(position)}
               </span>
               <div className="grid gap-2 sm:grid-cols-2">
                 {archetypes.map((a) => (
@@ -211,7 +223,7 @@ export function CreatePlayer() {
           )}
 
           <Button type="submit" size="lg" className="w-full">
-            Enter the summer circuit
+            {t.createPlayer.submit}
           </Button>
         </form>
       </CardBody>

@@ -61,20 +61,6 @@ jobs:
         env:
           VITE_API_URL: '' # same-origin: CloudFront serves /api/*
 
-      - name: DEBUG - print OIDC token claims (temporary, remove once fixed)
-        run: |
-          curl -sS -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
-            "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=sts.amazonaws.com" -o /tmp/token.json
-          python3 -c "
-          import json, base64
-          tok = json.load(open('/tmp/token.json'))['value']
-          payload = tok.split('.')[1]
-          payload += '=' * (-len(payload) % 4)
-          claims = json.loads(base64.urlsafe_b64decode(payload))
-          for k in ['sub','aud','iss','repository','repository_owner','ref','event_name','actor','workflow_ref']:
-              print(f'{k}: {claims.get(k)}')
-          "
-
       - uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}

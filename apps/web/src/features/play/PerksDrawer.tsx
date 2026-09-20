@@ -3,11 +3,10 @@ import { ShoppingCart } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { cn } from '../../lib/cn.js';
 import { moneyM } from '../../lib/format.js';
+import { useT } from '../../lib/i18n.js';
 
 type PerkShop = NonNullable<NonNullable<PendingDecision['season']>['shop']>;
 type PerkItem = PerkShop['items'][number];
-
-const KIND_TAG: Record<PerkItem['kind'], string> = { yearly: '/yr', permanent: 'once' };
 
 /**
  * The perks shop: a small cart button (it sits by the team name in the season
@@ -26,6 +25,7 @@ export function PerksDrawer({
   onHoverKeys?: (keys: readonly string[] | null) => void;
 }) {
   const [open, setOpen] = useState(false);
+  const t = useT();
   const ownedCount = shop.items.filter((i) => i.owned).length;
   const buyable = shop.items.filter((i) => i.affordable && !i.owned).length;
 
@@ -41,8 +41,8 @@ export function PerksDrawer({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        aria-label="Perks shop"
-        title={`Perks shop · ${ownedCount} active · ${moneyM(shop.bank)} in bank`}
+        aria-label={t.play.perksShop.ariaLabel}
+        title={t.play.perksShop.tooltip(ownedCount, moneyM(shop.bank))}
         className="relative inline-flex items-center gap-1.5 rounded-lg border border-court-700 bg-court-900/60 px-2 py-1 text-ink-dim transition-colors hover:border-amber hover:text-amber"
       >
         <ShoppingCart size={15} strokeWidth={1.75} />
@@ -63,21 +63,19 @@ export function PerksDrawer({
         >
           <div
             role="dialog"
-            aria-label="Perks shop"
+            aria-label={t.play.perksShop.ariaLabel}
             className="max-h-[85dvh] w-full max-w-3xl overflow-y-auto rounded-t-2xl border border-court-700 bg-court-900 p-5 sm:rounded-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="mb-4 flex items-start justify-between gap-3">
               <div>
-                <h3 className="font-display text-xl tracking-wide">Perks shop</h3>
-                <p className="text-xs text-ink-dim">
-                  Spend from the bank - yearly perks re-bill every offseason.
-                </p>
+                <h3 className="font-display text-xl tracking-wide">{t.play.perksShop.title}</h3>
+                <p className="text-xs text-ink-dim">{t.play.perksShop.subtitle}</p>
               </div>
               <div className="flex items-center gap-3">
                 <div className="text-right">
                   <div className="text-[10px] uppercase tracking-wide text-ink-dim">
-                    In the bank
+                    {t.play.perksShop.inTheBank}
                   </div>
                   <div className="font-display text-lg leading-none text-emerald-400">
                     {moneyM(shop.bank)}
@@ -85,7 +83,7 @@ export function PerksDrawer({
                 </div>
                 <button
                   onClick={() => setOpen(false)}
-                  aria-label="Close"
+                  aria-label={t.play.perksShop.close}
                   className="rounded-lg px-2 py-1 text-sm text-ink-dim hover:text-ink"
                 >
                   ✕
@@ -94,9 +92,7 @@ export function PerksDrawer({
             </div>
 
             {shop.items.length === 0 ? (
-              <p className="text-sm text-ink-dim">
-                Nothing on the shelves yet - check back next season.
-              </p>
+              <p className="text-sm text-ink-dim">{t.play.perksShop.empty}</p>
             ) : (
               <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
                 {shop.items.map((item) => (
@@ -120,6 +116,7 @@ function PerkTile({
   onBuy: (choiceId: string) => void;
   onHoverKeys?: (keys: readonly string[] | null) => void;
 }) {
+  const t = useT();
   const selectable = item.affordable && !item.owned;
   const hoverOn = onHoverKeys ? () => onHoverKeys(item.highlight) : undefined;
   const hoverOff = onHoverKeys ? () => onHoverKeys(null) : undefined;
@@ -152,7 +149,7 @@ function PerkTile({
         >
           {moneyM(item.cost)}
           <span className="ml-0.5 text-[9px] uppercase tracking-wide text-ink-dim">
-            {KIND_TAG[item.kind]}
+            {item.kind === 'yearly' ? t.play.perksShop.perYear : t.play.perksShop.once}
           </span>
         </span>
       </div>
@@ -161,12 +158,12 @@ function PerkTile({
 
       {item.tags.length > 0 && (
         <div className="flex flex-wrap gap-1">
-          {item.tags.map((t) => (
+          {item.tags.map((tag) => (
             <span
-              key={t}
+              key={tag}
               className="rounded bg-court-800 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-ink-dim"
             >
-              {t}
+              {tag}
             </span>
           ))}
         </div>
@@ -174,11 +171,11 @@ function PerkTile({
 
       <div className="mt-auto pt-0.5 text-[9px] font-bold uppercase tracking-widest">
         {item.owned ? (
-          <span className="text-amber">Owned</span>
+          <span className="text-amber">{t.play.perksShop.owned}</span>
         ) : item.affordable ? (
           <span className="text-emerald-400/70">{item.category}</span>
         ) : (
-          <span className="text-ink-dim">Need {moneyM(item.cost)}</span>
+          <span className="text-ink-dim">{t.play.perksShop.need(moneyM(item.cost))}</span>
         )}
       </div>
     </button>

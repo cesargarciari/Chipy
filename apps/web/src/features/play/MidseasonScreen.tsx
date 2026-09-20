@@ -1,4 +1,4 @@
-import type { PendingDecision } from '@chipy/engine';
+import type { EffectChip, PendingDecision } from '@chipy/engine';
 import { useState } from 'react';
 import { ChoiceCard } from '../../components/ChoiceCard.js';
 import { CareerHud } from './CareerHud.js';
@@ -10,9 +10,13 @@ type Midseason = NonNullable<PendingDecision['midseason']>;
 export function MidseasonScreen({
   midseason,
   onChoose,
+  recentDeltas,
+  echoSeq,
 }: {
   midseason: Midseason;
   onChoose: (choiceId: string) => void;
+  recentDeltas?: readonly EffectChip[];
+  echoSeq?: number;
 }) {
   const [highlight, setHighlight] = useState<readonly string[] | undefined>(undefined);
   const { decision, preview } = midseason;
@@ -23,7 +27,14 @@ export function MidseasonScreen({
       kicker={`Mid-season · Age ${preview.age}`}
       title={decision.title}
       prompt={decision.prompt}
-      footer={<CareerHud preview={preview} highlight={highlight} />}
+      footer={
+        <CareerHud
+          preview={preview}
+          highlight={highlight}
+          recentDeltas={recentDeltas}
+          echoSeq={echoSeq}
+        />
+      }
     >
       <div className="grid gap-3 sm:grid-cols-2">
         {decision.options.map((o) => (

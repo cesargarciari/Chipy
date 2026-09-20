@@ -1,4 +1,4 @@
-import type { PendingDecision } from '@chipy/engine';
+import type { EffectChip, PendingDecision } from '@chipy/engine';
 import { useState } from 'react';
 import { ChoiceCard } from '../../components/ChoiceCard.js';
 import { CareerHud } from './CareerHud.js';
@@ -15,9 +15,13 @@ type Chemistry = NonNullable<PendingDecision['chemistry']>;
 export function ChemistryScreen({
   chemistry,
   onChoose,
+  recentDeltas,
+  echoSeq,
 }: {
   chemistry: Chemistry;
   onChoose: (choiceId: string) => void;
+  recentDeltas?: readonly EffectChip[];
+  echoSeq?: number;
 }) {
   const [highlight, setHighlight] = useState<readonly string[] | undefined>(undefined);
   const { decision, preview } = chemistry;
@@ -28,7 +32,14 @@ export function ChemistryScreen({
       kicker={`Locker room · Age ${preview.age}`}
       title={decision.title}
       prompt={decision.prompt}
-      footer={<CareerHud preview={preview} highlight={highlight} />}
+      footer={
+        <CareerHud
+          preview={preview}
+          highlight={highlight}
+          recentDeltas={recentDeltas}
+          echoSeq={echoSeq}
+        />
+      }
     >
       <div className="grid gap-3 sm:grid-cols-2">
         {decision.options.map((o) => (

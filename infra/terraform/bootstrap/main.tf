@@ -97,11 +97,21 @@ data "aws_iam_policy_document" "github_assume" {
       values   = ["sts.amazonaws.com"]
     }
     condition {
+      # GitHub's `sub` claim can embed immutable owner/repo IDs
+      # (repo:name@owner_id/name@repo_id:...) instead of plain names, depending
+      # on account settings - so pin on the stable `repository` claim (plain
+      # "owner/repo", unaffected either way) for identity, and only use `sub`
+      # to restrict *which ref/event*, wildcarding the owner/repo portion.
+      test     = "StringEquals"
+      variable = "token.actions.githubusercontent.com:repository"
+      values   = [var.github_repo]
+    }
+    condition {
       test     = "StringLike"
       variable = "token.actions.githubusercontent.com:sub"
       values = [
-        "repo:${var.github_repo}:ref:refs/heads/main",
-        "repo:${var.github_repo}:pull_request",
+        "repo:*:ref:refs/heads/main",
+        "repo:*:pull_request",
       ]
     }
   }

@@ -2,6 +2,7 @@ import type { EffectChip } from '@chipy/engine';
 import { clubCrest, teamLogo } from '../lib/art.js';
 import { cn } from '../lib/cn.js';
 import { moneyM } from '../lib/format.js';
+import { useT } from '../lib/i18n.js';
 import { mergeDefenseChips, toDisplayKey } from '../lib/ratings.js';
 
 type ChoiceAccent = 'amber' | 'sky' | 'emerald';
@@ -53,6 +54,7 @@ export function ChoiceCard({
   className,
   onHoverKeys,
 }: ChoiceCardProps) {
+  const t = useT();
   const logo = teamId ? (teamLogo(teamId) ?? clubCrest(teamId)) : undefined;
   const shown = mergeDefenseChips(effects);
   const statKeys = effects.filter((e) => e.key !== 'money').map((e) => toDisplayKey(e.key));
@@ -105,7 +107,7 @@ export function ChoiceCard({
       <div className="relative z-10 flex flex-1 flex-col">
         {rare && (
           <span className="mb-1 inline-flex w-fit items-center gap-1 rounded-full bg-amber px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-court-950">
-            Gold
+            {t.play.gold}
           </span>
         )}
         {logo && <img src={logo} alt="" className="mb-2 h-10 w-10 object-contain" />}

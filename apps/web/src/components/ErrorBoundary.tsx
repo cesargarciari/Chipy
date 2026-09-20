@@ -1,4 +1,5 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
+import { getT } from '../lib/i18n.js';
 import { Button } from './ui/button.js';
 import { Card, CardBody } from './ui/card.js';
 
@@ -36,18 +37,16 @@ export class ErrorBoundary extends Component<{ children: ReactNode }, State> {
 
   override render(): ReactNode {
     if (!this.state.error) return this.props.children;
+    const t = getT().errorBoundary;
 
     return (
       <div className="mx-auto max-w-md px-4 py-16">
         <Card>
           <CardBody className="space-y-4 text-center">
-            <h1 className="text-2xl">Something broke</h1>
-            <p className="text-sm text-ink-dim">
-              The app hit an error it couldn&apos;t recover from - most likely a saved career from
-              an older version. Starting over will clear it.
-            </p>
+            <h1 className="text-2xl">{t.title}</h1>
+            <p className="text-sm text-ink-dim">{t.body}</p>
             <Button className="w-full" onClick={this.reset}>
-              Start over
+              {t.button}
             </Button>
           </CardBody>
         </Card>

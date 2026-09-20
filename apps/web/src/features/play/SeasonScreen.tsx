@@ -1,4 +1,4 @@
-import type { PendingDecision, PlayerProfile } from '@chipy/engine';
+import type { EffectChip, PendingDecision, PlayerProfile } from '@chipy/engine';
 import { useState } from 'react';
 import { ChoiceCard } from '../../components/ChoiceCard.js';
 import { MomentModal, isHeadlineMoment } from '../../components/MomentModal.js';
@@ -18,11 +18,15 @@ export function SeasonScreen({
   profile,
   onChoose,
   onBuyPerk,
+  recentDeltas,
+  echoSeq,
 }: {
   season: Season;
   profile: PlayerProfile;
   onChoose: (choiceId: string) => void;
   onBuyPerk: (choiceId: string) => void;
+  recentDeltas?: readonly EffectChip[];
+  echoSeq?: number;
 }) {
   const [highlight, setHighlight] = useState<readonly string[] | undefined>(undefined);
   const { preview, decision, shop } = season;
@@ -59,7 +63,12 @@ export function SeasonScreen({
 
       <MomentModal key={preview.seasonNumber} moments={headlineMoments} />
 
-      <CareerHud preview={preview} highlight={highlight} />
+      <CareerHud
+        preview={preview}
+        highlight={highlight}
+        recentDeltas={recentDeltas}
+        echoSeq={echoSeq}
+      />
 
       {last ? (
         <Card>

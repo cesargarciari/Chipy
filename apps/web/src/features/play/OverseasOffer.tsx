@@ -1,4 +1,4 @@
-import type { PendingDecision } from '@chipy/engine';
+import type { EffectChip, PendingDecision } from '@chipy/engine';
 import { useState } from 'react';
 import { ChoiceCard } from '../../components/ChoiceCard.js';
 import { MomentModal, isHeadlineMoment } from '../../components/MomentModal.js';
@@ -26,10 +26,14 @@ export function OverseasOffer({
   overseasOffer,
   onChoose,
   onBuyPerk,
+  recentDeltas,
+  echoSeq,
 }: {
   overseasOffer: OverseasOfferData;
   onChoose: (choiceId: string) => void;
   onBuyPerk: (choiceId: string) => void;
+  recentDeltas?: readonly EffectChip[];
+  echoSeq?: number;
 }) {
   const [highlight, setHighlight] = useState<readonly string[] | undefined>(undefined);
   const copy = COPY[overseasOffer.reason];
@@ -45,7 +49,12 @@ export function OverseasOffer({
 
       <MomentModal key={overseasOffer.preview.seasonNumber} moments={headlineMoments} />
 
-      <CareerHud preview={overseasOffer.preview} highlight={highlight} />
+      <CareerHud
+        preview={overseasOffer.preview}
+        highlight={highlight}
+        recentDeltas={recentDeltas}
+        echoSeq={echoSeq}
+      />
 
       {overseasOffer.shop && (
         <PerksDrawer

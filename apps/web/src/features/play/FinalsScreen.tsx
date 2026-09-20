@@ -13,9 +13,11 @@ type Finals = NonNullable<PendingDecision['finals']>;
 export function FinalsScreen({
   finals,
   onChoose,
+  echoSeq,
 }: {
   finals: Finals;
   onChoose: (choiceId: string) => void;
+  echoSeq?: number;
 }) {
   const { game, preview } = finals;
 
@@ -25,7 +27,7 @@ export function FinalsScreen({
       kicker={`${game.kicker} · Age ${preview.age}`}
       title={game.situation}
       prompt={game.prompt}
-      footer={<CareerHud preview={preview} />}
+      footer={<CareerHud preview={preview} echoSeq={echoSeq} />}
     >
       <div className="space-y-3">
         {game.options.map((o, i) => (
