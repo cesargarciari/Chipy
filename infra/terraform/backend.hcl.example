@@ -1,8 +1,0 @@
-# Copy to backend.hcl (gitignored) and fill in from `bootstrap/` outputs:
-#   terraform -chdir=bootstrap output
-#
-# Then:  terraform init -backend-config=backend.hcl
-
-bucket         = "chipy-tfstate-<your-account-id>"
-region         = "ca-central-1"
-dynamodb_table = "chipy-tflock"
