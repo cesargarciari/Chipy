@@ -61,7 +61,6 @@ export function Home() {
               </Button>
             )}
           </div>
-          <p className="text-xs text-ink-dim">{t.home.noSignup}</p>
         </div>
 
         <div className="flex w-full max-w-2xl flex-col items-center gap-2.5 border-t border-court-800 pt-8 text-[11px] font-bold uppercase tracking-[0.14em] text-ink-dim sm:flex-row sm:justify-between sm:gap-4">
