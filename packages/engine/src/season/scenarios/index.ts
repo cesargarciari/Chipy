@@ -9,11 +9,7 @@ import { shoeScenarios } from './shoe.js';
 import { teamScenarios } from './team.js';
 import { trainingScenarios } from './training.js';
 
-/**
- * The whole scenario library. Adding content = append an object to one of the
- * themed files. `buildScenarioIndex()` validates the pack (unique ids, 2–4
- * options, always at least one ungated fallback) - called from the test suite.
- */
+/** Every season scenario. To add one, append it to a themed file. Checked in tests. */
 export const SCENARIOS: readonly Scenario[] = [
   ...trainingScenarios,
   ...bodyScenarios,

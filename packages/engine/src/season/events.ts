@@ -8,7 +8,7 @@ export interface EventContext {
   teamStrength: number;
   contractYearsLeft: number;
   seasonIndex: number;
-  /** 0..1 from perks - scales bad-luck event weight down. */
+  /** 0 to 1 from perks. Fewer bad events. */
   slumpResist: number;
 }
 
@@ -20,8 +20,7 @@ interface EventDef {
 
 const resist = (r: number) => Math.max(0.15, 1 - r);
 
-// Injuries are their own per-season system now (`season/injuries.ts`), rolled
-// independently of this single "flavour event" so a career can't dodge them all.
+// Random season events. Injuries live in injuries.ts.
 const EVENTS: EventDef[] = [
   {
     id: 'quiet_year',

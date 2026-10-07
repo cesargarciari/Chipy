@@ -16,11 +16,7 @@ export interface TestApp {
   cleanup: () => Promise<void>;
 }
 
-/**
- * Spin up the real Fastify app wired to a throwaway table in DynamoDB Local, so
- * each test file gets a clean, isolated dataset. Requires `docker compose up
- * dynamodb-local` (CI starts it as a service container).
- */
+/** Starts the app against a fresh table in DynamoDB Local. Needs `docker compose up dynamodb-local`. */
 export async function makeTestApp(): Promise<TestApp> {
   const table = `chipy_test_${Math.random().toString(36).slice(2, 10)}`;
   const raw = new DynamoDBClient({
@@ -76,12 +72,12 @@ const PROFILE: PlayerProfile = {
   handedness: 'right',
 };
 
-/** A full, finished career's request body — plays the engine to build `choices`. */
+/** Request body for a full finished career. */
 export function createCareerBody(
   overrides: {
     seed?: number | string;
     profile?: PlayerProfile;
-    /** index of the option to pick at every node (default: 1st non-retire). */
+    /** Which option to pick at every node. */
     strategy?: 'first' | 'last';
   } = {},
 ): CreateCareerRequest {

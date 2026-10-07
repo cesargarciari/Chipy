@@ -1,4 +1,4 @@
-# Build from the repo root:  docker build -f apps/api/Dockerfile -t chipy-api .
+# Build from the repo root: docker build -f apps/api/Dockerfile -t chipy-api .
 # syntax=docker/dockerfile:1
 
 FROM node:22-alpine AS base
@@ -7,14 +7,14 @@ ENV PATH=$PNPM_HOME:$PATH
 RUN corepack enable
 WORKDIR /repo
 
-# Just the manifests — lets the install layer cache until deps change.
+# Copy package files first so the install step is cached.
 FROM base AS manifests
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.base.json ./
 COPY packages/engine/package.json packages/engine/
 COPY packages/shared/package.json packages/shared/
 COPY apps/api/package.json apps/api/
 
-# ---- build: full install, then compile engine -> shared -> api ----
+# Build: install everything, then compile engine, shared and api
 FROM manifests AS build
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
 COPY packages/engine packages/engine
@@ -22,7 +22,7 @@ COPY packages/shared packages/shared
 COPY apps/api apps/api
 RUN pnpm --filter @chipy/api... run build
 
-# ---- runner: prod-only deps + compiled output, non-root ----
+# Runner: production deps and compiled code, non-root
 FROM manifests AS runner
 ENV NODE_ENV=production
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \

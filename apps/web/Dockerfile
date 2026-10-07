@@ -1,6 +1,5 @@
-# Build from the repo root:  docker build -f apps/web/Dockerfile -t chipy-web .
-# In AWS (Milestone 2) the built assets go straight to S3 + CloudFront; this
-# image exists so `docker compose` mirrors production locally.
+# Build from the repo root: docker build -f apps/web/Dockerfile -t chipy-web .
+# Only used for docker compose. On AWS the site is served from S3 and CloudFront.
 # syntax=docker/dockerfile:1
 
 FROM node:22-alpine AS base

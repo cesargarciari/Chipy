@@ -25,7 +25,7 @@ void apiErrorSchema; // keeps the error contract discoverable from this module
 
 export interface BuildServerOptions {
   config?: AppConfig;
-  /** Inject a client in tests; otherwise one is created from config. */
+  /** Tests can pass in their own client. */
   docClient?: DynamoDBDocumentClient;
 }
 
@@ -47,8 +47,7 @@ export async function buildServer(opts: BuildServerOptions = {}): Promise<Fastif
   await app.register(rateLimit, { max: 120, timeWindow: '1 minute' });
 
   if (!config.isProduction) {
-    // Dev-only. Imported lazily so the two swagger packages can be marked
-    // external and dropped from the production Lambda bundle (see build-lambda.mjs).
+    // Dev only. Loaded lazily so the Lambda bundle can leave swagger out.
     const { default: swagger } = await import('@fastify/swagger');
     const { default: swaggerUi } = await import('@fastify/swagger-ui');
     await app.register(swagger, {

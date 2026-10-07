@@ -12,21 +12,15 @@ interface RatingStripProps {
   ratings: Ratings;
   athleticism: number;
   durability: number;
-  /** Tile keys to light up gold - e.g. the stats an option under the cursor would move. */
+  /** Stats to highlight in gold. */
   highlight?: readonly string[];
-  /** Effects from the decision that just resolved - tiles they touched get a
-   * brief floating +/- tick so the strip visibly reacts to that one call. */
+  /** Effects from the last decision, shown as small +/- badges. */
   recentDeltas?: readonly EffectChip[];
-  /** Bumped each time a new decision resolves, so the tick badges (keyed off
-   * it) remount and replay even when the same tile moves twice in a row. */
+  /** Changes on every decision so the badges replay. */
   echoSeq?: number;
 }
 
-/**
- * The persistent stat-tile row (56 FINISHING · 65 MID-RANGE · …). Interior and
- * perimeter defense collapse to one DEFENSE tile. `highlight` tiles glow gold on
- * hover; the top three skills are tinted by rank.
- */
+/** The row of stat tiles. Both defense ratings show as one DEFENSE tile. */
 export function RatingStrip({
   ratings,
   athleticism,
@@ -81,10 +75,7 @@ export function RatingStrip({
             )}
           >
             {delta && delta.delta !== 0 && (
-              // Stays inside the tile's own box (no negative offset): the
-              // strip's `overflow-x-auto` forces `overflow-y` to `auto` too
-              // per the CSS spec, so anything poking above the tile gets
-              // clipped rather than floating free.
+              // Stays inside the tile so the scrolling strip doesn't clip it.
               <span
                 key={echoSeq}
                 aria-hidden

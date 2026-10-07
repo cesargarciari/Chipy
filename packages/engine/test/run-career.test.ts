@@ -44,7 +44,7 @@ describe('runCareer — partial evaluation', () => {
       if (res.pending.nodeId === 's1') break;
       choices = [...choices, { nodeId: res.pending.nodeId, choiceId: firstOption(res) }];
     }
-    // Prologue → at least one college year → landing → season 1, in that order.
+    // Prologue, college, landing, then season 1, in that order.
     expect(seen[0]).toBe('highschool');
     expect(seen[1]).toBe('recruiting');
     expect(seen[2]).toBe('college1');

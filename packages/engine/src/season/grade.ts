@@ -1,10 +1,7 @@
 import type { AwardId, EuroResult, GradeLetter, Role, TeamResult } from '../types.js';
 import { clamp } from '../rng.js';
 
-/**
- * Per-award value toward a season grade. The individual hardware is worth the
- * most; the team-wide honours (`champion`) and the lesser lists are lighter.
- */
+/** How much each award counts toward the season grade. */
 const AWARD_POINTS: Partial<Record<AwardId, number>> = {
   mvp: 46,
   dpoy: 28,
@@ -64,15 +61,15 @@ function toLetter(points: number): GradeLetter {
 export interface SeasonGradeArgs {
   awards: readonly AwardId[];
   teamResult: TeamResult;
-  /** Conference seed 1..15 (0 when there is no NBA seeding - e.g. overseas). */
+  /** Conference seed 1 to 15, or 0 overseas. */
   seed: number;
-  /** This season's `impact` (0 if injured out). */
+  /** This season's impact, or 0 if injured. */
   impact: number;
   role: Role;
   gamesPlayed: number;
 }
 
-/** Grade one NBA season: accolades + team success + seed + individual production. */
+/** Grades an NBA season from awards, team success and stats. */
 export function gradeSeason(a: SeasonGradeArgs): GradeLetter {
   let pts = 30;
   for (const id of a.awards) pts += AWARD_POINTS[id] ?? 0;
@@ -93,7 +90,7 @@ export interface OverseasGradeArgs {
   gamesPlayed: number;
 }
 
-/** Grade one overseas season: club silverware + accolades + production. */
+/** Grades an overseas season from trophies, awards and stats. */
 export function gradeOverseasSeason(a: OverseasGradeArgs): GradeLetter {
   let pts = 32;
   for (const id of a.awards) pts += AWARD_POINTS[id] ?? 0;

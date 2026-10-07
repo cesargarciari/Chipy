@@ -1,11 +1,6 @@
 import type { SchoolRef, SchoolTier } from '../types.js';
 
-/**
- * College programs and overseas clubs. `prestige` sets the tournament / league
- * ceiling; `nbaPedigree` is the "sends players to the lottery" reputation that
- * boosts draft stock; `style.usage` is how ball-dominant you'll be (mid-majors
- * high, blue-bloods low); `style.dev` is the per-year growth flavour.
- */
+/** Colleges and overseas clubs. Prestige affects results, nbaPedigree boosts draft stock, usage is how much you'll have the ball. */
 const S = (
   id: string,
   name: string,
@@ -17,7 +12,7 @@ const S = (
 ): SchoolRef => ({ id, name, tier, prestige, nbaPedigree, style: { usage, dev } });
 
 export const SCHOOLS: readonly SchoolRef[] = [
-  // ---- Blue-bloods: elite pedigree, you share touches -----------------
+  // Blue-bloods: strong programs, but you share the ball
   S('duke', 'Duke', 'blue_blood', 0.92, 0.95, 0.58, { basketballIQ: 1, perimeterDefense: 1 }),
   S('unc', 'North Carolina', 'blue_blood', 0.9, 0.9, 0.6, { finishing: 1, playmaking: 1 }),
   S('kentucky', 'Kentucky', 'blue_blood', 0.9, 0.96, 0.62, { finishing: 1, perimeterDefense: 1 }),
@@ -39,7 +34,7 @@ export const SCHOOLS: readonly SchoolRef[] = [
   }),
   S('purdue', 'Purdue', 'blue_blood', 0.83, 0.76, 0.62, { interiorDefense: 1, midRange: 1 }),
 
-  // ---- Mid-majors: you are the whole offense -------------------------
+  // Mid-majors: you are the offense
   S('saint_marys', "Saint Mary's", 'mid_major', 0.62, 0.5, 0.82, { threePoint: 1, playmaking: 1 }),
   S('san_diego_st', 'San Diego State', 'mid_major', 0.64, 0.52, 0.78, {
     perimeterDefense: 1,
@@ -64,8 +59,7 @@ export const SCHOOLS: readonly SchoolRef[] = [
     finishing: 1,
   }),
 
-  // ---- Overseas: EuroLeague clubs, pro habits, low hype. Ids match the
-  //      crest artwork and the EURO_CLUBS list so a logo always shows. --------
+  // Overseas clubs. Ids match the crest artwork.
   S('real_madrid', 'Real Madrid', 'overseas', 0.9, 0.62, 0.58, {
     basketballIQ: 2,
     perimeterDefense: 1,

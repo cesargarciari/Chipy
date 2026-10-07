@@ -28,12 +28,7 @@ export const choiceSelectionSchema = z.object({
     .regex(/^[a-z][a-z0-9_]*$/, 'invalid choice id'),
 });
 
-/**
- * Engine input. `choices` may be empty (to fetch the first node) or partial
- * (to fetch the next). `@chipy/shared` layers a minimum length on top for the
- * "persist a finished career" API call. The cap is generous: a long career with
- * a busy perks shop can run well past 100 recorded choices.
- */
+/** Engine input. Choices can be empty or partial to get the next choice. */
 export const runCareerInputSchema = z.object({
   seed: z.union([z.number().int(), z.string().min(1).max(64)]),
   profile: playerProfileSchema,

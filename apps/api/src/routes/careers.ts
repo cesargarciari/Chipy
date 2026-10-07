@@ -5,11 +5,7 @@ import { nanoid } from 'nanoid';
 import { CareerConflictError } from '../db/repo.js';
 
 export const careerRoutes: FastifyPluginAsyncZod = async (app) => {
-  /**
-   * Persist a finished career. The client sends only the *inputs* (seed,
-   * profile, choices); the server replays the whole simulation itself and
-   * stores that result, so a tampered or stale client can't write bogus stats.
-   */
+  /** Saves a finished career. The server replays the inputs itself so the client can't fake stats. */
   app.post(
     '/careers',
     {
@@ -56,7 +52,7 @@ export const careerRoutes: FastifyPluginAsyncZod = async (app) => {
     },
   );
 
-  /** Fetch a stored career for the legacy / share page. */
+  /** Gets a saved career for the share page. */
   app.get(
     '/careers/:id',
     {

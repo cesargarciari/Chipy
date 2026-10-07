@@ -1,11 +1,6 @@
 import type { CountryRef } from '../types.js';
 
-/**
- * Countries a prospect can be born in. `pedigree` (0..1) is basketball strength -
- * it weights national-team medal odds and call-up odds in
- * `season/international.ts` and nothing else. Ordered roughly by pedigree so the
- * create screen reads sensibly.
- */
+/** Countries a player can be from. Pedigree is basketball strength and only affects national-team odds. */
 const C = (id: string, name: string, flag: string, pedigree: number): CountryRef => ({
   id,
   name,
@@ -14,7 +9,7 @@ const C = (id: string, name: string, flag: string, pedigree: number): CountryRef
 });
 
 export const COUNTRIES: readonly CountryRef[] = [
-  // ---- Basketball powers -------------------------------------------------
+  // Basketball powers
   C('USA', 'United States', '🇺🇸', 0.98),
   C('ESP', 'Spain', '🇪🇸', 0.86),
   C('SRB', 'Serbia', '🇷🇸', 0.85),

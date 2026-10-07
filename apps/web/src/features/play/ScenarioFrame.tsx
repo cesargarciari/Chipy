@@ -15,14 +15,7 @@ const KICKER: Record<ScenarioAccent, string> = {
   emerald: 'text-emerald-400',
 };
 
-/**
- * The shell every in-career question sits in: a coloured strand across the top,
- * the kicker / title / prompt, then the options right underneath it (no big HUD
- * wedged in between). Anything passed as `footer` - the ratings + money HUD,
- * usually - renders below the options where it does not separate the question
- * from the answer. The frame itself does not animate on a new question; only the
- * option cards ease in (`option-enter`), so it never reads as a full reload.
- */
+/** The layout for every in-career question: title, prompt, options, then the footer. */
 export function ScenarioFrame({
   accent = 'amber',
   kicker,

@@ -1,5 +1,4 @@
-# DynamoDB single table. Mirrors apps/api/src/db/table-schema.ts exactly:
-# PK/SK (S/S), one GSI `gsi1` on gsi1pk/gsi1sk projecting ALL, on-demand billing.
+# DynamoDB table. Matches apps/api/src/db/table-schema.ts.
 resource "aws_dynamodb_table" "this" {
   name         = var.name
   billing_mode = "PAY_PER_REQUEST"
@@ -30,9 +29,7 @@ resource "aws_dynamodb_table" "this" {
     projection_type = "ALL"
   }
 
-  # Free lever: the app does not write `expiresAt` today, so this is a no-op
-  # until saveCareer() sets one. Flip it on there if stored careers ever need
-  # to age out (keeps storage flat forever at zero cost).
+  # Not used yet since the app doesn't set expiresAt.
   ttl {
     attribute_name = "expiresAt"
     enabled        = true

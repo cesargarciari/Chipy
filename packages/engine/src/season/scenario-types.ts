@@ -1,6 +1,6 @@
 import type { CareerPhase, GameOption, Market, Role } from '../types.js';
 
-/** Read-only snapshot the scenario gates + predicates see. */
+/** What scenario gates can check. */
 export interface ScenarioContext {
   seasonNumber: number;
   age: number;
@@ -26,7 +26,7 @@ export interface ScenarioGate {
   once?: boolean;
   /** Relative selection weight (default 1). */
   weight?: number;
-  /** Escape hatch for anything the declarative gate can't express. */
+  /** Custom check for anything the gate can't express. */
   predicate?: (ctx: ScenarioContext) => boolean;
 }
 
@@ -37,6 +37,6 @@ export interface Scenario {
   gate: ScenarioGate;
   title: string;
   prompt: string;
-  /** 2–4 options. */
+  /** 2 to 4 options. */
   options: GameOption[];
 }

@@ -41,7 +41,7 @@ export function ShareRow({
             setCopied(true);
             setTimeout(() => setCopied(false), 1500);
           } catch {
-            /* clipboard blocked - the input is selectable as a fallback */
+            /* Clipboard blocked, the user can still select the text. */
           }
         }}
       >

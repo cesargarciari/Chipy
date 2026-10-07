@@ -7,9 +7,7 @@ import { useLanguage, type Lang } from '../store/language.js';
 const navItem = ({ isActive }: { isActive: boolean }) =>
   `text-sm font-semibold transition-colors ${isActive ? 'text-amber' : 'text-ink-dim hover:text-ink'}`;
 
-/** A native `<select>`, not a `<button>` - the e2e career-loop walk clicks the
- * first non-perks-shop button on every screen, and this control is always
- * mounted in the header, so it must never be a button candidate for that. */
+/** A select, not a button, so the e2e test doesn't click it. */
 function LanguageToggle() {
   const lang = useLanguage((s) => s.lang);
   const setLang = useLanguage((s) => s.setLang);

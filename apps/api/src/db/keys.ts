@@ -28,7 +28,7 @@ export interface CareerItem {
   id: string;
   createdAt: string;
   month: string;
-  // Denormalised leaderboard columns (GSI1 projects ALL, so these ride along).
+  // Leaderboard fields copied onto the item.
   name: string;
   position: CareerSummaryDto['profile']['position'];
   archetype: CareerSummaryDto['profile']['archetype'];
@@ -40,7 +40,7 @@ export interface CareerItem {
   rings: number;
   mvps: number;
   earnings: number;
-  // The full, authoritative simulation output.
+  // The full simulation result.
   summary: CareerSummaryDto;
 }
 

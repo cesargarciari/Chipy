@@ -51,7 +51,7 @@ describe('<PerksDrawer />', () => {
 
     await userEvent.click(screen.getByRole('button', { name: /perks shop/i }));
     expect(screen.getByRole('dialog', { name: 'Perks shop' })).toBeInTheDocument();
-    // bank shown in the header, no minus sign anywhere on the price
+    // Bank shows in the header, and prices have no minus sign.
     expect(screen.getAllByText('$6.4M').length).toBeGreaterThan(0);
     expect(screen.getByText('Shooting trainer')).toBeInTheDocument();
     expect(screen.getByText('Private chef')).toBeInTheDocument();

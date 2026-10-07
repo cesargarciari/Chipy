@@ -15,15 +15,15 @@ interface ChoiceCardProps {
   watermark?: string;
   onClick: () => void;
   tone?: 'default' | 'danger';
-  /** A once-a-career breakthrough - rendered gold. */
+  /** A once-a-career breakthrough, shown in gold. */
   rare?: boolean;
-  /** NBA team id / overseas club id - shows that logo on the card (contracts). */
+  /** Team or club id, used to show its logo. */
   teamId?: string;
-  /** Coloured left strand + matching hover border, keyed to the scenario type. */
+  /** Colour of the left stripe and hover border. */
   accent?: ChoiceAccent;
-  /** Extra classes on the button (e.g. the `option-enter` fade-in). */
+  /** Extra classes for the button. */
   className?: string;
-  /** Reports the stat-tile keys this option would move (or null on leave). */
+  /** Reports which stats this option would change, or null when the mouse leaves. */
   onHoverKeys?: (keys: string[] | null) => void;
 }
 
@@ -39,7 +39,7 @@ const ACCENT_STRAND: Record<ChoiceAccent, string> = {
   emerald: 'bg-emerald-400/40 group-hover:bg-emerald-400',
 };
 
-/** El Idolo–style option card: condensed title, blurb, effect chips, faint watermark. */
+/** An option card with a title, blurb, effect chips and a faint watermark. */
 export function ChoiceCard({
   title,
   description,
@@ -60,8 +60,7 @@ export function ChoiceCard({
   const statKeys = effects.filter((e) => e.key !== 'money').map((e) => toDisplayKey(e.key));
   const hoverOn = onHoverKeys ? () => onHoverKeys(statKeys) : undefined;
   const hoverOff = onHoverKeys ? () => onHoverKeys(null) : undefined;
-  // The strand + accent border are a plain-scenario dressing; gold and danger
-  // options keep their own stronger treatment.
+  // Gold and danger cards keep their own styling.
   const strand = accent && !rare && tone !== 'danger' ? accent : null;
 
   return (

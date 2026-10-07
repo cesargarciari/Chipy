@@ -30,7 +30,7 @@ describe('simulation determinism', () => {
     fc.assert(
       fc.property(fc.integer(), profileArb, (seed, profile) => {
         const first = autoPlay(seed, profile, 'random');
-        // Replay from the recorded choices — must reproduce exactly.
+        // Replaying the recorded choices must give the exact same result.
         const replay = runCareer({ seed, profile, choices: first.choices });
         expect(replay.status).toBe('complete');
         if (replay.status === 'complete') expect(replay.summary).toEqual(first);

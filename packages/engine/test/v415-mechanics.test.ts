@@ -27,7 +27,7 @@ describe('conference seed', () => {
         seen.add(season.seed);
       }
     }
-    // The spread is real - not every season is a 1-seed nor a 15-seed.
+    // Seeds vary across seasons.
     expect(seen.has(1)).toBe(true);
     expect([...seen].filter((x) => x >= 10).length).toBeGreaterThan(0);
   });
@@ -73,7 +73,7 @@ describe('higher seeds win more titles', () => {
       .reduce((n, [, c]) => n + c, 0);
     expect(topTitles).toBeGreaterThan(0);
     expect(topTitles).toBeGreaterThan(lowTitles * 5 + 3);
-    // The very best seed wins at a healthy clip.
+    // Top seeds win titles often.
     expect((titlesBySeed[1] ?? 0) / (seasonsBySeed[1] ?? 1)).toBeGreaterThan(0.08);
   });
 });
@@ -82,8 +82,7 @@ describe('the cellar-dwellers live in the lottery', () => {
   it('a roster-only Kings / Wizards / Nets seeds worse than the field, mostly out of the bracket', () => {
     expect([...BOTTOM_TEAMS]).toEqual(['SAC', 'WAS', 'BKN']);
 
-    // Average conference seed with no player attached (roster strength alone),
-    // over many career seeds and seasons.
+    // Average seed from roster strength alone, without the player.
     const avgSeed = (teamId: string) => {
       let sum = 0;
       let n = 0;
@@ -97,11 +96,10 @@ describe('the cellar-dwellers live in the lottery', () => {
     };
 
     const cellarAvg = ['SAC', 'WAS', 'BKN'].map(avgSeed).reduce((a, b) => a + b, 0) / 3;
-    // A neutral pair of ordinary East / West rosters for reference.
+    // Two average teams to compare against.
     const ordinaryAvg = ['ATL', 'MIN'].map(avgSeed).reduce((a, b) => a + b, 0) / 2;
 
-    // A conference midpoint is seed 8. The cellar teams sit well below that and
-    // clearly worse than an ordinary roster.
+    // The midpoint is seed 8. Bottom teams should finish well below it.
     expect(cellarAvg).toBeGreaterThan(9.5);
     expect(cellarAvg).toBeGreaterThan(ordinaryAvg + 1.5);
   });

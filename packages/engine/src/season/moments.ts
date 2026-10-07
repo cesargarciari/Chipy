@@ -1,10 +1,6 @@
 import type { AwardId, AwardTally, CareerMoment, FranchiseTier, TeamResult } from '../types.js';
 
-/**
- * Every award earns an end-of-season card so it's "noted". The big ones fire
- * again on every repeat; the lesser honours (`everyTime: false`) only get a
- * card the first time, so a 12-time All-Star doesn't bury the banner.
- */
+/** Every award gets a card. Lesser honours only get one the first time. */
 const AWARD_MOMENTS: Partial<Record<AwardId, { title: string; everyTime: boolean }>> = {
   mvp: { title: 'MOST VALUABLE PLAYER', everyTime: true },
   dpoy: { title: 'DEFENSIVE PLAYER OF THE YEAR', everyTime: true },
@@ -24,7 +20,7 @@ const AWARD_MOMENTS: Partial<Record<AwardId, { title: string; everyTime: boolean
   euroleague_champion: { title: 'EUROLEAGUE CHAMPION', everyTime: true },
   euroleague_mvp: { title: 'EUROLEAGUE MVP', everyTime: true },
   euro_domestic_title: { title: 'DOMESTIC LEAGUE TITLE', everyTime: true },
-  // Noted once, then folded into the trophy case.
+  // Only shown the first time.
   all_nba_1: { title: 'ALL-NBA FIRST TEAM', everyTime: false },
   all_nba_2: { title: 'ALL-NBA SECOND TEAM', everyTime: false },
   all_nba_3: { title: 'ALL-NBA THIRD TEAM', everyTime: false },
@@ -48,16 +44,16 @@ export interface SeasonMomentArgs {
   teamId: string;
   teamLabel: string;
   seasonAwards: readonly AwardId[];
-  /** Running tally *including* this season, to tell a first from a repeat. */
+  /** Award totals including this season. */
   tallyAfter: AwardTally;
   teamResult: TeamResult;
   traded: boolean;
-  /** The player forced the move themselves (a trade demand). */
+  /** True if the player demanded the trade. */
   tradeDemanded?: boolean;
-  /** Career points before and after this season, for milestone crossings. */
+  /** Career points before and after this season. */
   pointsBefore: number;
   pointsAfter: number;
-  /** A franchise tier newly reached this season, if any. */
+  /** A new franchise tier reached this season. */
   franchiseTierUp: FranchiseTier | null;
 }
 
@@ -68,7 +64,7 @@ const FRANCHISE_MOMENT: Partial<Record<FranchiseTier, { id: string; title: strin
   legend: { id: 'franchise_legend', title: 'A LEGEND' },
 };
 
-/** The notable beats of one finished season, newest-feeling first. */
+/** The highlights of one finished season. */
 export function detectSeasonMoments(a: SeasonMomentArgs): CareerMoment[] {
   const out: CareerMoment[] = [];
   const base = { seasonIndex: a.seasonIndex, teamId: a.teamId };
@@ -92,7 +88,7 @@ export function detectSeasonMoments(a: SeasonMomentArgs): CareerMoment[] {
     const def = AWARD_MOMENTS[id];
     if (!def || id === 'champion') continue;
     const count = a.tallyAfter[id] ?? 1;
-    if (!def.everyTime && count > 1) continue; // lesser honour - noted once
+    if (!def.everyTime && count > 1) continue; // lesser honours only show once
     out.push({
       ...base,
       kind: 'award',
@@ -108,7 +104,7 @@ export function detectSeasonMoments(a: SeasonMomentArgs): CareerMoment[] {
       ...base,
       kind: 'trade',
       id: a.tradeDemanded ? 'trade_demand' : 'trade',
-      // The client's trade modal shows this as "Traded to <title>".
+      // Shown as "Traded to <title>".
       title: a.teamLabel.toUpperCase(),
       subtitle: a.tradeDemanded
         ? `Age ${a.age} · you forced your way out`

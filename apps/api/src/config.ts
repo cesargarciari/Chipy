@@ -1,10 +1,6 @@
 import { z } from 'zod';
 
-/**
- * All environment access lives here. The server refuses to start if the
- * environment is not what it expects — better a loud boot failure than a
- * mystery 500 later.
- */
+/** All env vars are read here. The server won't start if any are wrong. */
 const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   API_HOST: z.string().default('0.0.0.0'),
@@ -13,7 +9,7 @@ const envSchema = z.object({
   CORS_ORIGIN: z.string().default('http://localhost:5173'),
 
   DYNAMODB_TABLE: z.string().min(1).default('chipy'),
-  /** Set for DynamoDB Local; leave empty to use the real AWS endpoint. */
+  /** Set for DynamoDB Local, leave empty for AWS. */
   DYNAMODB_ENDPOINT: z
     .string()
     .url()

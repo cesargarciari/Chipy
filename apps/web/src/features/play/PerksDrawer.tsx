@@ -8,13 +8,7 @@ import { useT } from '../../lib/i18n.js';
 type PerkShop = NonNullable<NonNullable<PendingDecision['season']>['shop']>;
 type PerkItem = PerkShop['items'][number];
 
-/**
- * The perks shop: a small cart button (it sits by the team name in the season
- * header) that opens a modal grid of perk tiles. Owned perks stay in the grid
- * with an orange highlight; perks you can't afford are greyed and unpickable.
- * Buying records a `perks{n}` choice and keeps the modal open so you can grab a
- * few.
- */
+/** The perks shop. A cart button opens a grid of perks. You can buy several before closing it. */
 export function PerksDrawer({
   shop,
   onBuy,

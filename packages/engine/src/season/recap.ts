@@ -1,7 +1,7 @@
 import type { Rng } from '../rng.js';
 import type { TeamResult } from '../types.js';
 
-/** Pick one item from a list using the given stream. */
+/** Random item from a list. */
 function one<T>(rng: Rng, xs: readonly T[]): T {
   return xs[Math.floor(rng() * xs.length)]!;
 }
@@ -25,7 +25,7 @@ const WON_SERIES_SWING = [
   'a road win to steal it',
 ] as const;
 
-/** "first round" / "second round" / "conference finals" phrasing. */
+/** Readable name for a playoff round. */
 function roundName(result: TeamResult): string {
   switch (result) {
     case 'first_round':
@@ -39,12 +39,7 @@ function roundName(result: TeamResult): string {
   }
 }
 
-/**
- * A one-line, randomly-flavoured account of how the season ended. Deterministic
- * for a given stream (call it with a derived RNG keyed on seed + season, so it
- * never perturbs the main simulation stream). Playoff results get a series
- * length, a venue and a swing moment; the rest get a short line.
- */
+/** A one-line recap of how the season ended. Use its own RNG so it doesn't change the main simulation. */
 export function seasonRecap(rng: Rng, args: { result: TeamResult; missedGames: number }): string {
   if (args.missedGames >= 82) {
     return one(rng, [
@@ -73,7 +68,7 @@ export function seasonRecap(rng: Rng, args: { result: TeamResult; missedGames: n
     ]);
   }
 
-  // ---- A real playoff series -------------------------------------------------
+  // Playoff series
   const swept = rng() < 0.22;
   const games = swept ? 4 : one(rng, [5, 5, 6, 6, 7]);
   const venue = one(rng, ['at home', 'on the road']);

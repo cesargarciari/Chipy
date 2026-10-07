@@ -7,11 +7,7 @@ interface State {
   error: Error | null;
 }
 
-/**
- * Last line of defence: a render throw anywhere below here shows a recovery
- * card instead of a blank page. "Start over" clears the saved career (the
- * usual culprit is a persisted run that no longer replays) and reloads.
- */
+/** Shows a recovery card if anything below crashes. "Start over" clears the saved career and reloads. */
 export class ErrorBoundary extends Component<{ children: ReactNode }, State> {
   override state: State = { error: null };
 
@@ -30,7 +26,7 @@ export class ErrorBoundary extends Component<{ children: ReactNode }, State> {
         if (key?.startsWith('chipy.run')) localStorage.removeItem(key);
       }
     } catch {
-      // ignore - private mode / storage disabled
+      // Storage not available, ignore.
     }
     window.location.assign('/');
   };

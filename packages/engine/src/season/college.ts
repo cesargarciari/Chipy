@@ -15,7 +15,7 @@ const AST_POS: Record<Position, number> = { PG: 1.7, SG: 1.05, SF: 0.85, PF: 0.6
 
 export const MAX_COLLEGE_YEARS = 3;
 
-/** Programs from the chosen tier, biased toward prestige (more so in a big market). */
+/** Schools from the chosen tier, leaning toward the better ones. */
 export function sampleSchools(
   rng: Rng,
   tier: SchoolTier,
@@ -44,8 +44,7 @@ function tournamentResult(rng: Rng, school: SchoolRef, impact: number): string {
   const p = clamp(school.prestige * 0.7 + impact / 42 + (rng() - 0.5) * 0.4, 0.05, 0.99);
   const r = rng();
   if (overseas) {
-    // League-neutral wording - the "overseas" tier spans the G League, the NBL,
-    // and European clubs, so nothing here should name a specific competition.
+    // Keep the wording general since this tier covers several leagues.
     if (p > 0.78 && r < p - 0.6) return 'Won the championship';
     if (p > 0.62 && r < p - 0.4) return 'Reached the finals';
     if (p > 0.45) return 'Made the playoffs';
@@ -77,7 +76,7 @@ export function simulateCollegeYear(rng: Rng, args: CollegeYearArgs): CollegeYea
   const { ratings: r, athleticism, position, school, yearNumber } = args;
   const usage = school.style.usage;
 
-  // A wide multiplier - the same prospect can have a monster year or flop.
+  // Big swing so the same player can have a great or bad year.
   const form = 0.62 + rng() * 0.72;
   const scoringRate = (r.finishing * 0.4 + r.midRange * 0.3 + r.threePoint * 0.3) / 100;
   const ppg = clamp(roundTo(scoringRate * usage * 33 * form + (yearNumber - 1) * 1.4, 1), 3, 27);
@@ -95,7 +94,7 @@ export function simulateCollegeYear(rng: Rng, args: CollegeYearArgs): CollegeYea
   const impact = ppg * 0.5 + rpg * 0.4 + apg * 0.6;
   const result = tournamentResult(rng, school, impact);
 
-  // A modest development year - the NBA does the heavy lifting later.
+  // Small growth in college.
   const growth: Partial<Ratings> = {};
   for (const [key, amt] of Object.entries(school.style.dev)) {
     growth[key as keyof Ratings] = (amt ?? 0) * (0.4 + rng() * 0.6);
@@ -141,11 +140,7 @@ export function simulateCollegeYear(rng: Rng, args: CollegeYearArgs): CollegeYea
   };
 }
 
-/**
- * The one decision after each simulated college year. If the year didn't move
- * the needle (draft stock still low) and there's a year of eligibility left, the
- * "declare" option is withheld - nobody's picking you yet, so you stay.
- */
+/** Options after each college year. You can't declare if your draft stock is still low and you have years left. */
 export function collegeYearOptions(yearNumber: number, draftStock: number): GameOption[] {
   const canReturn = yearNumber < MAX_COLLEGE_YEARS;
   const draftable = draftStock >= 34 || !canReturn;

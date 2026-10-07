@@ -1,10 +1,7 @@
 import { pino, type LoggerOptions } from 'pino';
 import type { AppConfig } from '../config.js';
 
-/**
- * Structured JSON logs in every environment (that is what CloudWatch Logs
- * Insights wants). Pretty-print only for local development.
- */
+/** JSON logs everywhere, pretty logs in local dev. */
 export function loggerOptions(config: AppConfig): LoggerOptions {
   const redact = ['req.headers.authorization', 'req.headers.cookie'];
 

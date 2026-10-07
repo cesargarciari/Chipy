@@ -50,8 +50,7 @@ describe('economy', () => {
 
 describe('perks', () => {
   it('the season screen carries an affordable, not-yet-owned shop; buys stick', () => {
-    // The shop is an aside on the season pending — buy the first option each
-    // season by recording a `perks{n}` choice before the `s{n}` choice.
+    // Buy the first perk each season by recording a perks choice before the season choice.
     const profile = SAMPLE_PROFILE;
     const choices: Array<{ nodeId: string; choiceId: string }> = [];
     let bought = 0;
@@ -175,8 +174,7 @@ describe('draft randomness', () => {
       if (!s.draft.undrafted && s.draft.pick! <= 14) lottery += 1;
       if (s.draft.undrafted || (!s.draft.undrafted && s.draft.pick! > 30)) secondRoundOrWorse += 1;
     }
-    // Most players do NOT go in the lottery, and a solid slice fall to the
-    // second round or out of the draft entirely.
+    // Most players miss the lottery, and plenty go in the second round or undrafted.
     expect(lottery / n).toBeLessThan(0.3);
     expect(secondRoundOrWorse / n).toBeGreaterThan(0.2);
   });
@@ -206,7 +204,7 @@ describe('franchise standing + career moments', () => {
     }
     // Over 160 careers at least one franchise idol shows up.
     expect(sawIdol).toBe(true);
-    // …and mid-season drama can drop a standing below zero.
+    // Mid-season drama can drop a standing below zero.
     expect(sawNegative).toBe(true);
   });
 
@@ -247,7 +245,7 @@ describe('franchise standing + career moments', () => {
 
 describe('overseas + shoe deals', () => {
   it('a low-value career can reach the EuroLeague and win there', () => {
-    // Scan a wider net for the overseas path (it is deliberately uncommon).
+    // Overseas careers are rare, so check more of them.
     let sawOverseas = false;
     let sawEuroTitle = false;
     for (let i = 0; i < 400 && !(sawOverseas && sawEuroTitle); i += 1) {

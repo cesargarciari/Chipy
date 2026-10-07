@@ -1,22 +1,16 @@
 import { int, pick, type Rng } from '../rng.js';
 import type { OptionEffect, RatingKey } from '../types.js';
 
-/**
- * Non-IQ rating keys only. Basketball IQ is scaled so hard on the card
- * (`IQ_SCALE` in `options.ts`) that spending a prologue budget on it would make
- * that option look strictly worse - so the summer-circuit / recruiting splits
- * never touch it. IQ still shows up through `growthBias`, which is a separate
- * long-term channel.
- */
+/** Rating groups for the prologue. Basketball IQ is left out because it's scaled down too much on the card. */
 export const SCORING: RatingKey[] = ['finishing', 'midRange', 'threePoint'];
 export const SLASHING: RatingKey[] = ['finishing', 'threePoint', 'playmaking'];
 export const PLAYMAKING: RatingKey[] = ['playmaking', 'perimeterDefense', 'midRange'];
 export const GLASS: RatingKey[] = ['rebounding', 'interiorDefense', 'finishing'];
 
-/** Roughly the card-visible fraction of a non-IQ rating point (mirrors RATING_SCALE). */
+/** Matches RATING_SCALE in options.ts. */
 const RATING_SHOWN = 0.85;
 
-/** Split `total` nominal points across two distinct keys from `keys`, ~evenly. */
+/** Splits points evenly across two random ratings. */
 export function rollSplit(
   rng: Rng,
   keys: readonly RatingKey[],
@@ -29,13 +23,7 @@ export function rollSplit(
   return { [a]: first, [b]: total - first };
 }
 
-/**
- * An effect worth ~`shownTarget` *card-visible* points: `meta` of them as
- * unscaled athleticism / durability (split at random), the rest as a scaled
- * rating pair from `pool`, plus a small random draft-stock bump. Because ratings
- * are scaled on the card and ath/dur are not, this keeps options with very
- * different shapes reading as equal value.
- */
+/** Builds an effect worth about the same on the card, mixing ratings, athleticism, durability and draft stock. */
 export function balancedEffect(
   rng: Rng,
   pool: readonly RatingKey[],
@@ -55,7 +43,7 @@ export function balancedEffect(
   return eff;
 }
 
-/** Pick which of `count` options gets this career's small edge, and by how much. */
+/** Picks which option gets a small bonus this career. */
 export function rollEdge(rng: Rng, count: number): { index: number; bump: number } {
   return { index: int(rng, 0, count - 1), bump: int(rng, 1, 2) };
 }

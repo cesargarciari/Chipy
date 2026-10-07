@@ -33,9 +33,7 @@ describe('draft slot drives talent', () => {
       // Lottery picks clearly out-develop second-round / undrafted starts.
       expect(mean(firstRound) - mean(secondRound)).toBeGreaterThan(4.5);
 
-      // A genuine slice of the late group still peaks star-level, but a lottery
-      // pick is markedly likelier to (the mean-gap check above is the real
-      // invariant; this just guards against the slot ceasing to matter).
+      // Some late picks still become stars, but lottery picks do it more often.
       const lateStars = secondRound.filter((p) => p >= 86).length / secondRound.length;
       const lottoStars = firstRound.filter((p) => p >= 86).length / firstRound.length;
       expect(lateStars).toBeGreaterThan(0.03);
@@ -127,7 +125,7 @@ describe('modest-overall veterans sign short deals', () => {
       }
     }
     expect(checkedLow).toBeGreaterThan(20);
-    // Sanity that the cap is overall-driven, not a blanket squeeze.
+    // Stars can still get long deals.
     expect(sawStarLongDeal).toBe(true);
   });
 });

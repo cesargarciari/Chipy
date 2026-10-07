@@ -3,10 +3,7 @@ import { ChoiceCard } from '../../components/ChoiceCard.js';
 
 type Farewell = NonNullable<PendingDecision['farewell']>;
 
-/**
- * Shown once age (not injury) has decided this is the end. "Farewell tour"
- * buys one more ceremonial season; "quiet goodbye" ends the career now.
- */
+/** Shown when age ends the career. Pick one last season or retire now. */
 export function FarewellScreen({
   farewell,
   onChoose,

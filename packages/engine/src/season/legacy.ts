@@ -130,7 +130,7 @@ interface LegacyArgs {
   peakOverall: number;
   seasons: SeasonRecord[];
   overseasSeasons: OverseasSeason[];
-  /** Final per-team standings - an idol / legend retires a jersey on its own. */
+  /** Final standings with each team. */
   franchises: FranchiseStanding[];
 }
 
@@ -146,7 +146,7 @@ export function buildLegacy({
   let score = 0;
 
   score += Math.max(0, Math.min(1, (peakOverall - 55) / 44)) * 240;
-  // Overseas years count for longevity too, at a discount.
+  // Overseas seasons count less toward longevity.
   const longevity = seasons.length + overseasSeasons.length * 0.6;
   score += Math.min(longevity, 20) * 9;
 
@@ -177,14 +177,13 @@ export function buildLegacy({
   const hallOfFame = score >= 660 || (score >= 560 && hofRng() < 0.5);
   const tier = tierFor(score);
 
-  // An idol / legend gets his jersey raised by that team; otherwise the old
-  // Hall-of-Fame bar with the team he played the most for.
+  // A team retires your jersey if you're their idol or legend, otherwise the team you played for most.
   const iconFranchise = franchises.find((f) => f.tier === 'legend' || f.tier === 'idol');
   const jerseyRetired =
     Boolean(iconFranchise) || (hallOfFame && (rings >= 1 || allNba >= 2 || score >= 900));
   const jerseyRetiredBy = jerseyRetired ? (iconFranchise?.teamId ?? mostPlayedTeam(seasons)) : null;
 
-  // A career that spent a real chunk of its length in Europe gets its own verdict.
+  // A career spent mostly in Europe gets its own verdict.
   const europeHeavy =
     overseasSeasons.length >= 3 && overseasSeasons.length >= seasons.length * 0.35;
 

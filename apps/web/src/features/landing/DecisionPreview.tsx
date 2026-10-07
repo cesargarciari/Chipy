@@ -1,11 +1,6 @@
 import { useT } from '../../lib/i18n.js';
 
-/**
- * A static illustration of what one in-career decision looks like, styled
- * after ScenarioFrame but never wired to real choices. Rows render as plain
- * divs (not buttons) so nothing here reads as clickable - it is a preview,
- * not a control.
- */
+/** A static example of a decision for the landing page. Not clickable. */
 export function DecisionPreview() {
   const t = useT();
   const { kicker, title, prompt, options } = t.home.sampleCall;

@@ -16,7 +16,7 @@ export const FRANCHISE_TIER_LABELS: Record<FranchiseTier, string> = {
   legend: 'Legend',
 };
 
-/** Rep a single award adds to the standing with the team you won it on. */
+/** Standing gained with a team for each award won there. */
 const AWARD_REP: Partial<Record<AwardId, number>> = {
   mvp: 32,
   dpoy: 16,
@@ -60,18 +60,18 @@ export interface SeasonRepArgs {
   role: Role;
   teamResult: TeamResult;
   awards: readonly AwardId[];
-  /** Consecutive seasons with this team, including the one just played. */
+  /** Seasons in a row with this team, including this one. */
   seasonsWithTeam: number;
-  /** Did the player suit up at all this year? A lost season barely moves the needle. */
+  /** False if the player missed the whole season. */
   played: boolean;
 }
 
-/** Rep earned with a team for one season played there. */
+/** Standing earned with a team for one season. */
 export function seasonFranchiseRep(a: SeasonRepArgs): number {
   if (!a.played) return 2;
   let pts = 6 + ROLE_REP[a.role] + (RESULT_REP[a.teamResult] ?? 0);
   for (const id of a.awards) pts += AWARD_REP[id] ?? 0;
-  // Loyalty compounds - a few years in one place and the city adopts you.
+  // Staying with a team for years builds extra standing.
   if (a.seasonsWithTeam >= 4) pts += Math.min(a.seasonsWithTeam - 3, 6) * 2;
   return pts;
 }
@@ -87,16 +87,12 @@ const EURO_RESULT_REP: Record<EuroResult, number> = {
 export interface OverseasRepArgs {
   awards: readonly AwardId[];
   result: EuroResult;
-  /** Consecutive seasons with this club, including the one just played. */
+  /** Seasons in a row with this club, including this one. */
   seasonsWithClub: number;
   played: boolean;
 }
 
-/**
- * Rep earned with an overseas club for one season - you're always the marquee
- * name there, so the role term is fixed high and the club silverware carries
- * its own weight.
- */
+/** Standing earned with an overseas club for one season. */
 export function overseasFranchiseRep(a: OverseasRepArgs): number {
   if (!a.played) return 2;
   let pts = 6 + ROLE_REP.franchise + EURO_RESULT_REP[a.result];
@@ -108,14 +104,11 @@ export function overseasFranchiseRep(a: OverseasRepArgs): number {
 export interface FranchiseTierArgs {
   rings: number;
   seasons: number;
-  /** A genuinely historic overall career (roughly all-timer or better). */
+  /** True for an all-time great career. */
   historic: boolean;
 }
 
-/**
- * Where a team's fans place you. `cornerstone` is tenure + production;
- * `idol` needs a ring *with them*; `legend` needs a historic career and years.
- */
+/** How a team's fans see you. Idol needs a ring with them, legend needs a historic career. */
 export function franchiseTier(score: number, a: FranchiseTierArgs): FranchiseTier {
   if (score >= 210 && a.seasons >= 6 && (a.historic || a.rings >= 2)) return 'legend';
   if (score >= 145 && a.rings >= 1) return 'idol';
@@ -140,7 +133,7 @@ export function tierRank(t: FranchiseTier): number {
 
 const LEGEND_SCORE = 210;
 
-/** 0..100 fill for an "idolatry" bar - 100 once the standing is legend-level. */
+/** 0 to 100 progress bar toward legend status. */
 export function franchiseProgress(score: number): number {
   return Math.max(0, Math.min(100, Math.round((score / LEGEND_SCORE) * 100)));
 }
@@ -152,7 +145,7 @@ export interface BuildStandingsArgs {
   historic: boolean;
 }
 
-/** Final per-team standings, best first. */
+/** Final standings with every team, best first. */
 export function buildFranchiseStandings(a: BuildStandingsArgs): FranchiseStanding[] {
   return Object.keys(a.score)
     .filter((teamId) => (a.seasons[teamId] ?? 0) > 0)

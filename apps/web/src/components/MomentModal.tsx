@@ -15,11 +15,7 @@ import { useEffect, useState } from 'react';
 import { awardArt, clubCrest, teamLogo } from '../lib/art.js';
 import { teamName } from '../lib/format.js';
 
-/**
- * The "main" awards - each gets a full-screen gala takeover, backed by artwork
- * in `src/assets/awards/<id>.png` (a lucide icon shows until the file is added).
- * A moment with `kind: "ring"` or `kind: "trade"` also qualifies.
- */
+/** Awards that get a full-screen celebration. Rings and trades do too. */
 const HEADLINE_AWARDS = new Set([
   'mvp',
   'dpoy',
@@ -36,7 +32,7 @@ const HEADLINE_AWARDS = new Set([
   'euroleague_champion',
 ]);
 
-/** Fallback icon when no artwork file exists for the award. */
+/** Icon used when an award has no artwork. */
 const ICON: Record<string, LucideIcon> = {
   mvp: Crown,
   dpoy: Shield,
@@ -53,7 +49,7 @@ const ICON: Record<string, LucideIcon> = {
   oly_bronze: Medal,
 };
 
-/** Short badge shown big and italic at the top of the card. */
+/** Big badge at the top of the card. */
 const BADGE: Record<string, string> = {
   mvp: 'MVP',
   dpoy: 'DPOY',
@@ -70,7 +66,7 @@ const BADGE: Record<string, string> = {
   euroleague_champion: 'EUROLEAGUE',
 };
 
-/** The white headline line - the "you are …" beat. */
+/** The main headline line. */
 const HEADLINE: Record<string, string> = {
   mvp: 'THE BEST IN THE WORLD',
   dpoy: 'NOBODY GETS PAST YOU',
@@ -112,12 +108,7 @@ export function isHeadlineMoment(m: CareerMomentDto): boolean {
   );
 }
 
-/**
- * Full-screen gala celebration for the headline beats of a season - a gold
- * top rail, a big italic badge, the trophy under a soft glow, a white headline
- * and a line of flavour, then a solid-gold button. Steps through the season's
- * headline moments one at a time, then unmounts itself.
- */
+/** Full-screen celebration for the season's biggest moments, shown one at a time. */
 export function MomentModal({
   moments,
   onDone,
@@ -178,7 +169,7 @@ export function MomentModal({
             'radial-gradient(120% 60% at 50% 0%, rgba(120,80,20,0.35), transparent 60%), linear-gradient(180deg, #1a130a 0%, #0a0a0b 55%)',
         }}
       >
-        {/* the gold top rail */}
+        {/* Gold top bar */}
         <div className="h-1 w-full bg-gradient-to-r from-transparent via-amber to-transparent" />
 
         <div className="px-7 pb-6 pt-8">
@@ -193,7 +184,7 @@ export function MomentModal({
             Season {m.seasonIndex}
           </div>
 
-          {/* trophy under a soft glow */}
+          {/* Trophy with a soft glow */}
           <div className="relative mx-auto my-6 flex h-40 w-40 items-center justify-center">
             <div
               aria-hidden

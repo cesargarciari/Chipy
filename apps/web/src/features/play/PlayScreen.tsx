@@ -15,10 +15,7 @@ import { OverseasOffer } from './OverseasOffer.js';
 import { PrologueNodeView } from './PrologueNodeView.js';
 import { SeasonScreen } from './SeasonScreen.js';
 
-/** Looks up the option the player just picked so its label + effects can be
- * echoed on the node it leads into. `college_pick` (schools, no effects) and
- * `finals` (a bare {id,label} play call) don't carry effects, so they echo
- * with an empty list. */
+/** Finds the option the player just picked so it can be shown on the next screen. */
 function resolveChosenOption(p: PendingDecision, choiceId: string): DecisionEchoData | null {
   switch (p.kind) {
     case 'prologue': {
@@ -81,7 +78,7 @@ export function PlayScreen() {
     if (!profile) {
       navigate('/create', { replace: true });
     } else if (result?.status === 'error') {
-      // A saved career that no longer replays - wipe it and start fresh.
+      // The saved career can't be replayed anymore, so start over.
       reset();
       navigate('/create', { replace: true });
     } else if (result?.status === 'complete') {
@@ -101,7 +98,7 @@ export function PlayScreen() {
   return (
     <div className="space-y-4">
       {echo && <DecisionEcho echo={echo} echoSeq={echoSeq} />}
-      {/* `key` remounts on every node so the entrance animation re-fires. */}
+      {/* The key resets the animation on every new choice. */}
       <div key={p.nodeId} className="space-y-4">
         {p.kind === 'prologue' && <PrologueNodeView node={p.prologue!} onChoose={onChoose} />}
         {p.kind === 'college_pick' && <CollegePick pick={p.collegePick!} onChoose={onChoose} />}

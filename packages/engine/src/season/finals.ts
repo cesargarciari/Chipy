@@ -1,34 +1,22 @@
 import { clamp, type Rng } from '../rng.js';
 
-/**
- * The NBA Finals as a single decisive possession the player calls, instead of a
- * coin flip. When a career reaches the Finals the engine poses one of these
- * scenarios: three real plays, ranked by how sound they are. How good the team
- * was decides how many of the three actually win it (a genuine title favourite
- * has two right answers; an underdog run has only one). Pick a winning play and
- * you see its `good` line and lift the trophy; pick a losing one and you see the
- * `bad` line (the shot rims out, the pass is picked) and fall in the Finals.
- *
- * Nothing here touches the main RNG stream - `buildFinalsGame` runs off a
- * derived stream and `resolveFinals` is pure - so a career replays byte for byte
- * whether or not it ever reached a Finals.
- */
+/** The NBA Finals come down to one play the player picks. Better teams have two winning plays out of three, others have one. Uses its own RNG so replays stay identical. */
 
 export interface FinalsPlay {
   id: string;
-  /** The play call, as a full sentence. Carries no hint of whether it's right. */
+  /** The play, written so it doesn't hint whether it's right. */
   label: string;
   /** Shown when this play wins the title. */
   good: string;
   /** Shown when this play loses the Finals. */
   bad: string;
-  /** 0 = the soundest read, 2 = hero ball. The `correctCount` best plays win. */
+  /** 0 is the smartest play, 2 is hero ball. */
   soundness: 0 | 1 | 2;
 }
 
 export interface FinalsScenario {
   id: string;
-  /** The moment: score, clock, who has the ball. */
+  /** The setup: score, clock and who has the ball. */
   situation: string;
   prompt: string;
   plays: [FinalsPlay, FinalsPlay, FinalsPlay];
@@ -154,11 +142,7 @@ export const FINALS_SCENARIOS: readonly FinalsScenario[] = [
   },
 ];
 
-/**
- * How strong the Finals team is, 0..1. A genuine title favourite (a top roster
- * with a star playing at an MVP clip, or an open ring window) lands near 1; a
- * Cinderella run sits near 0. `>= 0.5` gets two winning plays, below it one.
- */
+/** How strong the Finals team is, 0 to 1. At 0.5 or more it gets two winning plays. */
 export function finalsEdge(args: {
   teamStrength: number;
   playerImpact: number;
@@ -174,28 +158,24 @@ export function finalsEdge(args: {
   );
 }
 
-/**
- * 2 winning plays for a genuine title favourite, 1 for everyone else - so a
- * coin-flip pick still fails a Finals more often than not unless the team really
- * was the best in the league.
- */
+/** Two winning plays for a title favourite, one for everyone else. */
 export function finalsCorrectCount(edge: number): 1 | 2 {
   return edge >= 0.66 ? 2 : 1;
 }
 
 export interface FinalsGameView {
   scenarioId: string;
-  /** e.g. "NBA Finals". */
+  /** For example "NBA Finals". */
   kicker: string;
   situation: string;
   prompt: string;
-  /** The three plays, order shuffled per career so "right" is never positional. */
+  /** The three plays, shuffled so the right answer isn't always in the same spot. */
   options: { id: string; label: string }[];
 }
 
 export interface FinalsResolution {
   won: boolean;
-  /** The chosen play's `good` line (win) or `bad` line (loss). */
+  /** The win or loss line for the chosen play. */
   outcome: string;
 }
 
@@ -205,15 +185,11 @@ function getScenario(scenarioId: string): FinalsScenario {
   return s;
 }
 
-/**
- * Pick the scenario and shuffle its plays. `rng` must be a derived stream (never
- * the main one) so replays line up. The count of winning plays is deliberately
- * not exposed - the player reads the floor, not a hint.
- */
+/** Picks a Finals scenario and shuffles the plays. Only pass a separate RNG, never the main one. */
 export function buildFinalsGame(rng: Rng): FinalsGameView {
   const scenario = FINALS_SCENARIOS[Math.floor(rng() * FINALS_SCENARIOS.length)]!;
   const options = scenario.plays.map((p) => ({ id: p.id, label: p.label }));
-  // Fisher-Yates on the derived stream - cosmetic only, resolution is by id.
+  // Shuffle the plays.
   for (let i = options.length - 1; i > 0; i -= 1) {
     const j = Math.floor(rng() * (i + 1));
     [options[i], options[j]] = [options[j]!, options[i]!];
@@ -227,10 +203,7 @@ export function buildFinalsGame(rng: Rng): FinalsGameView {
   };
 }
 
-/**
- * Decide the Finals from the chosen play. Pure: the winning set is the
- * `correctCount` soundest plays, and `correctCount` comes straight from `edge`.
- */
+/** Decides the Finals from the chosen play. No randomness. */
 export function resolveFinals(
   scenarioId: string,
   choiceId: string,

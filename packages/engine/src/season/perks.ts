@@ -23,11 +23,7 @@ export interface AggregatePerkEffect {
   valueMult: number;
 }
 
-/**
- * Everything the player's owned + active-yearly perks add up to, for one season.
- * Perks are an edge, not a cheat code, so the totals are aggressively capped -
- * stacking the whole shop gets you a fraction more than buying two smart ones.
- */
+/** Adds up the effects of every active perk for one season, with caps so stacking perks doesn't get out of hand. */
 export function aggregatePerkEffect(state: CareerState): AggregatePerkEffect {
   let impactBonus = 0;
   let awardBonus = 0;
@@ -58,7 +54,7 @@ export function aggregatePerkEffect(state: CareerState): AggregatePerkEffect {
     agg.valueMult *= e.valueMult ?? 1;
   }
 
-  // Per-rating growth nudge from perks tops out well below the ±1.6 decision cap.
+  // Cap the growth boost from perks.
   for (const k of Object.keys(agg.growthBias) as RatingKey[]) {
     agg.growthBias[k] = Math.min(agg.growthBias[k] ?? 0, 0.35);
   }
@@ -73,10 +69,7 @@ export function aggregatePerkEffect(state: CareerState): AggregatePerkEffect {
   return agg;
 }
 
-/**
- * Pay this year's fee for each active yearly perk from the bank. Perks that can't
- * be covered lapse (and reappear in the shop). Mutates `state`.
- */
+/** Pays for yearly perks from the bank. Perks you can't afford lapse. */
 export function renewYearlyPerks(state: CareerState): { lapsed: string[] } {
   const lapsed: string[] = [];
   const kept: string[] = [];
@@ -101,7 +94,7 @@ const CATEGORY_TAG: Record<PerkCategory, string> = {
   facility: 'Facility',
 };
 
-/** The `GameOption` a perk purchase records - one shape, reused by shop + apply. */
+/** The option recorded when buying a perk. */
 function perkBuyOption(p: PerkDef): GameOption {
   return {
     id: `buy_${p.id}`,
@@ -113,7 +106,7 @@ function perkBuyOption(p: PerkDef): GameOption {
   };
 }
 
-/** Perks the player can buy right now (not owned, season unlocked, affordable). */
+/** Perks the player can buy right now. */
 export function perkShopOptions(state: CareerState, seasonNumber: number): GameOption[] {
   const owned = new Set([...state.ownedPerks, ...state.yearlyPerks]);
   return PERKS.filter(
@@ -124,14 +117,14 @@ export function perkShopOptions(state: CareerState, seasonNumber: number): GameO
   ).map(perkBuyOption);
 }
 
-/** Stat tiles a perk feeds - its growth-bias keys plus durability. */
+/** The stats a perk affects. */
 export function perkHighlightKeys(p: PerkDef): string[] {
   const keys = Object.keys(p.effect.growthBias ?? {});
   if (p.effect.durabilityPerYear || p.effect.injuryResist) keys.push('durability');
   return keys;
 }
 
-/** Short human descriptors of what a perk does - the shop card's chips. */
+/** Short labels for what a perk does. */
 export function perkEffectTags(p: PerkDef): string[] {
   const e = p.effect;
   const tags: string[] = [];
@@ -149,41 +142,37 @@ export function perkEffectTags(p: PerkDef): string[] {
   return tags;
 }
 
-/** One row in the perk shop - owned, affordable, or priced out (still shown). */
+/** One perk in the shop. */
 export interface PerkShopItem {
-  /** `buy_<perkId>` - the choice recorded against `perks{n}`. */
+  /** The choice id saved for this purchase. */
   choiceId: string;
   perkId: string;
   name: string;
   blurb: string;
   category: PerkCategory;
   kind: PerkKind;
-  /** Positive $M - the client shows this in green, never as `-$2M`. */
+  /** Positive number in millions, shown in green. */
   cost: number;
   owned: boolean;
-  /** `false` when priced out - the client greys the card and blocks the click. */
+  /** False when the player can't afford it, so the card is greyed out. */
   affordable: boolean;
-  /** Rating / `durability` tiles this perk feeds, for the strip hover. */
+  /** Stats to highlight when hovering this perk. */
   highlight: string[];
-  /** Short descriptors - `+3PT growth`, `injury shield` - for the card's chips. */
+  /** Short labels like "+3PT growth". */
   tags: string[];
 }
 
-/** The whole shop for one offseason: the bank plus every visible perk. */
+/** The perk shop for one offseason. */
 export interface PerkShop {
-  /** `perks{n}` - the nodeId to record a `buy_<id>` purchase against. */
+  /** The node id purchases are saved under. */
   nodeId: string;
-  /** Spendable cash this offseason, in $M. */
+  /** Cash available to spend, in millions. */
   bank: number;
-  /** Actionable perks first (affordable), then priced-out, then owned. */
+  /** Affordable perks first, then too expensive, then owned. */
   items: PerkShopItem[];
 }
 
-/**
- * Build the shop the client renders: every not-owned perk whose `minSeason` has
- * arrived (affordable or not) plus the ones already owned. Priced-out and owned
- * rows are kept so the shop is a stable list, not one that shrinks as you buy.
- */
+/** Builds the perk shop. Owned and unaffordable perks stay listed so the list doesn't jump around. */
 export function buildPerkShop(state: CareerState, seasonNumber: number): PerkShop {
   const owned = new Set([...state.ownedPerks, ...state.yearlyPerks]);
   const items: PerkShopItem[] = PERKS.filter(
@@ -213,11 +202,7 @@ export function perkBuyId(choiceId: string): string | null {
   return choiceId.startsWith('buy_') ? choiceId.slice(4) : null;
 }
 
-/**
- * Fold the always-on perk bonuses into a one-season `SeasonEffect`. The
- * `growthBias` is applied separately (through the capped growth-bias channel),
- * not here.
- */
+/** Turns the always-on perk bonuses into a season effect. Growth boosts are handled elsewhere. */
 export function perkToSeasonEffect(agg: AggregatePerkEffect): SeasonEffect {
   return {
     durability: agg.durabilityPerYear,

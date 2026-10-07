@@ -1,12 +1,6 @@
 import type { Scenario } from '../scenario-types.js';
 
-/**
- * The one-per-career leap. Every option is `rare` (the client renders it gold)
- * and - because rare options skip the global rating slowdown - actually lands
- * its full `+12` (trimmed only by the 99 cap). Uncommon: it turns up for roughly
- * one career in six, at most once, and only for a player who has already carved
- * out a role. (At weight 0.3 it was ~1-in-10 and most players never saw it.)
- */
+/** A once-a-career +12 jump, shown in gold. Shows up in about one in six careers, only for players with a role. */
 export const breakthroughScenarios: Scenario[] = [
   {
     id: 'scn_breakthrough',
@@ -42,9 +36,7 @@ export const breakthroughScenarios: Scenario[] = [
         id: 'brk_defense',
         label: 'A LOCKDOWN SWITCH',
         blurb: 'You start erasing the other team’s best option, one through five.',
-        // Both D ratings move the full +12: the DEFENSE tile is their weighted
-        // average, so a lopsided split would only lift it ~+6 and this leap would
-        // read as half the size of the others.
+        // Raise both defense ratings so the DEFENSE chip shows the full +12.
         effect: { ratings: { perimeterDefense: 12, interiorDefense: 12 } },
         rare: true,
         stance: { tag: 'Breakthrough', awardMult: { defense: 1.08 } },

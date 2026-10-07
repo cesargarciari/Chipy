@@ -3,11 +3,7 @@ import { roundTo } from '../rng.js';
 import type { CareerState } from '../types.js';
 import type { AggregatePerkEffect } from './perks.js';
 
-/**
- * The money side of a played season. `salary` is gross pay for the year;
- * `KEEP_RATE` of it reaches the bank after taxes, agent, and lifestyle.
- * Mutates `state`.
- */
+/** Pays out this season's salary. Only KEEP_RATE of it reaches the bank. */
 export function settleSeasonPay(state: CareerState): void {
   const pay = state.salary;
   if (pay <= 0) return;
@@ -18,14 +14,11 @@ export function settleSeasonPay(state: CareerState): void {
 
 export interface MarketInputs {
   overall: number;
-  /** Last played season's `impact` (0 if none / injured out). */
+  /** Last season's impact, or 0 if none. */
   lastImpact: number;
 }
 
-/**
- * Recompute `state.marketValue` from current form, fame, perks, and any
- * lingering `valueMods` (shoe deals, brand plays). Mutates and returns it.
- */
+/** Updates market value from form, fame, perks and deals. */
 export function recomputeMarketValue(
   state: CareerState,
   { overall, lastImpact }: MarketInputs,
@@ -46,7 +39,7 @@ export function recomputeMarketValue(
   return value;
 }
 
-/** Age lingering value multipliers by one season. Mutates `state`. */
+/** Counts down value boosts by one season. */
 export function tickValueMods(state: CareerState): void {
   state.valueMods = state.valueMods
     .map((v) => ({ ...v, seasonsLeft: v.seasonsLeft - 1 }))

@@ -1,6 +1,4 @@
-# Cheap guardrails: a hard cost ceiling, plus alarms for the two things that
-# actually signal trouble on this stack (Lambda erroring, or hitting its
-# reserved-concurrency cap).
+# A budget limit plus alarms for Lambda errors and hitting the concurrency cap.
 
 resource "aws_sns_topic" "alerts" {
   name = "${var.name}-alerts"
@@ -13,13 +11,11 @@ resource "aws_sns_topic_subscription" "email" {
   endpoint  = var.alert_email
 }
 
-# ---------------------------------------------------------------------------
-# AWS Budgets: the backstop. Notifies at 50/80% actual and 100% forecast.
-# ---------------------------------------------------------------------------
+# Budget alerts at 50% and 80% actual, and 100% forecast.
 resource "aws_budgets_budget" "monthly" {
   name        = "${var.name}-monthly"
   budget_type = "COST"
-  # AWS stores this as "5.0"; format to match so `plan` stays diff-free.
+  # Match AWS's "5.0" format so plan shows no diff.
   limit_amount = format("%.1f", var.monthly_budget_usd)
   limit_unit   = "USD"
   time_unit    = "MONTHLY"
@@ -47,9 +43,7 @@ resource "aws_budgets_budget" "monthly" {
   }
 }
 
-# ---------------------------------------------------------------------------
 # Lambda alarms
-# ---------------------------------------------------------------------------
 resource "aws_cloudwatch_metric_alarm" "lambda_errors" {
   alarm_name          = "${var.name}-lambda-errors"
   namespace           = "AWS/Lambda"

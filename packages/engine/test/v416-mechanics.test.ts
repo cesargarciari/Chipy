@@ -51,7 +51,7 @@ describe('overseas: return to the NBA offers a choice of two teams', () => {
               if (p.overseasOffer!.reason === 'contract_up' && returns.length > 0) {
                 sawReturnNode += 1;
                 if (returns.length !== 2) allHadTwo = false;
-                // Each carries a real NBA team id.
+                // Each one is a real NBA team.
                 for (const r of returns)
                   expect(r.teamId && /^[A-Z]{3}$/.test(r.teamId)).toBeTruthy();
                 return returns[0]!.id; // take a return offer
@@ -166,12 +166,11 @@ describe('overseas clubs build idolatry', () => {
           const euro = s.franchises.filter((f) => EURO_IDS.has(f.teamId));
           if (euro.length > 0) {
             sawEuroStanding = true;
-            // The club actually accrued seasons + a real tier.
+            // The club has seasons and a real tier.
             expect(euro.some((f) => f.seasons >= 2 && f.tier !== 'none')).toBe(true);
           }
         }
-        // An overseas season never coincides with an NBA-team assignment: the
-        // per-season NBA records and the overseas records are disjoint by index.
+        // A season is either NBA or overseas, never both.
         const nbaIdx = new Set(s.seasons.map((x) => x.index));
         for (const o of s.overseasSeasons) expect(nbaIdx.has(o.index)).toBe(false);
       }

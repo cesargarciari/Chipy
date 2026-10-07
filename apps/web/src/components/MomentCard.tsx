@@ -15,7 +15,7 @@ import { awardArt } from '../lib/art.js';
 import { cn } from '../lib/cn.js';
 import { teamName } from '../lib/format.js';
 
-/** Icon per moment kind (lucide) - shown when there's no artwork for the award. */
+/** Icon for each moment type when there's no award art. */
 const ICON: Record<CareerMomentDto['kind'], LucideIcon> = {
   award: Medal,
   ring: Trophy,
@@ -40,13 +40,7 @@ const TONE: Record<CareerMomentDto['kind'], string> = {
   injury: 'from-rose-500/15 border-rose-500/40',
 };
 
-/**
- * A single recap-banner beat - an award, a franchise milestone, an injury. The
- * glyph box shows award art (`assets/awards/<awardId>.png`) when one exists,
- * otherwise an emoji glyph. Team logos are deliberately *not* shown here - they
- * add clutter to a stack of event notifications (they live on the trade modal
- * and the contract cards instead). See `src/lib/art.ts`.
- */
+/** One highlight from the season. Shows award art if it exists, otherwise an icon. */
 export function MomentCard({ moment }: { moment: CareerMomentDto }) {
   const art = awardArt(moment.awardId);
   const Icon = ICON[moment.kind];

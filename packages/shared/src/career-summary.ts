@@ -8,13 +8,10 @@ import {
 } from '@chipy/engine';
 import { z } from 'zod';
 
-/**
- * A zod mirror of `@chipy/engine`'s `CareerSummary` (engine v4). Lets the API
- * validate what it stores and returns, and gives both apps one transport type.
- */
+/** Zod version of the engine's CareerSummary, so the API can validate it. */
 
 const rating = z.number().int().min(25).max(99);
-/** $M figures — non-negative, one decimal place at most in practice. */
+/** Money in millions. */
 const money = z.number().nonnegative().max(2000);
 const COUNTRY_IDS = COUNTRIES.map((c) => c.id) as [string, ...string[]];
 
@@ -267,17 +264,17 @@ export const careerSummarySchema = z.object({
   careerTotals: careerTotalsSchema,
   legacy: legacySchema,
   timeline: z.array(timelineEntrySchema),
-  // v4 economy / perks / overseas / injuries
+  // Economy, perks, overseas and injuries
   careerEarnings: money,
   peakSalary: money,
   perks: z.array(z.string().max(40)),
   shoeDeal: z.string().nullable(),
   overseasSeasons: z.array(overseasSeasonSchema),
   injuryHistory: z.array(injuryEntrySchema),
-  // v4.2 — franchise standing + the career's big moments
+  // Franchise standing and big moments
   franchises: z.array(franchiseStandingSchema),
   moments: z.array(careerMomentSchema),
-  // v4.4 — national-team standing
+  // National team standing
   nationalTeam: nationalStandingSchema,
 });
 

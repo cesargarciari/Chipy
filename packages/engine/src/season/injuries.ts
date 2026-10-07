@@ -3,11 +3,11 @@ import type { InjurySeverity } from '../types.js';
 
 export interface InjuryRollCtx {
   age: number;
-  /** 20..100 - the single biggest lever on how often you get hurt. */
+  /** 20 to 100. The biggest factor in how often you get hurt. */
   durability: number;
-  /** Prior entries on the injury record - wear compounds. */
+  /** Past injuries make new ones more likely. */
   injuryCount: number;
-  /** 0..1 from perks (medical team, recovery staff) - cuts the odds down. */
+  /** 0 to 1 from perks. Lowers injury odds. */
   injuryResist: number;
 }
 
@@ -15,42 +15,36 @@ export interface RolledInjury {
   type: string;
   severity: InjurySeverity;
   gamesMissed: number;
-  /** True when the injury wipes the rest of the year (surgery / rupture). */
+  /** True when the injury ends the season. */
   seasonEnding: boolean;
-  /** Permanent hit applied through the season `effect`. */
+  /** Permanent athleticism loss. */
   athleticismHit: number;
   durabilityHit: number;
-  /** Flat OVR drop - the season pipeline subtracts this from every rating. */
+  /** Overall drop applied to every rating. */
   overallHit: number;
   /** Ends the career on the spot. */
   careerEnding: boolean;
-  /** Makes the player retirement-eligible (they can choose to walk). */
+  /** Lets the player choose to retire. */
   retirementEligible: boolean;
 }
 
 interface InjuryType {
   type: string;
   severity: InjurySeverity;
-  /** Base relative likelihood among all injuries. */
+  /** How common this injury is compared to others. */
   weight: number;
   games: [number, number];
   athHit?: [number, number];
   durHit?: [number, number];
-  /** Flat OVR drop range - only the surgery-grade injuries carry one. */
+  /** Overall drop range. Only serious injuries have one. */
   ovrHit?: [number, number];
-  /** `true` = always season-ending; `number` = chance it is (surgery call). */
+  /** true means always season-ending, a number is the chance it is. */
   seasonEnding?: true | number;
-  /** Per-injury chance it ends the career (before age scaling / wear). */
+  /** Chance it ends the career. */
   endBase?: number;
 }
 
-/**
- * The catalogue. Minor knocks are common and cost a handful of games and,
- * at worst, a point or two of athleticism / durability - never a chunk of your
- * overall. Only the surgery-grade knee/achilles injuries at the bottom take a
- * flat 2-3 OVR for good and carry a real career-ending chance. Nothing is
- * impossible - a healthy 24-year-old can still tear an ACL, just rarely.
- */
+/** All injuries. Minor ones cost a few games. Only the serious knee and achilles injuries drop your overall for good or can end a career. */
 export const INJURY_CATALOG: readonly InjuryType[] = [
   { type: 'jammed finger', severity: 'knock', weight: 15, games: [1, 4] },
   { type: 'broken finger', severity: 'knock', weight: 8, games: [4, 11] },
@@ -122,11 +116,7 @@ export const INJURY_CATALOG: readonly InjuryType[] = [
   },
 ];
 
-/**
- * Chance the player picks up *some* injury this season. Low durability is the
- * dominant term; age and a long injury record add to it; medical perks cut it.
- * Floored at 6% so nobody is truly indestructible, capped at 85%.
- */
+/** Chance of any injury this season, between 6% and 85%. Low durability matters most. */
 export function seasonInjuryChance(c: InjuryRollCtx): number {
   const frail = (100 - clamp(c.durability, 20, 100)) / 100; // 0 (iron) .. 0.8
   const ageRisk = c.age <= 27 ? 0 : (c.age - 27) * 0.02;
@@ -136,7 +126,7 @@ export function seasonInjuryChance(c: InjuryRollCtx): number {
   return clamp(p, 0.05, 0.8);
 }
 
-/** Frail / older bodies skew the *type* toward the nastier end of the catalogue. */
+/** Older or fragile players get worse injuries. */
 function severityScale(c: InjuryRollCtx): Record<InjurySeverity, number> {
   const frail = (100 - clamp(c.durability, 20, 100)) / 100; // 0..0.8
   const aged = clamp((c.age - 28) / 12, 0, 1); // 0..1
@@ -149,7 +139,7 @@ function severityScale(c: InjuryRollCtx): Record<InjurySeverity, number> {
   };
 }
 
-/** Roll this season's injury, or `null` for a clean bill of health. */
+/** Rolls this season's injury, or null if healthy. */
 export function rollSeasonInjury(rng: Rng, c: InjuryRollCtx): RolledInjury | null {
   if (rng() >= seasonInjuryChance(c)) return null;
 

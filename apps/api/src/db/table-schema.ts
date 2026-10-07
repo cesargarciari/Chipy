@@ -1,10 +1,6 @@
 import type { CreateTableCommandInput } from '@aws-sdk/client-dynamodb';
 
-/**
- * The one place the table's key schema is defined. `scripts/create-table.ts`
- * uses it for DynamoDB Local, the test helper uses it for throwaway tables, and
- * the Terraform table in Milestone 2 mirrors it exactly.
- */
+/** The table's key schema, shared by the local setup script, tests and Terraform. */
 export function tableInput(tableName: string): CreateTableCommandInput {
   return {
     TableName: tableName,

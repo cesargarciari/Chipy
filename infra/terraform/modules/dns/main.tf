@@ -1,9 +1,4 @@
-# Custom domain: an ACM certificate (in us-east-1, where CloudFront reads certs)
-# validated via DNS records in a Route 53 hosted zone. The zone must already
-# exist with its nameservers live at your registrar - pass its id as
-# `route53_zone_id`. (If you leave it empty Terraform creates the zone, but then
-# ACM validation hangs until you point the registrar at it, so prefer passing
-# an id.)
+# ACM certificate for a custom domain, validated through Route 53. Pass an existing zone id, otherwise validation waits until the registrar points at the new zone.
 
 terraform {
   required_providers {

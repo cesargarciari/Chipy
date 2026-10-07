@@ -1,14 +1,6 @@
-# S3 (private) + CloudFront. One distribution serves the SPA from S3 and proxies
-# /api/* to the Lambda Function URL, so the browser is always same-origin.
-#
-# No custom domain today -> the CloudFront default cert. To add one later: create
-# an `aws_acm_certificate` in a us-east-1 provider (CloudFront certs must live
-# there), pass its ARN as `acm_certificate_arn`, set `domain_name`, and add the
-# Route 53 alias records. Nothing here needs the us-east-1 provider until then.
+# Private S3 bucket and CloudFront. CloudFront serves the site and sends /api/* to Lambda, so everything is same-origin.
 
-# ---------------------------------------------------------------------------
-# S3: the built SPA
-# ---------------------------------------------------------------------------
+# S3 bucket for the site
 resource "aws_s3_bucket" "site" {
   bucket        = "${var.name}-site"
   force_destroy = var.force_destroy
@@ -38,9 +30,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "site" {
   }
 }
 
-# ---------------------------------------------------------------------------
-# Origin Access Control - one for S3, one for the Lambda Function URL
-# ---------------------------------------------------------------------------
+# Origin access for S3 and the Lambda Function URL
 resource "aws_cloudfront_origin_access_control" "s3" {
   name                              = "${var.name}-s3"
   origin_access_control_origin_type = "s3"
@@ -55,9 +45,7 @@ resource "aws_cloudfront_origin_access_control" "lambda" {
   signing_protocol                  = "sigv4"
 }
 
-# ---------------------------------------------------------------------------
-# CloudFront managed policies (by name, so no magic IDs)
-# ---------------------------------------------------------------------------
+# CloudFront managed policies, looked up by name
 data "aws_cloudfront_cache_policy" "optimized" {
   name = "Managed-CachingOptimized"
 }
@@ -70,9 +58,7 @@ data "aws_cloudfront_origin_request_policy" "all_viewer_except_host" {
   name = "Managed-AllViewerExceptHostHeader"
 }
 
-# ---------------------------------------------------------------------------
 # Distribution
-# ---------------------------------------------------------------------------
 resource "aws_cloudfront_distribution" "this" {
   enabled             = true
   is_ipv6_enabled     = true
@@ -122,7 +108,7 @@ resource "aws_cloudfront_distribution" "this" {
     origin_request_policy_id = data.aws_cloudfront_origin_request_policy.all_viewer_except_host.id
   }
 
-  # SPA: client-side routes 403/404 from S3 fall back to index.html.
+  # Send unknown routes to index.html so the web app can handle them.
   custom_error_response {
     error_code            = 403
     response_code         = 200
@@ -159,9 +145,7 @@ resource "aws_cloudfront_distribution" "this" {
   }
 }
 
-# ---------------------------------------------------------------------------
-# Let CloudFront (this distribution only) read S3 and invoke the Function URL
-# ---------------------------------------------------------------------------
+# Let this distribution read S3 and call the Function URL
 data "aws_iam_policy_document" "s3_read" {
   statement {
     sid       = "AllowCloudFrontRead"

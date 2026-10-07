@@ -76,12 +76,12 @@ describe('injuries make sense', () => {
         const prev = s.seasons.find((x) => x.index === inj.seasonIndex - 1);
         if (!cur || !prev) continue;
         drops.push(prev.overallAfter - cur.overallAfter);
-        // Every severe injury visibly costs overall (a lost season barely grows).
+        // Every serious injury lowers overall.
         expect(prev.overallAfter - cur.overallAfter).toBeGreaterThanOrEqual(1);
       }
     }
     expect(drops.length).toBeGreaterThan(0);
-    // On average it's the surgery-grade 2-3 (plus any age decline).
+    // Usually a 2 to 3 point drop.
     const mean = drops.reduce((a, b) => a + b, 0) / drops.length;
     expect(mean).toBeGreaterThanOrEqual(2);
   });
@@ -171,12 +171,12 @@ describe('chemistry + midseason', () => {
         expect(chemSeasons[k]! - chemSeasons[k - 1]!).toBeGreaterThanOrEqual(2);
       }
     }
-    // They still fire regularly (just not back-to-back).
+    // They still happen often, just not back to back.
     expect(totalChem).toBeGreaterThan(50);
   });
 });
 
-/** Walk `count` steps into a career always taking option 0, for preview probing. */
+/** Plays a few steps always taking the first option. */
 function gather(seed: string, count: number) {
   const choices: Array<{ nodeId: string; choiceId: string }> = [];
   for (let step = 0; step < count; step += 1) {

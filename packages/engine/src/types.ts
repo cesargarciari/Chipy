@@ -1,8 +1,4 @@
-/**
- * Bump when the simulation math changes in a way that would alter results for an
- * existing `(seed, profile, choices)` tuple. Stored on every `CareerSummary` so
- * the API can tell whether a persisted career predates the current rules.
- */
+/** Bump when rule changes would change the result of a saved career. */
 export const ENGINE_VERSION = '4.21.0';
 
 export const POSITIONS = ['PG', 'SG', 'SF', 'PF', 'C'] as const;
@@ -11,7 +7,7 @@ export type Position = (typeof POSITIONS)[number];
 export const MARKETS = ['small', 'mid', 'large'] as const;
 export type Market = (typeof MARKETS)[number];
 
-/** The eight rated skills - also the radar axes. */
+/** The eight skills, also used as the radar axes. */
 export const RATING_KEYS = [
   'finishing',
   'midRange',
@@ -95,7 +91,7 @@ export type TeamResult =
 
 export type Role = 'franchise' | 'starter' | 'rotation' | 'bench' | 'fringe';
 
-/** Where the player sits in the league pecking order - drives trade leverage. */
+/** Where the player ranks in the league. Affects trade leverage. */
 export type StatusTier = 'fringe' | 'role_player' | 'star' | 'superstar' | 'generational';
 
 export const STATUS_TIER_LABELS: Record<StatusTier, string> = {
@@ -112,7 +108,7 @@ export interface CountryRef {
   id: string;
   name: string;
   flag: string;
-  /** Basketball pedigree 0..1 - weights national-team medal odds. */
+  /** Basketball strength from 0 to 1. Affects medal odds. */
   pedigree: number;
 }
 
@@ -172,31 +168,31 @@ export interface ArchetypeDef {
   ratingBias: Partial<Ratings>;
   growthWeights: Partial<Record<RatingKey, number>>;
   awardAffinity: AwardAffinity;
-  /** Points added to the starting athleticism roll - explosive builds start springier. */
+  /** Extra starting athleticism for explosive builds. */
   athBias?: number;
 }
 
-/** Deterministic, player-visible effect of choosing an option - shown as chips. */
+/** What picking an option does, shown as chips. */
 export interface OptionEffect {
   ratings?: Partial<Ratings>;
   athleticism?: number;
   durability?: number;
   hype?: number;
   draftStock?: number;
-  /** One-off cash: `+$18M` (endorsement) or `-$2M` (a perk purchase). */
+  /** One-off cash, like an endorsement or a perk purchase. */
   money?: number;
 }
 
-/** Strategy knobs - shown as a one-word tag, not chips. */
+/** Play style settings, shown as a single tag. */
 export interface OptionStance {
   roleBias?: number;
   impactMult?: number;
   teamMult?: number;
   awardMult?: Partial<AwardAffinity>;
-  /** Ongoing per-rating growth nudge; lasts `growthBiasSeasons` seasons (default 3). */
+  /** Extra growth per rating for a few seasons (3 by default). */
   growthBias?: Partial<Record<RatingKey, number>>;
   growthBiasSeasons?: number;
-  /** Multiplier folded into market value for `valueMultSeasons` seasons (default 3). */
+  /** Market value multiplier for a few seasons (3 by default). */
   valueMult?: number;
   valueMultSeasons?: number;
   /** Force a mid-season team change this year (mid-season scenarios). */
@@ -207,15 +203,15 @@ export interface OptionStance {
 }
 
 export interface GameOption {
-  /** Globally unique across all option pools - stored as the `choiceId`. */
+  /** Unique across every option pool. Saved as the choice id. */
   id: string;
   label: string;
   blurb: string;
   effect: OptionEffect;
   stance?: OptionStance;
-  /** Watermark override; otherwise derived from the biggest effect. */
+  /** Overrides the card watermark. */
   watermark?: string;
-  /** A once-a-career breakthrough - the client renders it gold. */
+  /** A once-a-career breakthrough, shown in gold. */
   rare?: boolean;
 }
 
@@ -224,13 +220,13 @@ export interface EffectChip {
   key: string;
   label: string;
   short: string;
-  /** The delta the player will *actually* get (clamped to the 25–99 band). */
+  /** The actual change after capping ratings to 25 to 99. */
   delta: number;
-  /** What the option nominally promised, if `delta` had to be trimmed at the cap. */
+  /** The original promised change, if it got capped. */
   nominal?: number;
 }
 
-/** The serialisable view of an option for the client. */
+/** The option as sent to the client. */
 export interface OptionView {
   id: string;
   label: string;
@@ -239,7 +235,7 @@ export interface OptionView {
   tag?: string;
   watermark: string;
   rare?: boolean;
-  /** NBA team id or overseas club id - the client shows its logo on the card. */
+  /** NBA team or overseas club id, used for the logo. */
   teamId?: string;
 }
 
@@ -256,7 +252,7 @@ export interface PlayerProfile {
 }
 
 export interface ChoiceSelection {
-  /** `highschool` | `recruiting` | `college1..3` | `cy1..3` | `landing` | `s1..` */
+  /** For example highschool, recruiting, college1, landing, s1. */
   nodeId: string;
   choiceId: string;
 }
@@ -283,12 +279,12 @@ export interface SchoolRef {
   id: string;
   name: string;
   tier: SchoolTier;
-  /** 0..1 - tournament ceiling + draft-stock pedigree. */
+  /** 0 to 1. Affects tournament runs and draft stock. */
   prestige: number;
-  /** 0..1 - "NBA factory" bonus to draft stock. */
+  /** 0 to 1. Bonus to draft stock for schools that produce NBA players. */
   nbaPedigree: number;
   style: {
-    /** 0..1 - how much of the offense runs through you. */
+    /** 0 to 1. How much of the offense runs through you. */
     usage: number;
     dev: Partial<Record<RatingKey, number>>;
   };
@@ -322,7 +318,7 @@ export type InjurySeverity = 'knock' | 'strain' | 'moderate' | 'severe';
 
 export interface InjuryEntry {
   seasonIndex: number;
-  /** Human name - `torn ACL`, `hamstring strain`, `broken finger`, … */
+  /** For example torn ACL or hamstring strain. */
   type: string;
   gamesMissed: number;
   severity?: InjurySeverity;
@@ -331,16 +327,16 @@ export interface InjuryEntry {
 export type PerkKind = 'yearly' | 'permanent';
 export type PerkCategory = 'training' | 'body' | 'brand' | 'analytics' | 'facility';
 
-/** How a perk changes the sim while owned (yearly) or forever (permanent). */
+/** How a perk changes the simulation while you own it. */
 export interface PerkEffect {
   growthBias?: Partial<Record<RatingKey, number>>;
   durabilityPerYear?: number;
-  /** 0..1 - scales injury games + injury-event odds down. */
+  /** 0 to 1. Fewer games lost to injury. */
   injuryResist?: number;
   impactMult?: number;
   awardMult?: Partial<AwardAffinity>;
   hypePerYear?: number;
-  /** 0..1 - cuts the odds of bad in-season events. */
+  /** 0 to 1. Fewer bad in-season events. */
   slumpResist?: number;
   /** Multiplier on market value. */
   valueMult?: number;
@@ -352,7 +348,7 @@ export interface PerkDef {
   blurb: string;
   category: PerkCategory;
   kind: PerkKind;
-  /** $M - one-off for permanent, per-year for yearly. */
+  /** In millions. One-off for permanent perks, yearly for yearly ones. */
   cost: number;
   /** Earliest season this can be bought. */
   minSeason?: number;
@@ -363,7 +359,7 @@ export interface ClubRef {
   id: string;
   name: string;
   country: string;
-  /** 0..1 - EuroLeague / domestic ceiling. */
+  /** 0 to 1. How strong the club is. */
   prestige: number;
 }
 
@@ -375,7 +371,7 @@ export type EuroResult =
   | 'euro_missed';
 
 export interface OverseasSeason {
-  /** 1-based, on the same scale as `SeasonRecord.index` (counts every pro year). */
+  /** Same numbering as SeasonRecord.index. */
   index: number;
   age: number;
   club: string;
@@ -386,7 +382,7 @@ export interface OverseasSeason {
   /** $M for this season. */
   salary: number;
   headline: string;
-  /** This one season graded on accolades + club success + production. */
+  /** Season grade from awards, club success and stats. */
   grade: GradeLetter;
 }
 
@@ -407,7 +403,7 @@ export interface TeamOffer {
   years: number;
   /** $M/yr on the table. */
   salary: number;
-  /** 0..1 title odds if you sign here (roster strength lifted by your own ceiling). */
+  /** 0 to 1 chance of a title if you sign here. */
   contender: number;
   pitch: string;
 }
@@ -480,10 +476,10 @@ export interface SeasonRecord {
   decisionHeadline: string;
   eventId: string;
   eventHeadline: string;
-  /** Interactive mid-season situation, if one fired this year. */
+  /** The mid-season situation this year, if any. */
   midseasonId: string | null;
   midseasonHeadline: string | null;
-  /** How the Finals possession the player called played out, if they reached one. */
+  /** How the Finals possession went, if the team got there. */
   finalsHeadline: string | null;
   stats: SeasonStatLine;
   teamResult: TeamResult;
@@ -493,11 +489,11 @@ export interface SeasonRecord {
   injuredGames: number;
   /** $M for this season. */
   salary: number;
-  /** A one-line, randomly-flavoured account of how the season / playoffs went. */
+  /** A one-line recap of the season. */
   recap: string;
-  /** Where the team finished its conference, 1 (best) .. 15 (worst). */
+  /** Conference finish, 1 is best and 15 is worst. */
   seed: number;
-  /** This one season graded on accolades + team success + production. */
+  /** Season grade from awards, team success and stats. */
   grade: GradeLetter;
 }
 
@@ -544,7 +540,7 @@ export interface FranchiseStanding {
   rings: number;
   score: number;
   tier: FranchiseTier;
-  /** 0..100 toward legend - for an "idolatry" progress bar. */
+  /** 0 to 100 progress toward legend status. */
   progress: number;
 }
 
@@ -569,16 +565,16 @@ export type MomentKind =
   | 'injury';
 
 export interface CareerMoment {
-  /** `SeasonRecord.index` of the season it belongs to. */
+  /** Which season this belongs to. */
   seasonIndex: number;
   kind: MomentKind;
-  /** Stable id for slotting artwork later (`mvp`, `champion`, `franchise_idol`, `shoe_apex`…). */
+  /** Stable id used to pick the artwork, like mvp or champion. */
   id: string;
   title: string;
   subtitle: string;
   teamId?: string;
   awardId?: AwardId;
-  /** For `midseason` - the option label the player chose. */
+  /** The option the player picked, for mid-season moments. */
   choice?: string;
 }
 
@@ -608,7 +604,7 @@ export interface ValueMod {
 export interface CareerState {
   age: number;
   seasonIndex: number;
-  /** Per-career development ceiling multiplier (~0.8 role player … ~1.3 superstar). */
+  /** Growth ceiling multiplier, from about 0.8 for role players to 1.3 for superstars. */
   talent: number;
   ratings: Ratings;
   athleticism: number;
@@ -624,40 +620,40 @@ export interface CareerState {
   retirementEligible: boolean;
   forcedRetire: boolean;
   careerEndingInjury: boolean;
-  /** Set once the player has answered the pre-retirement farewell node. */
+  /** True once the player has made the farewell choice. */
   farewellChosen: boolean;
-  /** True during the single ceremonial season a "farewell tour" grants. */
+  /** True during the farewell tour season. */
   onFarewellTour: boolean;
-  /** Seasons left in the post-ring contention window (5 after each title). */
+  /** Seasons left as a contender after a title (5 after each ring). */
   ringWindowLeft: number;
-  /** True for the season right after any trade - suppresses back-to-back moves. */
+  /** True the season after a trade, so trades don't happen back to back. */
   justTraded: boolean;
-  /** 0..100 - how well you gel with teammates. Low chemistry gets you traded. */
+  /** 0 to 100. How well you get along with teammates. */
   chemistry: number;
-  /** An injury rolled this season - consumed when the season record is written. */
+  /** An injury from this season, saved into the season record. */
   pendingInjury: InjuryEntry | null;
   peakOverall: number;
-  // economy ($M)
+  // Money (in millions)
   salary: number;
   bank: number;
   marketValue: number;
   careerEarnings: number;
   peakSalary: number;
-  // perks
+  // Perks
   ownedPerks: string[];
   yearlyPerks: string[];
   valueMods: ValueMod[];
-  // life
+  // Life
   shoeDeal: string | null;
   injuryHistory: InjuryEntry[];
   overseasSeasons: OverseasSeason[];
-  // franchise standing
+  // Franchise standing
   franchiseScore: Record<string, number>;
   franchiseSeasons: Record<string, number>;
   franchiseRings: Record<string, number>;
   franchiseTierSeen: Record<string, FranchiseTier>;
   seasonsWithTeam: number;
-  // national team standing
+  // National team standing
   nationalRep: number;
   nationalCaps: number;
   nationalMedals: number;
@@ -667,7 +663,7 @@ export interface CareerState {
   timeline: TimelineEntry[];
   firedScenarioIds: string[];
   firedChemistryIds: string[];
-  /** Season number the last chemistry question fired - keeps them 2-3 apart. */
+  /** Season of the last chemistry question, to keep them spaced out. */
   lastChemistrySeason: number;
   growthBiases: GrowthBias[];
   lastPlayedStats: SeasonStatLine | null;
@@ -689,16 +685,15 @@ export interface CareerSummary {
   careerTotals: CareerTotals;
   legacy: Legacy;
   timeline: TimelineEntry[];
-  // v4
   careerEarnings: number;
   peakSalary: number;
   perks: string[];
   shoeDeal: string | null;
   overseasSeasons: OverseasSeason[];
   injuryHistory: InjuryEntry[];
-  // v4.2 - franchise standing + the career's big moments
+  // Franchise standing and big moments
   franchises: FranchiseStanding[];
   moments: CareerMoment[];
-  // v4.4 - national-team standing
+  // National team standing
   nationalTeam: NationalStanding;
 }

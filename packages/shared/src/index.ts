@@ -1,9 +1,4 @@
-/**
- * `@chipy/shared` — the HTTP contract between `@chipy/web` and `@chipy/api`.
- *
- * Zod schemas are the single source of truth; the `*Dto` / `*Request` /
- * `*Response` types are inferred from them so the two apps cannot drift.
- */
+/** @chipy/shared: the API contract between web and api. Types are inferred from the zod schemas. */
 
 export * from './career-summary.js';
 export * from './api.js';

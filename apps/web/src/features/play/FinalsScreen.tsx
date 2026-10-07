@@ -4,12 +4,7 @@ import { ScenarioFrame } from './ScenarioFrame.js';
 
 type Finals = NonNullable<PendingDecision['finals']>;
 
-/**
- * The NBA Finals as one possession the player calls. Three real plays; how good
- * the team was decides how many of them actually win it. Pick the right one and
- * you lift the trophy - pick wrong and the shot rims out. The consequence shows
- * on the next screen's "Last season" card.
- */
+/** The NBA Finals come down to one play the player picks. */
 export function FinalsScreen({
   finals,
   onChoose,

@@ -1,6 +1,5 @@
 import type { ClubRef } from '../types.js';
 
-/** EuroLeague / top domestic clubs a struggling NBA player can sign with. */
 const C = (id: string, name: string, country: string, prestige: number): ClubRef => ({
   id,
   name,
@@ -8,11 +7,7 @@ const C = (id: string, name: string, country: string, prestige: number): ClubRef
   prestige,
 });
 
-/**
- * The clubs a struggling NBA player can sign with. Kept to the set that has
- * crest artwork in the web (`apps/web/src/assets/clubs/`) so every overseas
- * offer card shows a badge - add a crest, add the club here.
- */
+/** Overseas clubs. Only clubs with a crest in apps/web/src/assets/clubs/ are listed. */
 export const EURO_CLUBS: readonly ClubRef[] = [
   C('real_madrid', 'Real Madrid', 'Spain', 0.94),
   C('barcelona', 'FC Barcelona', 'Spain', 0.9),

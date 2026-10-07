@@ -125,7 +125,7 @@ const MAX_SEASONS = 25;
 export interface RunCareerArgs {
   seed: number | string;
   profile: PlayerProfile;
-  /** prologue ×2, college, landing ×1, then per season: perks*, decision, [midseason]. */
+  /** Order: two prologue picks, college, landing, then each season's perks, decision and any mid-season call. */
   choices: ChoiceSelection[];
 }
 
@@ -152,13 +152,13 @@ export interface SeasonPreview {
   franchiseProgress: number;
   /** National-team standing so far. */
   nationalTeam: NationalStanding;
-  /** League pecking-order tier - star+ players can demand a trade. */
+  /** Where the player ranks in the league. Stars and up can demand a trade. */
   statusTier: StatusTier;
-  /** 0..1 rough chance of being traded this season; the HUD flags it when tense. */
+  /** Rough 0 to 1 chance of a trade this season, shown in the HUD. */
   tradeChance: number;
-  /** Seasons of a still-open championship window (a ring keeps you a contender). */
+  /** Seasons left as a contender after winning a ring. */
   ringWindow: number;
-  /** 0..100 team chemistry - low chemistry drives trades. */
+  /** Team chemistry from 0 to 100. Low chemistry leads to trades. */
   chemistry: number;
   /** Big beats from the season that just finished. */
   moments: CareerMoment[];
@@ -185,17 +185,17 @@ export interface PendingDecision {
   landing?: { offers: OptionView[]; draft: DraftResult };
   season?: { decision: SeasonDecisionNode; preview: SeasonPreview; shop: PerkShop };
   midseason?: { decision: SeasonDecisionNode; preview: SeasonPreview };
-  /** A locker-room question - rolls on its own, so it can share a season with a mid-season one. */
+  /** A locker-room question. Can show up in the same season as a mid-season one. */
   chemistry?: { decision: SeasonDecisionNode; preview: SeasonPreview };
-  /** The one decisive Finals possession, posed only when a career reaches the NBA Finals. */
+  /** The deciding Finals possession, only when the team reaches the Finals. */
   finals?: { game: FinalsGameView; preview: SeasonPreview };
-  /** The pre-retirement send-off choice: `farewell_tour` vs `quiet_goodbye`. */
+  /** The retirement choice: farewell tour or quiet goodbye. */
   farewell?: { options: OptionView[]; preview: SeasonPreview };
   overseasOffer?: {
     reason: 'washed_out' | 'contract_up';
     options: OptionView[];
     preview: SeasonPreview;
-    /** Present only for `contract_up` (start-of-season); the washout rescue has none. */
+    /** Only set when the contract is up. */
     shop?: PerkShop;
   };
 }
@@ -229,11 +229,7 @@ function applyGrowth(base: Ratings, growth: Partial<Ratings>): Ratings {
   return next;
 }
 
-/**
- * The deterministic heart of the game. Replays the whole career from
- * `(seed, profile, choices)`. Returns `awaiting_choice` with the next node when
- * `choices` runs out, or `complete` with the full `CareerSummary`.
- */
+/** Replays the whole career from the seed, profile and choices. Returns the next choice to make, or the finished summary. */
 export function runCareer(args: RunCareerArgs): RunCareerResult {
   const { profile } = args;
   const seed = args.seed;
@@ -254,9 +250,7 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
   };
   const peekNodeId = (): string | null => (ci < choices.length ? choices[ci]!.nodeId : null);
 
-  // ---- Prologue -----------------------------------------------------------
-  // Rolled per career from a derived stream so the summer-circuit / recruiting
-  // options are equal-value with rerolled attribute spreads.
+  // Prologue
   const prologueNodes = buildPrologueNodes(mulberry32(normalizeSeed(`${seed}::prologue`)));
   let recruitTier: SchoolTier = 'blue_blood';
   for (const node of prologueNodes) {
@@ -278,7 +272,7 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
     if (node.id === 'recruiting') recruitTier = recruitingTier(pick.choiceId);
   }
 
-  // ---- College (1-3 years, pick + declare/return/transfer) --------------
+  // College
   const collegeYears: CollegeSeason[] = [];
   let currentSchool: SchoolRef | null = null;
   const priorSchoolIds = new Set<string>();
@@ -348,8 +342,7 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
     if (kind === 'transfer') currentSchool = null;
   }
 
-  // Every extra year in school ages you: a one-and-done reaches the NBA at 19,
-  // a player who went back once is 20, twice is 21.
+  // Each extra college year adds a year of age.
   state.age += Math.max(0, collegeYears.length - 1);
 
   state.college = {
@@ -358,13 +351,9 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
     years: collegeYears,
   } satisfies College;
 
-  // ---- Draft ------------------------------------------------------------
+  // Draft
   state.draft = simulateDraft(rng, state);
-  // Talent ceiling is set mostly by where you actually landed: a high pick
-  // almost always gets real growth headroom, a late pick usually does not - but
-  // a few still pop (the "second-round steal"), and the odds of that rise the
-  // deeper you went. A prospect who genuinely slid keeps some credit for the
-  // pre-draft scouting grade.
+  // Higher picks usually get more room to grow, but late picks can still surprise.
   const draftSlot = state.draft.undrafted ? 62 : state.draft.pick!;
   const slotCeiling = clamp(1.19 - draftSlot * 0.0135, 0.52, 1.19);
   const stockNudge = ((state.draftStock - 55) / 100) * 0.12;
@@ -384,7 +373,7 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
         } round.`,
   });
 
-  // ---- Landing spot ---------------------------------------------------
+  // Landing spot
   const offers = landingOffers({
     seed,
     overall: overallFor(profile.position, state.ratings),
@@ -420,9 +409,9 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
     });
   }
 
-  // ---- Season loop --------------------------------------------------
+  // Season loop
   let prevImpact = 0;
-  // HUD-only reads, refreshed at the top of each season before any preview.
+  // Values shown in the HUD, refreshed each season.
   let hudStatus: StatusTier = 'fringe';
   let hudTradeChance = 0;
 
@@ -434,7 +423,7 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
       score: state.nationalRep,
     });
 
-  /** One national-team summer: accrue the standing, return any medals. */
+  /** Plays one national-team summer and returns any medals. */
   const runNationalSummer = (ovr: number, impact: number): AwardId[] => {
     const r = maybeInternational(rng, {
       seasonIndex: state.seasonIndex,
@@ -443,8 +432,7 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
       impact,
       hype: state.hype,
       countryPedigree,
-      // Team USA has a bottomless pool - you need real star status to make it.
-      // Smaller nations lean on whoever they've got.
+      // Team USA is deep, so you need to be a star to make it.
       deepPool: profile.country === 'USA',
       status: hudStatus,
     });
@@ -472,7 +460,7 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
     bank: state.bank,
     marketValue: state.marketValue,
     ownedPerks: [...state.ownedPerks, ...state.yearlyPerks],
-    // Idolatry tracks the current club whether it's an NBA team or a EuroLeague one.
+    // Works for both NBA teams and EuroLeague clubs.
     franchiseTier: (() => {
       const id = state.team?.id ?? state.club?.id;
       return id ? (state.franchiseTierSeen[id] ?? 'none') : 'none';
@@ -490,7 +478,7 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
     tradeChance: hudTradeChance,
     ringWindow: state.ringWindowLeft,
     chemistry: state.chemistry,
-    // The big beats of the season just finished - the web pops these as cards.
+    // Highlights from last season, shown as cards.
     moments: state.moments.filter((m) => m.seasonIndex === sn - 1),
     lastSeason: state.seasons.at(-1) ?? null,
     previousOverall: state.seasons.at(-2)?.overallAfter ?? null,
@@ -506,12 +494,10 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
       state.league === 'overseas'
         ? 'franchise'
         : (prevRole ?? (overall >= 82 ? 'starter' : overall >= 72 ? 'rotation' : 'bench'));
-    // A farewell-tour season is never a free-agency season - the exit is
-    // already scripted, so it always runs a normal scenario.
+    // The farewell season is never a free-agency year.
     const contractYear = state.contractYearsLeft <= 1 && !state.onFarewellTour;
 
-    // League status + a rough trade estimate - HUD reads and the demand-trade
-    // gate. RNG-free so it stays a display value.
+    // Status and trade odds for the HUD. No randomness here.
     hudStatus = statusTier({
       overall,
       peakOverall: state.peakOverall,
@@ -537,9 +523,7 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
           })
         : 0;
 
-    // ===== 1. Perks shop - an always-open aside on the season screen, never a
-    // blocking step. Yearly perks auto-renew from the bank first; any recorded
-    // `perks{n}` purchases (they always precede the `s{n}` choice) apply here.
+    // 1. Perks shop. Yearly perks renew first, then any purchases this season.
     const renew = renewYearlyPerks(state);
     for (const id of renew.lapsed) {
       state.timeline.push({
@@ -574,7 +558,7 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
     }
     const shop: PerkShop = buildPerkShop(state, seasonNumber);
 
-    // ===== 2. Season decision =====
+    // 2. Season decision
     let effect: SeasonEffect = {};
     let decisionHeadline: string;
     let decisionId: string;
@@ -706,8 +690,7 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
       const offer = faOffers.find((o) => o.choiceId === pick.choiceId);
       if (!offer) throw new Error(`Unknown free-agency offer "${pick.choiceId}"`);
       const resign = offer.team.id === state.team.id;
-      // Re-signing *extends* the current stint: the team, the standing, and the
-      // years-with-team counter all carry over - only the contract is new.
+      // Re-signing keeps the same team history, only the contract changes.
       if (!resign) state.seasonsWithTeam = 0;
       state.team = offer.team;
       state.contractYearsLeft = offer.years + 1;
@@ -734,10 +717,9 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
       });
       scenarioId = scenario.id;
       const options = scenario.options.map((o) => optionView(o, state.ratings));
-      // On a farewell-tour season the exit is already scripted - no re-signing,
-      // no trade demand, no "retire now" button. It's a lap of honour.
+      // The farewell season has no re-signing, trade demands or early retirement.
       const scripted = state.onFarewellTour || state.farewellChosen;
-      // Star-and-up players on a settled roster can force their way out.
+      // Stars on a settled roster can demand a trade.
       const canDemandTrade =
         state.league === 'nba' &&
         state.team !== null &&
@@ -784,8 +766,7 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
         if (!canDemandTrade) throw new Error('demand_trade not available this season');
         tradeDemanded = true;
         effect.forceTrade = true;
-        // Burning the bridge costs you standing with the team you're leaving
-        // (only where you actually have a history to lose).
+        // Leaving burns some goodwill with the old team.
         if (state.team && (state.franchiseSeasons[state.team.id] ?? 0) > 0) {
           state.franchiseScore[state.team.id] = (state.franchiseScore[state.team.id] ?? 0) - 14;
         }
@@ -812,12 +793,7 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
       }
     }
 
-    // ===== 3. Mid-season situation (~30% from season 3 on) =====
-    // NBA only - the mid-season pool is all NBA locker-room / front-office
-    // drama (a fight with the star, a benching, a trade demand). Overseas you
-    // ARE the club's marquee name, so none of it applies, and a farewell-tour
-    // season is a scripted lap of honour with no drama. The rng roll still burns
-    // so those seasons don't shift the stream for later NBA years.
+    // 3. Mid-season situation. NBA only, and the roll always happens so later seasons stay the same.
     let midId: string | null = null;
     let midHeadline: string | null = null;
     const midFires =
@@ -881,16 +857,13 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
           effect = mergeEffects(effect, { chemistry: mr.chemistryDelta });
         }
         midId = mid.id;
-        // The situation + the call live on `SeasonRecord.midseasonHeadline` and
-        // fold into that season's recap line - not a separate card at the top.
+        // Shown in the season recap instead of its own card.
         midHeadline = `${mid.title}: ${found.option.label} - ${mr.note}`;
         if (!state.firedScenarioIds.includes(mid.id)) state.firedScenarioIds.push(mid.id);
       }
     }
 
-    // ===== 3b. Chemistry question - its own roll, so it can share a season
-    // with the mid-season one (they're about different things). NBA only, and
-    // kept to roughly one every 2-3 seasons via the cooldown.
+    // 3b. Chemistry question. NBA only, about once every 2 to 3 seasons.
     let chemHeadline: string | null = null;
     const chemEligible =
       state.league === 'nba' &&
@@ -932,13 +905,13 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
       const cr = resolveChemistry(rng, chm.id, pick.choiceId);
       effect = mergeEffects(effect, cr.effect);
       const optLabel = chm.options.find((o) => o.id === pick.choiceId)?.label ?? '';
-      // Folds into the season recap line rather than a top-of-screen card.
+      // Shown in the season recap instead of its own card.
       chemHeadline = `${chm.title}: ${optLabel} - ${cr.note}`;
       if (!state.firedChemistryIds.includes(chm.id)) state.firedChemistryIds.push(chm.id);
     }
     if (chemHeadline) midHeadline = midHeadline ? `${midHeadline} ${chemHeadline}` : chemHeadline;
 
-    // ===== 4. Simulate the season =====
+    // 4. Simulate the season
     const perkAgg = aggregatePerkEffect(state);
     effect = mergeEffects(effect, perkToSeasonEffect(perkAgg));
 
@@ -947,7 +920,7 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
         ? clamp(state.club?.prestige ?? 0.6, 0.3, 0.9)
         : teamStrengthFor(seed, state.team!.id, state.seasonIndex);
 
-    // An interactive mid-season situation *replaces* the silent auto-event.
+    // A mid-season situation replaces the random event.
     const evt =
       midId !== null
         ? { id: midId, headline: midHeadline ?? '', effect: {} as SeasonEffect }
@@ -964,9 +937,7 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
       effect.injuredGames = Math.round(effect.injuredGames * (1 - perkAgg.injuryResist));
     }
 
-    // ===== 3b. Injury roll - its own per-season chance, on top of the event.
-    // Low durability and age drive it; medical perks blunt it. A career going
-    // fully injury-free is now a real rarity, but ACL / Achilles stay uncommon.
+    // Injury roll. More likely with low durability and age, less likely with medical perks.
     const injury = rollSeasonInjury(rng, {
       age: state.age,
       durability: state.durability,
@@ -990,9 +961,7 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
       };
     }
 
-    // A "tense situation" / toxic-locker-room trade - rolled once against the
-    // same estimate the HUD shows (which already folds in low chemistry). Never
-    // on a farewell-tour season: you finish where you are.
+    // Chance of being traded away. Never during the farewell season.
     if (
       !effect.forceTrade &&
       !state.justTraded &&
@@ -1010,26 +979,22 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
       state.team = pickTradeTeam(rng, state.team.id);
       state.seasonsWithTeam = 0;
       tradedThisSeason = true;
-      // Fresh locker room - chemistry resets toward neutral (a clean slate).
+      // New team, chemistry starts closer to neutral.
       state.chemistry = clamp(Math.round(state.chemistry * 0.4 + 33), 0, 100);
-      // A trade this severe usually costs some of the ring-window momentum.
+      // A forced trade usually shortens the contender window.
       if (!tradeDemanded && state.ringWindowLeft > 0) {
         state.ringWindowLeft = Math.max(0, state.ringWindowLeft - 2);
       }
     }
 
-    // Dynasty window - a title keeps you a contender for a few years (decaying),
-    // so back-to-backs and repeat runs are a real possibility, not automatic.
+    // After a title the team stays a contender for a few years, with fading odds.
     if (state.league === 'nba' && state.ringWindowLeft > 0) {
       effect = mergeEffects(effect, {
         teamMult: 1 + 0.12 * (0.45 + 0.55 * (state.ringWindowLeft / 5)),
       });
     }
 
-    // A flat OVR hit (a surgery-grade injury, a locker-room blow-up) is spread
-    // evenly across every rating so the overall really does drop by that much.
-    // Capped at 3 total, even if a bad injury and a bad-news week stack: no
-    // single season should gut a career.
+    // Overall hits are spread across every rating and capped at 3 per season.
     if (effect.overallHit && effect.overallHit > 0) {
       const drop = Math.min(effect.overallHit, 3);
       const r: Partial<Ratings> = { ...(effect.ratings ?? {}) };
@@ -1037,8 +1002,7 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
       effect.ratings = r;
     }
 
-    // Team chemistry drifts toward a baseline that RISES the longer you've been
-    // with the team - you learn the room. A fresh trade resets that tenure.
+    // Chemistry settles higher the longer you stay with a team.
     const tenure = state.league === 'nba' ? Math.min(state.seasonsWithTeam, 8) : 0;
     const chemTarget = 42 + tenure * 4; // 42 fresh ... 74 after 8 years together
     const chemDrift =
@@ -1047,7 +1011,7 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
         : state.chemistry > chemTarget + 6
           ? -2
           : 0;
-    // Bonding pays off more when you already know the team; drama still hurts full.
+    // Bonding helps more with a team you know.
     const familiarity = 1 + Math.min(state.seasonsWithTeam, 6) * 0.08; // up to 1.48x
     const swing = effect.chemistry ?? 0;
     state.chemistry = clamp(
@@ -1062,7 +1026,7 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
         : teamStrengthFor(seed, state.team!.id, state.seasonIndex);
     const archetype = getArchetype(profile.archetype);
 
-    // Lingering growth biases (past decisions) + always-on perk bias.
+    // Growth nudges from past decisions and perks.
     const growthBias: Partial<Record<RatingKey, number>> = {};
     for (const gb of state.growthBiases) {
       for (const [k, v] of Object.entries(gb.ratings)) {
@@ -1086,8 +1050,7 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
     });
     state.ratings = grown.ratings;
     state.athleticism = grown.athleticism;
-    // Perk / event durability deltas are fractional; age erosion is too - round
-    // once so the stored value is always a clean integer.
+    // Round so durability is always stored as a whole number.
     state.durability = clamp(
       Math.round(state.durability + (effect.durability ?? 0) + grown.durabilityDelta),
       20,
@@ -1152,7 +1115,7 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
           subtitle: `Age ${state.age} · ${state.club!.name}, ${state.club!.country}`,
         });
       }
-      // ---- Idolatry with the overseas club (same standings as NBA teams) ---
+      // Standing with the overseas club
       const clubId = state.club!.id;
       state.seasonsWithTeam += 1;
       state.franchiseSeasons[clubId] = (state.franchiseSeasons[clubId] ?? 0) + 1;
@@ -1200,19 +1163,14 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
       });
       gamesMissed = sim.gamesMissed;
 
-      // Where the team landed in its conference this year (1-15), then how far
-      // that seed carries it in the bracket.
+      // Conference seed for this year, then how far the team goes in the playoffs.
       const confSeed = conferenceSeed(seed, state.team!.id, state.seasonIndex, sim.impact);
       const playoffResult: TeamResult =
         sim.stats.gp === 0
           ? 'missed_season'
           : simulatePlayoffs(rng, { seed: confSeed, playerImpact: sim.impact, effect });
 
-      // Reaching the Finals is a possession the player calls, not a coin flip.
-      // How good the team was decides how many of the three plays actually win
-      // it. The mini-game runs off a derived stream and resolves from the choice
-      // alone - it never touches the main RNG, so a career that never reached a
-      // Finals still replays byte for byte.
+      // The Finals are decided by the player's call. It uses its own RNG so replays stay identical.
       let teamResult: TeamResult = playoffResult;
       let finalsHeadline: string | null = null;
       if (playoffResult === 'champion' || playoffResult === 'finals') {
@@ -1247,11 +1205,10 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
         });
       }
 
-      // Open (or refresh) the 5-season championship window on a title.
+      // A title keeps the team a contender for 5 seasons.
       if (teamResult === 'champion') state.ringWindowLeft = 5;
 
-      // Fresh league status off this season's finished overall + tally - the
-      // MVP / DPOY bars read it.
+      // Status from this season's overall, used by the MVP and DPOY odds.
       const seasonStatus = statusTier({
         overall: overallAfter,
         peakOverall: state.peakOverall,
@@ -1288,7 +1245,7 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
       ];
       for (const a of seasonAwards) tallyAward(state.awards, a);
 
-      // ---- Franchise standing with this team --------------------------
+      // Standing with this team
       const teamId = state.team!.id;
       state.seasonsWithTeam += 1;
       state.franchiseSeasons[teamId] = (state.franchiseSeasons[teamId] ?? 0) + 1;
@@ -1304,7 +1261,7 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
           seasonsWithTeam: state.seasonsWithTeam,
           played: sim.stats.gp > 0,
         });
-      // Provisional tier (real `historic` isn't known until the career ends).
+      // Temporary tier until the career ends.
       const provTier = franchiseTier(state.franchiseScore[teamId], {
         rings: state.franchiseRings[teamId] ?? 0,
         seasons: state.franchiseSeasons[teamId] ?? 0,
@@ -1314,8 +1271,7 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
       const tierUp = tierRank(provTier) > seenRank ? provTier : null;
       if (tierUp) state.franchiseTierSeen[teamId] = tierUp;
 
-      // A creative, seeded one-liner for how the year ended - its own derived
-      // stream, so it never shifts the main simulation.
+      // A short recap line for the season, with its own RNG.
       const recap = seasonRecap(derivedRng(seed, 'recap', seasonNumber), {
         result: teamResult,
         missedGames: sim.gamesMissed,
@@ -1329,7 +1285,7 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
         gamesPlayed: sim.stats.gp,
       });
 
-      // ---- Big-moment detection -------------------------------------
+      // Big moments
       const pointsBefore = state.seasons.reduce((n, s) => n + s.stats.gp * s.stats.ppg, 0);
       state.seasons.push({
         index: seasonNumber,
@@ -1380,8 +1336,7 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
     }
 
     if (state.pendingInjury) {
-      // A rolled injury - record it by its real name. `gamesMissed` is the
-      // season's actual total (82 − games played), so it always adds up.
+      // Record the injury and the games it actually cost.
       const entry = { ...state.pendingInjury, gamesMissed: Math.max(gamesMissed, 1) };
       state.injuryHistory.push(entry);
       if (entry.severity === 'moderate' || entry.severity === 'severe') {
@@ -1407,10 +1362,7 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
       });
     }
 
-    // ===== 4b. Fame follows the ball =====
-    // Fame is not an attribute you train - it tracks how you played and the
-    // trophies you won this year (plus the off-court drama already merged into
-    // `effect.hype` from mid-season situations, events, and shoe deals).
+    // 4b. Fame comes from how you played, the awards you won and any off-court drama.
     const lastNba = state.seasons.at(-1);
     const seasonAwardCount =
       (lastNba?.index === seasonNumber ? lastNba.awards.length : 0) +
@@ -1425,12 +1377,12 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
       (state.hype > 70 ? 1.5 : 0); // fame fades a touch if you go quiet
     state.hype = clamp(Math.round(state.hype + perfHype), 0, 100);
 
-    // ===== 5. Money =====
+    // 5. Money
     settleSeasonPay(state);
     recomputeMarketValue(state, { overall: overallAfter, lastImpact: prevImpact }, perkAgg);
     tickValueMods(state);
 
-    // ===== 6. Advance the clock =====
+    // 6. Advance the clock
     state.age += 1;
     state.seasonIndex += 1;
     state.contractYearsLeft = Math.max(0, state.contractYearsLeft - 1);
@@ -1451,12 +1403,10 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
     }
     if (effect.retirementEligible) state.retirementEligible = true;
 
-    // While a guaranteed multi-year deal is still running, the roster spot is
-    // safe: no age-out, no washout cut. Retirement can only come from the
-    // player's own choice or a career-ending injury until the contract is up.
+    // A player under a multi-year deal can't be cut or age out until it ends.
     const underContract = state.contractYearsLeft > 1;
 
-    // The one ceremonial season a farewell tour granted has now been played.
+    // The farewell season is done.
     if (state.onFarewellTour) {
       state.onFarewellTour = false;
       state.forcedRetire = true;
@@ -1466,10 +1416,7 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
       if (state.age >= 34 && overallAfter <= state.peakOverall - 4) state.retirementEligible = true;
       if (state.age >= 35) state.retirementEligible = true;
 
-      // Early washout - a real cut for role players who never develop. Not while
-      // a signed multi-year deal still has years left. A late-second-round or
-      // undrafted start makes it markedly more likely (and a slightly higher
-      // overall still isn't safe).
+      // Early washout for players who never develop, more likely for late picks.
       const draftPick = state.draft?.pick ?? null;
       const draftRisk = state.draft?.undrafted
         ? 0.32
@@ -1496,13 +1443,10 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
         overallAfter < washCeil &&
         state.talent < 1.0 &&
         rng() < 0.32 + draftRisk;
-      // A washed-out player who can still hoop gets real EuroLeague interest; the
-      // rest are simply out of the game (→ a short, low-grade career).
+      // A washed-out player who is still good enough can go to the EuroLeague.
       const euroInterest = overallAfter >= 64 && state.age <= 33;
 
-      // Age-out cascade - the decline is all after ~34. Only fires at a contract
-      // boundary; layered with real rng so careers end anywhere from the mid-30s
-      // to ~40, not all on the same birthday.
+      // Age-related retirement, usually from the mid-30s to about 40.
       if (!underContract) {
         if (state.age >= 34 && overallAfter < 70) state.forcedRetire = true;
         if (state.age >= 35 && overallAfter <= state.peakOverall - 7 && rng() < 0.45)
@@ -1587,9 +1531,7 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
       }
     }
 
-    // ===== 6b. Farewell node - age has decided this is the end, but the player
-    // gets to script the exit. A career-ending injury or an early washout is
-    // abrupt by nature and skips this.
+    // 6b. Farewell choice when age ends the career. Skipped after a career-ending injury or washout.
     if (
       state.forcedRetire &&
       !state.careerEndingInjury &&
@@ -1614,7 +1556,7 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
       }
       state.farewellChosen = true;
       if (pick.choiceId === 'farewell_tour') {
-        // One more, non-FA, ceremonial season; retirement is locked in after it.
+        // One last season, then retire.
         state.forcedRetire = false;
         state.onFarewellTour = true;
         state.retirementEligible = true;
@@ -1627,7 +1569,7 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
           headline: 'You announce next season is your last - a farewell tour, arena by arena.',
         });
       } else {
-        // Quiet goodbye - retire now, no extra season.
+        // Retire now.
         state.forcedRetire = true;
         state.onFarewellTour = false;
         state.timeline.push({
@@ -1652,9 +1594,7 @@ export function runCareer(args: RunCareerArgs): RunCareerResult {
 function buildSummary(args: RunCareerArgs, state: CareerState, consumed: number): CareerSummary {
   const totals = buildCareerTotals(state.seasons);
 
-  // Two passes: legacy needs the standings for jersey retirement, but the
-  // `legend` tier needs the final legacy score. Compute a first-pass legacy for
-  // the `historic` flag, build standings, then a final legacy that can see them.
+  // Legacy is computed twice because jersey retirement and the legend tier depend on each other.
   const roughLegacy = buildLegacy({
     seed: args.seed,
     awards: state.awards,
@@ -1683,8 +1623,7 @@ function buildSummary(args: RunCareerArgs, state: CareerState, consumed: number)
   const finalRatings = { ...state.ratings };
   const rookieTeamId = state.seasons[0]?.teamId ?? state.team?.id;
 
-  // Only keep the highest career-points milestone - 20k shouldn't sit next to
-  // 10k and 15k in the moment list.
+  // Only keep the biggest career points milestone.
   const topPointsMark = Math.max(
     0,
     ...state.moments

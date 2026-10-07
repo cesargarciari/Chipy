@@ -17,7 +17,7 @@ type EuroResult = CareerSummaryDto['overseasSeasons'][number]['result'];
 export { FRANCHISE_TIER_LABELS };
 export type { FranchiseTier };
 
-/** How prominent a franchise tier should read - drives colour on the legacy card. */
+/** Colour for each franchise tier on the legacy card. */
 export const FRANCHISE_TIER_TONE: Record<FranchiseTier, string> = {
   none: 'text-ink-dim',
   known: 'text-ink-dim',
@@ -40,7 +40,7 @@ export function archetypeLabel(id: ArchetypeId): string {
 
 const EURO_CLUB_NAMES = new Map(EURO_CLUBS.map((c) => [c.id, c.name]));
 
-/** NBA team label, or the EuroLeague club name for an overseas club id. */
+/** NBA team name, or the club name for an overseas club. */
 export function teamName(id: string): string {
   return EURO_CLUB_NAMES.get(id) ?? teamLabel(id);
 }
@@ -70,13 +70,13 @@ export function pctText(pct: number): string {
   return `${pct % 1 === 0 ? pct.toFixed(0) : pct.toFixed(1)}%`;
 }
 
-/** `$18M`, `$1.5M`, `$1.2B` - the game's money unit is $M. */
+/** Formats millions, like $18M or $1.2B. */
 export function moneyM(m: number): string {
   if (m >= 1000) return `$${(m / 1000).toFixed(m % 1000 === 0 ? 0 : 1)}B`;
   return `$${m % 1 === 0 ? m.toFixed(0) : m.toFixed(1)}M`;
 }
 
-/** Human name for a perk id (`shooting_trainer` → "Shooting trainer"). */
+/** Readable name for a perk id. */
 export function perkLabel(id: string): string {
   return perkExists(id) ? getPerk(id).name : id;
 }
@@ -169,7 +169,7 @@ export const AWARD_LABELS: Record<AwardId, string> = {
   euro_domestic_title: 'Domestic League Title',
 };
 
-/** Big-ticket awards, in the order a trophy case should show them. */
+/** The order to show awards in the trophy case. */
 export const TROPHY_ORDER: AwardId[] = [
   'mvp',
   'finals_mvp',

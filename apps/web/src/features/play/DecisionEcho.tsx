@@ -9,14 +9,7 @@ export interface DecisionEchoData {
   effects: EffectChip[];
 }
 
-/**
- * A one-line recap of the call the player just made, threaded through every
- * decision kind (prologue, college, season, farewell, …). Sits above the
- * keyed node wrapper in PlayScreen so it survives the remount and can
- * re-trigger its own fade via `echoSeq` - the throughline from "you picked
- * this" to "here's what moved" that the rest of the screen only shows once a
- * season rolls over.
- */
+/** A one-line recap of the choice the player just made. */
 export function DecisionEcho({ echo, echoSeq }: { echo: DecisionEchoData; echoSeq: number }) {
   const t = useT();
   const chips = mergeDefenseChips(echo.effects);

@@ -2,7 +2,7 @@ import { loadConfig } from './config.js';
 import { ensureTable } from './db/ensure-table.js';
 import { buildServer } from './server.js';
 
-/** Local / container entrypoint. On AWS the Lambda handler in `lambda.ts` is used instead. */
+/** Local entrypoint. AWS uses lambda.ts instead. */
 async function main(): Promise<void> {
   const config = loadConfig();
   await ensureTable(config.dynamo);

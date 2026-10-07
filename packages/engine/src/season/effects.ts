@@ -1,37 +1,33 @@
 import type { AwardAffinity, OptionStance, RatingKey, Ratings, Role } from '../types.js';
 
-/**
- * The knobs an offseason decision or an in-season event turns for one season.
- * Everything is optional and additive; the season pipeline reads them in
- * `growth.ts`, `season-sim.ts`, `awards.ts`, and `simulate.ts`.
- */
+/** Everything a decision or event can change for one season. All fields are optional. */
 export interface SeasonEffect {
-  /** Flat per-rating growth added on top of the age-curve growth this season. */
+  /** Extra growth per rating this season. */
   growth?: Partial<Record<RatingKey, number>>;
-  /** Immediate rating deltas applied before growth (injuries, breakouts). */
+  /** Rating changes applied before growth. */
   ratings?: Partial<Ratings>;
   athleticism?: number;
   durability?: number;
   hype?: number;
-  /** Delta to team chemistry (0..100). Negative from drama, positive from bonding. */
+  /** Change in team chemistry. */
   chemistry?: number;
-  /** A flat overall drop - subtracted from every rating so the OVR falls by ~this. */
+  /** Overall drop, taken from every rating. */
   overallHit?: number;
-  /** Nudges playing-time role up/down (in role ranks). */
+  /** Moves the player's role up or down. */
   roleBias?: number;
-  /** Adds to minutes-per-game target. */
+  /** Adds to minutes per game. */
   mpgBias?: number;
-  /** Scales personal box-score impact (usage / shot volume). */
+  /** Scales the player's stats. */
   impactMult?: number;
-  /** Scales the team's playoff ceiling this season. */
+  /** Scales the team's playoff chances. */
   teamMult?: number;
-  /** Multipliers layered onto the archetype's award affinity. */
+  /** Award odds multipliers. */
   awardMult?: Partial<AwardAffinity>;
   /** Games missed to injury this season. */
   injuredGames?: number;
-  /** Force a mid-season team change (event only). */
+  /** Forces a mid-season trade. */
   forceTrade?: boolean;
-  /** Mark the player retirement-eligible / career over (event only). */
+  /** Lets the player retire. */
   retirementEligible?: boolean;
   careerEnding?: boolean;
 }
@@ -72,7 +68,7 @@ export function mergeEffects(a: SeasonEffect, b: SeasonEffect): SeasonEffect {
 
 export const EMPTY_EFFECT: SeasonEffect = {};
 
-/** An option's strategy knobs → a one-season `SeasonEffect` (growth bias is handled elsewhere). */
+/** Turns an option's play style into a season effect. */
 export function stanceToEffect(stance: OptionStance | undefined): SeasonEffect {
   if (!stance) return {};
   return {

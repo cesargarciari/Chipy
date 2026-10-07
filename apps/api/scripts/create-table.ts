@@ -1,8 +1,4 @@
-/**
- * Create the single `chipy` table in DynamoDB Local. Idempotent — safe to run
- * on every `docker compose up` or before the test suite. The real table is
- * created by Terraform in Milestone 2 with this exact key schema.
- */
+/** Creates the chipy table in DynamoDB Local. Safe to run more than once. */
 import {
   CreateTableCommand,
   DescribeTableCommand,

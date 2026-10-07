@@ -2,13 +2,7 @@ import { int, type Rng } from '../rng.js';
 import type { GameOption, PrologueNode } from '../types.js';
 import { balancedEffect, PLAYMAKING, rollEdge, SCORING, SLASHING } from './prologue-roll.js';
 
-/**
- * The recruiting choice only picks a *tier*. `college1` then offers real
- * programs from that tier and a freshman year is simulated - so the real
- * draft-stock swing comes from the school + how you play, not from here. The
- * effects on these options are light, equal-value tier flavour, rerolled per
- * career.
- */
+/** Recruiting only picks a school tier. The actual school comes in college1. */
 export const RECRUITING_TEMPLATE = {
   id: 'recruiting',
   stage: 'Recruiting',
@@ -36,12 +30,7 @@ export const RECRUITING_TEMPLATE = {
   ],
 } as const;
 
-/**
- * Three tier options of equal card value (~5 shown attribute points plus a
- * similar draft-stock bump), with one getting a small random edge each career.
- * The pool and athleticism/durability share are rerolled per playthrough so no
- * tier is a permanent best pick.
- */
+/** Builds the recruiting choice. All three tiers are worth about the same, with a small random bonus on one. */
 export function buildRecruitingNode(rng: Rng): PrologueNode {
   const TARGET = 5;
   const edge = rollEdge(rng, 3);

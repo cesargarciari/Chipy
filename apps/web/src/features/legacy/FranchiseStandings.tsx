@@ -5,10 +5,7 @@ import { countryName, teamName } from '../../lib/format.js';
 type Standing = CareerSummaryDto['franchises'][number];
 type National = CareerSummaryDto['nationalTeam'];
 
-/**
- * "Idolatry" - how beloved you are, club by club and with the national team.
- * Each is a progress bar toward legend.
- */
+/** How much each team and your country love you. */
 export function FranchiseStandings({
   franchises,
   nationalTeam,

@@ -5,7 +5,7 @@ import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
-  // Read the shared repo-root .env (VITE_API_URL lives there).
+  // Use the .env at the repo root.
   envDir: fileURLToPath(new URL('../../', import.meta.url)),
   server: { port: 5173, strictPort: true },
   preview: { port: 5173, strictPort: true },

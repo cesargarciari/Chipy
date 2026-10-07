@@ -1,14 +1,6 @@
 import type { Market, TeamRef } from '../types.js';
 
-/**
- * The 30 NBA franchises. Only static reference data lives here (city, name,
- * conference, and a coarse media-market tier used for hype and free-agency
- * weighting). Per-season team strength is rolled by the simulation, not stored
- * here, so the same team can be a contender in one playthrough and a lottery
- * club in another.
- *
- * Trademarks belong to their owners; this is a fan project (see README).
- */
+/** The 30 NBA teams. Team strength is rolled each game, not stored here. Trademarks belong to their owners, this is a fan project. */
 const T = (
   id: string,
   city: string,

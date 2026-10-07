@@ -10,11 +10,7 @@ import type {
 import type { Rng } from '../rng.js';
 import type { SeasonEffect } from './effects.js';
 
-/**
- * "Lead the league" check: only one player wins these, so the bar is a high
- * floor plus a low base probability that rises the further past the floor the
- * player is.
- */
+/** Checks for awards only one player can win, like scoring title. */
 function leagueBest(
   rng: Rng,
   value: number,
@@ -50,11 +46,11 @@ export interface AwardArgs {
   teamResult: TeamResult;
   archetype: ArchetypeDef;
   effect: SeasonEffect;
-  /** The player's listed position - bigs and wings win DPOY far more often. */
+  /** Bigs and wings win DPOY more often. */
   position: Position;
-  /** Merged defensive rating (mean of the two D's), 25..99. */
+  /** Average of the two defense ratings. */
   defenseRating: number;
-  /** League pecking order this season - superstars clear the MVP bar more often. */
+  /** Superstars win MVP more often. */
   status: StatusTier;
 }
 
@@ -96,8 +92,7 @@ export function resolveAwards(args: AwardArgs): AwardId[] {
     else if (impact >= 20.5 + rng() * 2) out.push('all_nba_3');
   }
 
-  // All-Defense + DPOY. A big or a wing is the prototype - guards win it rarely -
-  // and a superstar-level defender with elite tools (85+) is the front-runner.
+  // All-Defense and DPOY. Bigs and wings are favoured, guards rarely win it.
   const dpoyPosBonus =
     position === 'C'
       ? 2
@@ -128,8 +123,7 @@ export function resolveAwards(args: AwardArgs): AwardId[] {
   if (leagueBest(rng, stats.spg, 1.9, 0.5, 0.12)) out.push('steals_title');
   if (leagueBest(rng, stats.bpg, 2.3, 0.7, 0.12)) out.push('blocks_title');
 
-  // MVP - the rarest, but a bona fide superstar clears the bar a good deal more
-  // often than a one-year All-Star.
+  // MVP. Superstars have a much better shot.
   const mvpScore =
     impact *
     (0.85 + (TEAM_SUCCESS[teamResult] ?? 0)) *
@@ -167,11 +161,7 @@ export function resolveAwards(args: AwardArgs): AwardId[] {
     if (impact >= 19 + rng() * 3 && rng() < 0.6) out.push('finals_mvp');
   }
 
-  // Keep the honours coherent. The All-NBA / All-Defense teams are the peer
-  // read on a season, so they can't contradict the individual trophies:
-  //  - an MVP is First Team All-NBA, full stop
-  //  - a superstar-tier All-Star almost always lands on one of the top two teams
-  //  - a DPOY is First Team All-Defense
+  // Keep awards consistent. An MVP is always First Team All-NBA and a DPOY is always First Team All-Defense.
   const setAllNba = (team: 'all_nba_1' | 'all_nba_2') => {
     for (const t of ['all_nba_1', 'all_nba_2', 'all_nba_3'] as const) {
       const i = out.indexOf(t);
@@ -182,8 +172,7 @@ export function resolveAwards(args: AwardArgs): AwardId[] {
   if (out.includes('mvp')) {
     setAllNba('all_nba_1');
   } else if (elite && isAllStar && !out.includes('all_nba_1') && !out.includes('all_nba_2')) {
-    // A generational season is nearly always First Team; a plain superstar is
-    // guaranteed no worse than Second (the merit path above still earns 1st).
+    // Superstars make at least Second Team All-NBA.
     setAllNba(status === 'generational' && rng() < 0.7 ? 'all_nba_1' : 'all_nba_2');
   }
   if (out.includes('dpoy') && !out.includes('all_defense_1')) {

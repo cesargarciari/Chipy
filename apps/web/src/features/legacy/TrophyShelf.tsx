@@ -3,10 +3,7 @@ import { Trophy } from 'lucide-react';
 import { awardArt } from '../../lib/art.js';
 import { AWARD_LABELS, TROPHY_ORDER } from '../../lib/format.js';
 
-/**
- * Awards that ship with artwork in `src/assets/awards/`. These go on the shelf
- * as stacked trophies; everything else is listed as text below it.
- */
+/** Awards with artwork. Others are listed as text. */
 const SHELF_AWARDS: AwardId[] = [
   'mvp',
   'finals_mvp',
@@ -22,7 +19,7 @@ const SHELF_AWARDS: AwardId[] = [
   'oly_bronze',
 ];
 
-/** Short caption under each stack - the label alone would be too wide. */
+/** Short label under each trophy stack. */
 const SHORT: Partial<Record<AwardId, string>> = {
   mvp: 'MVP',
   finals_mvp: 'Finals MVP',
@@ -38,20 +35,14 @@ const SHORT: Partial<Record<AwardId, string>> = {
   oly_bronze: 'Olympic Bronze',
 };
 
-/** How many trophies to actually draw in a stack before it just gets silly. The
- * `xN` caption carries the exact count, so the stack only has to read as "a lot". */
+/** Max trophies drawn per stack. The count label shows the real number. */
 const MAX_IN_STACK = 4;
 
 interface TrophyShelfProps {
   awards: Partial<Record<AwardId, number>>;
 }
 
-/**
- * A horizontal trophy case. Each award the player won is a little stack of that
- * many trophies - overlapping and clumped at rest, easing apart when you hover
- * the shelf so you can count them. Only image-backed awards go on the shelf;
- * the rest are a plain text list underneath.
- */
+/** Trophy case. Each award shows as a stack that spreads out on hover. */
 export function TrophyShelf({ awards }: TrophyShelfProps) {
   const shelf = SHELF_AWARDS.filter((id) => (awards[id] ?? 0) > 0 && awardArt(id));
   const rest = TROPHY_ORDER.filter((id) => (awards[id] ?? 0) > 0 && !shelf.includes(id as AwardId));

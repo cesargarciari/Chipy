@@ -7,8 +7,7 @@ const RADIUS = 84;
 const RING_STEPS = [0.25, 0.5, 0.75, 1];
 const AXES = DISPLAY_AXES;
 
-// Explicit hex, not CSS vars / utility classes - `html-to-image` doesn't resolve
-// custom properties inside the exported SVG, so the labels came out black.
+// Hex colors because html-to-image can't read CSS variables.
 const GRID = '#2a2a31'; // court-700
 const LABEL = '#a1a1ad'; // ink-dim
 const ACCENT = '#f97316'; // amber
@@ -26,7 +25,7 @@ function polygon(magnitudes: number[]): string {
   return magnitudes.map((m, i) => point(i, m).join(',')).join(' ');
 }
 
-/** Radar of the player's ratings (interior + perimeter D merged), 25–99 → 0–1. */
+/** Radar chart of the player's ratings. */
 export function RatingRadar({ ratings }: { ratings: Ratings }) {
   const magnitudes = AXES.map((a) =>
     Math.max(0, Math.min(1, (displayRatingValue(ratings, a.key) - 25) / 74)),

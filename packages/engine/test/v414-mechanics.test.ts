@@ -14,7 +14,7 @@ describe('defenseRatingOf', () => {
     expect(defenseRatingOf(96, 70)).toBeGreaterThanOrEqual(86);
     // Two equal middling D's land right between them.
     expect(defenseRatingOf(75, 75)).toBe(75);
-    // A genuine two-way stopper climbs into the 90s (the old mean capped ~85).
+    // An elite two-way defender reaches the 90s.
     expect(defenseRatingOf(95, 92)).toBeGreaterThanOrEqual(90);
     // Never exceeds the 99 cap.
     expect(defenseRatingOf(99, 99)).toBe(99);
@@ -34,7 +34,7 @@ describe('a superstar is not shopped out from under his feet', () => {
     };
     expect(tradeChance({ ...base, status: 'superstar' })).toBeLessThanOrEqual(0.04);
     expect(tradeChance({ ...base, status: 'generational' })).toBeLessThanOrEqual(0.02);
-    // A mere star still gets moved by a toxic room.
+    // A star can still be traded from a bad locker room.
     expect(tradeChance({ ...base, status: 'star' })).toBeGreaterThan(0.2);
   });
 });
@@ -58,7 +58,7 @@ describe('superstar-only exemptions', () => {
         profile((['PG', 'SG', 'SF', 'PF', 'C'] as const)[i % 5]!, 'three_level_wing'),
       );
       for (const season of s.seasons) {
-        // A player who already has an MVP or first-team All-NBA is unambiguously "the guy".
+        // A player with an MVP or First Team All-NBA is clearly the top guy.
         const priorSeasons = s.seasons.filter((x) => x.index < season.index);
         const wasElite = priorSeasons.some(
           (x) => x.awards.includes('mvp') || x.awards.includes('all_nba_1'),
@@ -95,7 +95,7 @@ describe('maxed attributes drop off option cards', () => {
       if (p.kind === 'season' && p.season!.decision.kind === 'scenario') {
         for (const o of p.season!.decision.options) {
           for (const chip of o.effects) {
-            // No "+0" rating chips at all - a capped stat is simply absent.
+            // No +0 chips, capped stats are left out.
             if (chip.key !== 'money' && chip.key !== 'hype' && chip.key !== 'draftStock') {
               expect(chip.delta === 0).toBe(false);
               checked += 1;

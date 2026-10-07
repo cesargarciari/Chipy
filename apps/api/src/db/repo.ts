@@ -29,7 +29,7 @@ export class CareerConflictError extends Error {
   }
 }
 
-/** Just the slice of a pino/Fastify logger this module needs. */
+/** The logger methods this module uses. */
 export interface RepoLogger {
   warn(obj: unknown, msg?: string): void;
 }
@@ -47,7 +47,7 @@ export class CareerRepo {
     private readonly log: RepoLogger,
   ) {}
 
-  /** Cheap round-trip used by the readiness probe. */
+  /** Quick check used by the readiness probe. */
   async ping(): Promise<boolean> {
     try {
       await this.doc.send(
@@ -109,12 +109,7 @@ export class CareerRepo {
     return (res.Item as CareerItem | undefined) ?? null;
   }
 
-  /**
-   * Best-effort: the career is already persisted by the time this runs, and a
-   * social-proof counter that lags by one is not worth failing a request over.
-   * Only "comparable" choices are counted — team offers vary per player, so
-   * `describeChoice` returns null and they're skipped.
-   */
+  /** Counts each choice for the "N% also chose" stat. Failures are only logged since the career is already saved. */
   async bumpChoiceCounts(choices: ChoiceSelection[]): Promise<void> {
     const comparable = choices.filter((c) => describeChoice(c.nodeId, c.choiceId) !== null);
     const results = await Promise.allSettled(
@@ -146,7 +141,7 @@ export class CareerRepo {
     }
   }
 
-  /** Turn the raw counters into "N% of players also chose X" for each pick. */
+  /** Turns the counts into percentages for each pick. */
   async getChoiceStats(choices: ChoiceSelection[]): Promise<ChoiceStat[]> {
     const comparable = choices.filter((c) => describeChoice(c.nodeId, c.choiceId) !== null);
     const nodeIds = [...new Set(comparable.map((c) => c.nodeId))];

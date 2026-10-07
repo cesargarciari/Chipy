@@ -24,7 +24,7 @@ env:
   TF_VAR_alert_email: ${{ vars.ALERT_EMAIL }}
 
 jobs:
-  # PRs: format + validate only, no credentials, no plan against real state.
+  # PRs: format and validate only, no credentials.
   validate:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
@@ -40,7 +40,7 @@ jobs:
       - run: terraform -chdir=${{ env.TF_DIR }}/bootstrap init -backend=false
       - run: terraform -chdir=${{ env.TF_DIR }}/bootstrap validate
 
-  # main: build, apply, ship the SPA.
+  # main: build, apply and ship the site.
   deploy:
     if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
@@ -53,7 +53,7 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
 
-      # Lambda bundle (dist-lambda/index.mjs) + SPA build (apps/web/dist).
+      # Build the Lambda bundle and the web app.
       - run: pnpm --filter "@chipy/api..." build
       - run: pnpm --filter @chipy/api build:lambda
       - run: pnpm --filter "@chipy/web..." build
@@ -82,7 +82,7 @@ jobs:
         run: |
           BUCKET=$(terraform -chdir=${{ env.TF_DIR }} output -raw site_bucket)
           DIST=$(terraform -chdir=${{ env.TF_DIR }} output -raw cloudfront_distribution_id)
-          # Hashed assets: cache forever. Everything else (index.html): no-cache.
+          # Hashed assets are cached forever, index.html is never cached.
           aws s3 sync apps/web/dist "s3://$BUCKET" --delete \
             --cache-control "public,max-age=31536000,immutable" \
             --exclude "index.html" --exclude "*.map"

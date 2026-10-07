@@ -3,12 +3,7 @@ import { RATING_KEYS, type Ratings } from '../types.js';
 import { clamp, type Rng } from '../rng.js';
 import type { SeasonEffect } from './effects.js';
 
-/**
- * Per-rating skill change available at a given age, then scaled by the
- * archetype's growth weight for that rating. A long, decelerating climb - every
- * year adds a little into the early 30s - then a hard flip to decline at 34 as
- * age catches up. A key rating (weight ~1.4) gains ~12 points across the rise.
- */
+/** How much a rating can grow at a given age. Slow gains into the early 30s, then decline from 34. */
 export function ageCurveDelta(age: number): number {
   const table: Record<number, number> = {
     19: 1.75,
@@ -18,7 +13,7 @@ export function ageCurveDelta(age: number): number {
     23: 0.82,
     24: 0.6,
     25: 0.42,
-    // The "prime plateau" - near-maintenance, a point or two of polish a year.
+    // Prime years, small gains.
     26: 0.2,
     27: 0.16,
     28: 0.13,
@@ -27,7 +22,7 @@ export function ageCurveDelta(age: number): number {
     31: 0.06,
     32: 0.04,
     33: 0.02,
-    // Age catches up.
+    // Decline starts.
     34: -0.7,
     35: -1.6,
     36: -2.6,
@@ -38,13 +33,13 @@ export function ageCurveDelta(age: number): number {
   return table[age] ?? 0;
 }
 
-/** Baseline durability lost to age each season - nothing before 31, steepening after. */
+/** Durability lost to age each season, starting at 31. */
 export function durabilityAgeDelta(age: number, rng: Rng): number {
   if (age <= 30) return 0;
   return -(age - 30) * 0.7 * (0.6 + rng() * 0.7);
 }
 
-/** How hard each rating falls in decline (athleticism-linked skills drop most). */
+/** How fast each rating declines. Athletic skills drop fastest. */
 const DECLINE_WEIGHT: Record<string, number> = {
   finishing: 1.3,
   perimeterDefense: 1.2,
@@ -53,7 +48,7 @@ const DECLINE_WEIGHT: Record<string, number> = {
   midRange: 0.6,
   threePoint: 0.5,
   playmaking: 0.5,
-  // Fades slower than the physical skills, but it still fades.
+  // Declines slower than physical skills.
   basketballIQ: 0.6,
 };
 
@@ -64,9 +59,9 @@ interface GrowthArgs {
   talent: number;
   archetype: ArchetypeDef;
   effect: SeasonEffect;
-  /** Sum of active lingering growth biases from past decisions, this season. */
+  /** Growth boosts from past decisions. */
   growthBias?: Partial<Record<RatingKey, number>>;
-  /** 0..1 - share of the season actually played. A year lost to injury barely develops. */
+  /** 0 to 1. How much of the season was played. */
   availability?: number;
 }
 
@@ -86,17 +81,14 @@ export function growSeason(
   const base = ageCurveDelta(age);
   const next = { ...ratings };
 
-  // You develop by playing - a season mostly lost to injury adds almost nothing,
-  // so a bad injury's flat OVR hit isn't quietly papered over by growth.
+  // You grow by playing, so an injured season adds little.
   const play = clamp(availability, 0.12, 1);
 
-  // Growth splits into a small component everyone gets and a large one only
-  // genuine lottery-caliber talent gets - so role players plateau in the high
-  // 70s / low 80s while stars climb into the 90s.
+  // Only high-talent players get the big growth, so role players top out around 80.
   const talentEdge = Math.max(0, talent - 0.95);
 
   for (const key of RATING_KEYS) {
-    // Lingering decision biases stack, but cap their pull so it can't run away.
+    // Cap how much past decisions can boost growth.
     const decision =
       (effect.growth?.[key] ?? 0) + Math.min(1.6, Math.max(-1.6, growthBias?.[key] ?? 0));
     const immediate = effect.ratings?.[key] ?? 0;

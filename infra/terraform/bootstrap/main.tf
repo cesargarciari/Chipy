@@ -1,10 +1,10 @@
-# Run once, with an admin/bootstrap identity, BEFORE the root module:
+# Run once with an admin account, before the root module:
 #
 #   cd infra/terraform/bootstrap
 #   terraform init && terraform apply -var 'github_repo=<owner>/<repo>'
 #   terraform output          # copy into ../backend.hcl and GitHub secrets
 #
-# Idempotent - safe to re-run. Uses local state (it is what creates remote state).
+# Safe to re-run. Uses local state since it creates the remote state.
 
 provider "aws" {
   region = var.aws_region
@@ -15,9 +15,7 @@ provider "aws" {
 
 data "aws_caller_identity" "current" {}
 
-# ---------------------------------------------------------------------------
-# Remote state: S3 bucket (versioned, encrypted, private) + a lock table
-# ---------------------------------------------------------------------------
+# Remote state: S3 bucket and lock table
 resource "aws_s3_bucket" "tfstate" {
   bucket = "chipy-tfstate-${data.aws_caller_identity.current.account_id}"
 }
@@ -68,12 +66,8 @@ resource "aws_dynamodb_table" "tflock" {
   }
 }
 
-# ---------------------------------------------------------------------------
-# GitHub Actions OIDC: a role CI can assume with no stored keys
-# ---------------------------------------------------------------------------
-# AWS no longer verifies this thumbprint for token.actions.githubusercontent.com
-# (it uses its own trust store), but the resource still requires a value - read
-# the live one rather than pinning a string that rotates.
+# GitHub Actions OIDC role, so CI needs no stored keys.
+# AWS ignores this thumbprint now but still requires one, so read the live value.
 data "tls_certificate" "github" {
   url = "https://token.actions.githubusercontent.com"
 }
@@ -97,11 +91,7 @@ data "aws_iam_policy_document" "github_assume" {
       values   = ["sts.amazonaws.com"]
     }
     condition {
-      # GitHub's `sub` claim can embed immutable owner/repo IDs
-      # (repo:name@owner_id/name@repo_id:...) instead of plain names, depending
-      # on account settings - so pin on the stable `repository` claim (plain
-      # "owner/repo", unaffected either way) for identity, and only use `sub`
-      # to restrict *which ref/event*, wildcarding the owner/repo portion.
+      # Match on the repository claim, and use sub only to limit which branch or event.
       test     = "StringEquals"
       variable = "token.actions.githubusercontent.com:repository"
       values   = [var.github_repo]

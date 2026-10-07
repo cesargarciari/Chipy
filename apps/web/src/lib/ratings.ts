@@ -1,9 +1,6 @@
 import { defenseRatingOf, type EffectChip, type Ratings } from '@chipy/engine';
 
-/**
- * The engine keeps eight rated skills, but the UI collapses interior + perimeter
- * defense into a single **DEFENSE** number for a cleaner card.
- */
+/** The UI shows both defense ratings as one DEFENSE number. */
 export interface DisplayAxis {
   key: string;
   label: string;
@@ -20,11 +17,7 @@ export const DISPLAY_AXES: DisplayAxis[] = [
   { key: 'basketballIQ', label: 'BASKETBALL IQ', short: 'IQ' },
 ];
 
-/**
- * The value to show for a display axis. DEFENSE folds the two D ratings, weighted
- * toward the stronger one (engine `defenseRatingOf`), so a one-way stopper still
- * reads elite and a true two-way defender can climb past 85 into the 90s.
- */
+/** The value to show for a stat. DEFENSE uses the engine's combined defense rating. */
 export function displayRatingValue(ratings: Ratings, key: string): number {
   if (key === 'defense') {
     return defenseRatingOf(ratings.interiorDefense, ratings.perimeterDefense);
@@ -32,10 +25,7 @@ export function displayRatingValue(ratings: Ratings, key: string): number {
   return ratings[key as keyof Ratings];
 }
 
-/**
- * Fold `perimeterDefense` + `interiorDefense` effect chips into one `DEFENSE`
- * chip (deltas summed), leaving every other chip untouched and in order.
- */
+/** Combines the two defense chips into one DEFENSE chip. */
 export function mergeDefenseChips(chips: EffectChip[]): EffectChip[] {
   const out: EffectChip[] = [];
   let defDelta = 0;
@@ -64,7 +54,7 @@ export function mergeDefenseChips(chips: EffectChip[]): EffectChip[] {
   return out;
 }
 
-/** Map an effect-chip key to the display-axis key it lights on the strip. */
+/** Maps a chip key to its stat tile. */
 export function toDisplayKey(key: string): string {
   return key === 'perimeterDefense' || key === 'interiorDefense' ? 'defense' : key;
 }

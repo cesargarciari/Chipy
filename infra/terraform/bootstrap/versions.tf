@@ -12,7 +12,5 @@ terraform {
     }
   }
 
-  # Bootstrap uses LOCAL state on purpose - it creates the remote backend that
-  # everything else uses. Commit bootstrap/terraform.tfstate is NOT wanted; keep
-  # it on the machine that ran it (or re-run it, it's idempotent).
+  # Local state on purpose since this creates the remote backend. Don't commit the state file.
 }

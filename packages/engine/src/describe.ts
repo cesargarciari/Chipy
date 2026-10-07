@@ -4,12 +4,7 @@ import { CHEMISTRY_SCENARIOS } from './season/chemistry.js';
 import { findMidseasonOption } from './season/midseason.js';
 import { findScenarioOption } from './season/scenarios/index.js';
 
-/**
- * Human label for a stored `(nodeId, choiceId)` - used by the API to render
- * "N% of players also chose X". Returns `null` for choices that are not
- * meaningfully comparable across players (team / club offers, school picks, and
- * the declare/return/transfer decisions, which are per-player).
- */
+/** Readable label for a saved choice, for the "N% also chose" stat. Returns null for choices that differ per player. */
 export function describeChoice(nodeId: string, choiceId: string): string | null {
   if (nodeId === 'highschool' || nodeId === 'recruiting') {
     return prologueOptionLabel(nodeId, choiceId);

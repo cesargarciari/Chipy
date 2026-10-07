@@ -23,7 +23,7 @@ import { TrophyShelf } from './TrophyShelf.js';
 
 interface LegacyCardProps {
   summary: CareerSummaryDto;
-  /** Kept for call-site compatibility; the "also chose" panel was removed. */
+  /** No longer used, kept so callers don't break. */
   choiceStats?: ChoiceStat[];
   shareUrl?: string;
   saving?: boolean;

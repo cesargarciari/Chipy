@@ -12,7 +12,7 @@ import type { AwardId, AwardTally, CareerState, PlayerProfile } from './types.js
 
 export const START_AGE = 19;
 
-/** Build the starting career state from the profile and the seeded RNG. */
+/** Builds the starting career state. */
 export function createInitialState(rng: Rng, profile: PlayerProfile): CareerState {
   const ratings = rollStartingRatings(rng, profile.archetype);
   const overall = overallFor(profile.position, ratings);
@@ -47,7 +47,7 @@ export function createInitialState(rng: Rng, profile: PlayerProfile): CareerStat
     onFarewellTour: false,
     ringWindowLeft: 0,
     justTraded: false,
-    chemistry: 40 + Math.round(rng() * 30), // 40..70 - earned over a career
+    chemistry: 40 + Math.round(rng() * 30), // 40 to 70
     pendingInjury: null,
     peakOverall: overall,
     salary: 0,

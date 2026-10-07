@@ -1,12 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 
-/**
- * Large statement text whose words brighten one at a time as the section
- * crosses into view, muted to full ink in reading order. A single
- * IntersectionObserver on the block drives it; per-word stagger comes from
- * a CSS transition-delay, so there is no scroll listener and no per-word
- * observer. Fires once - it never re-mutes on scroll away.
- */
+/** Big text where each word lights up in order when it scrolls into view. Runs once. */
 export function TaglineReveal({ lines }: { lines: string[] }) {
   const ref = useRef<HTMLParagraphElement>(null);
   const [active, setActive] = useState(false);

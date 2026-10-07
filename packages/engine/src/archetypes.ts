@@ -1,17 +1,8 @@
 import { ARCHETYPE_IDS, type ArchetypeDef, type ArchetypeId, type Position } from './types.js';
 
-/**
- * The 30 position-locked archetypes. `ratingBias` is added to a flat 62
- * baseline; `growthWeights` scale the yearly age-curve delta per rating (a key
- * left out defaults to 0.78 in `growSeason`, so specialists stay specialists);
- * `athBias` nudges the starting athleticism roll so explosive builds start
- * springier. The `comps` name real players so a pick reads as a real style, and
- * the biases actually follow it - choose the Curry build and you start (and
- * grow) as a shooter; choose the Ja build and you start bouncy and finish over
- * the rim.
- */
+/** The 30 archetypes, 6 per position. Each one is modeled on real players and starts and grows like them. */
 const DEFS: Record<ArchetypeId, ArchetypeDef> = {
-  // ---- PG -----------------------------------------------------------------
+  // PG
   floor_general: {
     id: 'floor_general',
     label: 'Floor General',
@@ -130,7 +121,7 @@ const DEFS: Record<ArchetypeId, ArchetypeDef> = {
     athBias: 9,
   },
 
-  // ---- SG -----------------------------------------------------------------
+  // SG
   movement_shooter: {
     id: 'movement_shooter',
     label: 'Movement Shooter',
@@ -242,7 +233,7 @@ const DEFS: Record<ArchetypeId, ArchetypeDef> = {
     awardAffinity: { scoring: 1.5, playmaking: 0.9, defense: 0.3, rebounding: 0.2 },
   },
 
-  // ---- SF -----------------------------------------------------------------
+  // SF
   point_forward: {
     id: 'point_forward',
     label: 'Point Forward',
@@ -383,7 +374,7 @@ const DEFS: Record<ArchetypeId, ArchetypeDef> = {
     awardAffinity: { scoring: 0.4, playmaking: 0.3, defense: 1.6, rebounding: 0.6 },
   },
 
-  // ---- PF -----------------------------------------------------------------
+  // PF
   stretch_four: {
     id: 'stretch_four',
     label: 'Stretch Four',
@@ -499,7 +490,7 @@ const DEFS: Record<ArchetypeId, ArchetypeDef> = {
     athBias: 8,
   },
 
-  // ---- C ----------------------------------------------------------------
+  // C
   rim_protector: {
     id: 'rim_protector',
     label: 'Rim Protector',
@@ -644,7 +635,7 @@ export function getArchetype(id: ArchetypeId): ArchetypeDef {
   return DEFS[id];
 }
 
-/** The archetypes selectable at a given position, in canonical order. */
+/** The archetypes for a position. */
 export function archetypesFor(position: Position): ArchetypeDef[] {
   return ARCHETYPE_DEFS.filter((a) => a.position === position);
 }

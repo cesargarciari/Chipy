@@ -18,7 +18,7 @@ export function Home() {
 
   return (
     <div className="relative isolate flex flex-col">
-      {/* Arena light: one warm pool behind the headline, never a spotlight in the eye. */}
+      {/* Warm glow behind the headline. */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-x-0 -top-20 -z-10 mx-auto h-105 w-full max-w-180"
@@ -28,8 +28,7 @@ export function Home() {
         }}
       />
 
-      {/* min-h roughly discounts the AppShell header + footer so the hero sits
-          centered in the first viewport on tall screens and flows normally on short ones. */}
+      {/* Full screen height minus the header and footer, so the hero is centered. */}
       <section className="flex min-h-[calc(100dvh-9.5rem)] flex-col items-center justify-center gap-10 py-12 sm:gap-14">
         <div className="decision-enter flex flex-col items-center gap-5 text-center">
           <h1 className="max-w-2xl text-pretty text-4xl italic font-light tracking-tight text-ink sm:text-6xl">

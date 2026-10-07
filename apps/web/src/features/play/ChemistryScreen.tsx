@@ -6,12 +6,7 @@ import { ScenarioFrame } from './ScenarioFrame.js';
 
 type Chemistry = NonNullable<PendingDecision['chemistry']>;
 
-/**
- * A locker-room question. It rolls on its own, so it can land in the same
- * season as a fame / mid-season one. The sociable pick lifts chemistry but
- * costs a couple of overall points; the professional pick keeps you sharp and
- * a little distant.
- */
+/** A locker-room question that can show up in the same season as other events. */
 export function ChemistryScreen({
   chemistry,
   onChoose,

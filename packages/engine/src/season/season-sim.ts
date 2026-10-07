@@ -3,28 +3,20 @@ import { getTeam, TEAMS } from '../data/teams.js';
 import type { Position, Ratings, Role, SeasonStatLine, TeamResult, TeamWindow } from '../types.js';
 import type { SeasonEffect } from './effects.js';
 
-/** A stable PRNG derived from the career seed + arbitrary parts (does not touch the main stream). */
+/** A separate RNG built from the career seed, so it doesn't affect the main one. */
 export function derivedRng(seed: number | string, ...parts: Array<string | number>): Rng {
   return mulberry32(normalizeSeed(`${seed}::${parts.join(':')}`));
 }
 
-/**
- * The glamour franchises: free agents want to play there, ownership spends, and
- * a real player joining almost always finds talent already in the building. They
- * carry a standing edge to their strength every season.
- */
+/** Big-market teams that start each season a bit stronger. */
 export const GLAMOUR_TEAMS: ReadonlySet<string> = new Set(['LAL', 'GSW', 'NYK', 'BOS', 'MIA']);
 const GLAMOUR_EDGE = 0.06;
 
-/**
- * The perennial cellar-dwellers: small-market, badly run, rebuilding on a loop.
- * They start every season a tier down, so they live in the lottery unless the
- * player himself drags them up.
- */
+/** Struggling small-market teams that start each season a bit weaker. */
 export const BOTTOM_TEAMS: ReadonlySet<string> = new Set(['SAC', 'WAS', 'BKN']);
 const BOTTOM_EDGE = -0.11;
 
-/** 0..1 strength for a team in a given season - a fixed base tier plus a per-season wobble. */
+/** Team strength from 0 to 1 for a given season. */
 export function teamStrengthFor(
   seed: number | string,
   teamId: string,
@@ -37,17 +29,11 @@ export function teamStrengthFor(
     : BOTTOM_TEAMS.has(teamId)
       ? BOTTOM_EDGE
       : 0;
-  // Centred a touch higher so the median team is a play-in / playoff club, not
-  // a lottery one - most rosters around a real player are competitive.
+  // Centered so the average team is around the playoff line.
   return clamp(base * 0.5 + 0.33 + standing + (wobble - 0.5) * 0.44, 0.06, 0.96);
 }
 
-/**
- * Where the player's team finishes its own conference this season, 1 (best) ..
- * 15 (worst). Every conference rival's roster strength is ranked against the
- * player's team - and the player's own presence lifts his team (a superstar is
- * worth a few seeds).
- */
+/** Where the player's team finishes in its conference, 1 to 15. A star player moves the team up a few spots. */
 export function conferenceSeed(
   seed: number | string,
   teamId: string,
@@ -72,11 +58,7 @@ export function windowFromStrength(s: number): TeamWindow {
   return 'rebuild';
 }
 
-/**
- * How likely a title becomes if this player signs here: the roster's own
- * strength, lifted by what the player brings (a star drags a middling team up a
- * tier; he can't do much for one already at the top).
- */
+/** Chance of a title if the player signs here. A star helps a middling team more than a top one. */
 export function contenderOdds(teamStrength: number, playerOverall: number): number {
   const lift = clamp((playerOverall - 76) / 100, 0, 0.24);
   return clamp(teamStrength + lift * (1 - teamStrength), 0.05, 0.97);
@@ -114,9 +96,9 @@ export function roleFor(args: {
   teamStrength: number;
   isRookie: boolean;
   effect: SeasonEffect;
-  /** Last season's role - the result can't move more than one rank from it. */
+  /** Last season's role. The new role can only move one step from it. */
   previousRole?: Role;
-  /** Bypass the momentum clamp (big overall jump, or a lost season). */
+  /** Skip the one-step limit after a big jump or a lost season. */
   allowJump?: boolean;
 }): Role {
   let role = roleFromOverall(args.overall);
@@ -125,7 +107,7 @@ export function roleFor(args: {
   if (args.teamStrength <= 0.35 && args.overall >= 70) role = shiftRole(role, 1);
   role = shiftRole(role, args.effect.roleBias ?? 0);
 
-  // Role momentum: don't jump/crash more than one tier a year.
+  // Role can only move one step per year.
   if (args.previousRole && !args.allowJump && !args.isRookie) {
     const prev = roleRank(args.previousRole);
     const target = roleRank(role);
@@ -161,18 +143,18 @@ export interface SeasonSimArgs {
   age: number;
   durability: number;
   effect: SeasonEffect;
-  /** Last *played* season's line - the new line is smoothed toward it. */
+  /** Last played season's stats, used to smooth the new ones. */
   previousStats?: SeasonStatLine | null;
   previousRole?: Role;
 }
 
 export interface SeasonSimResult {
   stats: SeasonStatLine;
-  /** Games missed this season - always exactly `82 - stats.gp`. */
+  /** Always 82 minus games played. */
   gamesMissed: number;
-  /** Overall on-court value (drives MVP / All-NBA / All-Star). */
+  /** Overall value on the court. Drives MVP, All-NBA and All-Star. */
   impact: number;
-  /** Defensive value (drives DPOY / All-Defense). */
+  /** Defensive value. Drives DPOY and All-Defense. */
   defImpact: number;
 }
 
@@ -195,8 +177,7 @@ export function simulateSeason(rng: Rng, args: SeasonSimArgs): SeasonSimResult {
     };
   }
 
-  // Continuity: pull each stat toward last played season so a role change can't
-  // crater a scoring average (24 → 6). `w` is how much the fresh number counts.
+  // Blend toward last season's stats so a role change doesn't tank the numbers.
   const prev = args.previousStats;
   const roleDelta =
     args.previousRole !== undefined ? roleRank(role) - roleRank(args.previousRole) : 0;
@@ -268,14 +249,7 @@ export function simulateSeason(rng: Rng, args: SeasonSimArgs): SeasonSimResult {
   };
 }
 
-/**
- * Turn a conference seed (1..15) into how far the team runs. Seeds 11-15 are in
- * the lottery; 7-10 fight through the play-in; 1-6 are in the bracket, where
- * every round threshold scales with the seed: a 1-seed almost always makes a
- * deep run (a first-round exit is a genuine upset, ~5% not ~50%), a 6-seed
- * usually goes out early. A superstar and an open ring window lift the whole
- * curve.
- */
+/** Turns a conference seed into a playoff result. 11 to 15 miss, 7 to 10 go to the play-in, and better seeds go deeper. */
 export function simulatePlayoffs(
   rng: Rng,
   args: { seed: number; playerImpact: number; effect: SeasonEffect },
@@ -287,16 +261,13 @@ export function simulatePlayoffs(
   if (seed >= 11) return 'lottery';
 
   if (seed >= 7) {
-    // Play-in: 7-8 are favoured to punch into the bracket, 9-10 are long shots.
+    // Play-in: seeds 7 and 8 usually get through, 9 and 10 rarely do.
     const winP = clamp(0.6 - (seed - 7) * 0.15 + star * 0.06 + windowBoost, 0.06, 0.9);
     if (rng() < winP) return 'first_round';
     return rng() < 0.55 ? 'play_in' : 'lottery';
   }
 
-  // Bracket, seeds 1-6. `q` is "how good this team really is", 0..1: mostly the
-  // seed, lifted by a star carrying them and by a ring window, with a little
-  // variance. Every cumulative round threshold rises with `q`, so a strong seed
-  // rarely bows out in the first two rounds and a weak one rarely survives them.
+  // q is how good the team really is, mostly from the seed plus a boost for a star or a ring window.
   const seedStrength = (7 - seed) / 6; // 1-seed 1.0 ... 6-seed ~0.17
   const q = clamp(
     seedStrength * 0.82 + star * 0.15 + windowBoost * 1.6 + jitter(rng, 1) / 46,
@@ -304,11 +275,7 @@ export function simulatePlayoffs(
     0.99,
   );
   const run = rng();
-  // Cumulative thresholds (champ <= finals <= conf_finals <= second_round), each
-  // rising with q. The Finals-reaching odds match the old model (a 1-seed ~30%,
-  // a 3-seed ~13%); what changes is the tail: the deeper rounds now absorb the
-  // probability that used to dump every strong seed into a first-round exit, so a
-  // 1-seed goes out in round one ~4% (was ~48%) and a 3-seed ~18%.
+  // Each round's cutoff rises with q, so top seeds rarely lose early.
   if (run < clamp(q * 0.43 - 0.205, 0, 0.3)) return 'champion';
   if (run < clamp(q * 0.59 - 0.256, 0, 0.4)) return 'finals';
   if (run < clamp(q * 0.82 - 0.05, 0, 0.86)) return 'conf_finals';

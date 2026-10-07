@@ -10,8 +10,7 @@ provider "aws" {
   }
 }
 
-# CloudFront certificates must live in us-east-1. Only used when `domain_name`
-# is set (the `dns` module); harmless otherwise.
+# CloudFront certificates must be in us-east-1. Only used with a custom domain.
 provider "aws" {
   alias  = "us_east_1"
   region = "us-east-1"
@@ -28,29 +27,21 @@ provider "aws" {
 locals {
   name       = "${var.project}-${var.environment}"
   has_domain = var.domain_name != ""
-  # Two ways to get HTTPS on a custom domain:
-  #  - bring your own validated cert (acm_certificate_arn set) -> DNS can live
-  #    anywhere (Cloudflare, etc.); Terraform never touches Route 53.
-  #  - let Terraform manage the cert (and optionally the zone) in Route 53.
+  # Either bring your own certificate (DNS can be anywhere) or let Terraform manage it in Route 53.
   external_cert   = var.acm_certificate_arn != ""
   use_managed_dns = local.has_domain && !local.external_cert
   acm_certificate = local.external_cert ? var.acm_certificate_arn : (local.use_managed_dns ? module.dns[0].certificate_arn : "")
 }
 
-# ---------------------------------------------------------------------------
-# Lambda deployment package. Built beforehand:
+# Lambda package. CI builds it, or run this before a local apply:
 #   pnpm --filter "@chipy/api..." build && pnpm --filter @chipy/api build:lambda
-# CI does this automatically; do it by hand before a local `terraform apply`.
-# ---------------------------------------------------------------------------
 data "archive_file" "lambda" {
   type        = "zip"
   source_dir  = "${path.module}/../../apps/api/dist-lambda"
   output_path = "${path.module}/.build/lambda.zip"
 }
 
-# ---------------------------------------------------------------------------
 # Modules
-# ---------------------------------------------------------------------------
 module "data" {
   source = "./modules/data"
 
@@ -73,8 +64,7 @@ module "api" {
   cors_origin          = var.api_cors_origin
 }
 
-# Custom domain, Route-53-managed path: cert + DNS validation. Skipped when
-# there's no domain, or when acm_certificate_arn brings an external cert instead.
+# Certificate and DNS validation when Route 53 manages the domain.
 module "dns" {
   count  = local.use_managed_dns ? 1 : 0
   source = "./modules/dns"
@@ -98,9 +88,7 @@ module "static_site" {
   force_destroy       = var.site_bucket_force_destroy
 }
 
-# Point the domain at CloudFront - only when Terraform also owns the zone. With
-# an external cert (Cloudflare etc.) this record is added by hand instead; see
-# the `manual_dns_needed` output.
+# Point the domain at CloudFront when Terraform owns the zone. Otherwise add it by hand (see manual_dns_needed).
 resource "aws_route53_record" "alias" {
   for_each = local.use_managed_dns ? toset(["A", "AAAA"]) : toset([])
 

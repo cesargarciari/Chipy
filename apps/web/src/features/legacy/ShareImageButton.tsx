@@ -3,11 +3,7 @@ import { Check, Copy, LoaderCircle } from 'lucide-react';
 import { type RefObject, useState } from 'react';
 import { Button } from '../../components/ui/button.js';
 
-/**
- * Renders the referenced node to a PNG and writes it to the clipboard, so the
- * career card can be pasted straight into a chat or a post (the way Copero /
- * El Idolo do it
- */
+/** Copies the career card to the clipboard as an image. */
 export function ShareImageButton({ targetRef }: { targetRef: RefObject<HTMLElement | null> }) {
   const [state, setState] = useState<'idle' | 'busy' | 'done' | 'error'>('idle');
 

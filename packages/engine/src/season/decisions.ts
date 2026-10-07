@@ -1,7 +1,7 @@
 import type { ClubOffer, GameOption, OptionView, TeamOffer, TeamRef } from '../types.js';
 import { contenderLabel } from './season-sim.js';
 
-/** Offered in the free-agency node once the player is retirement-eligible. */
+/** Shown in free agency once the player can retire. */
 export const RETIRE_OPTION: GameOption = {
   id: 'retire',
   label: 'RETIRE',
@@ -17,11 +17,7 @@ export const RETIRE_VIEW: OptionView = {
   watermark: 'END',
 };
 
-/**
- * The two ways to bow out, offered once age (not injury) has decided this is
- * the end. "Farewell tour" buys one last ceremonial season; "quiet goodbye"
- * ends it now.
- */
+/** The two ways to retire when age ends the career. */
 export const FAREWELL_TOUR_VIEW: OptionView = {
   id: 'farewell_tour',
   label: 'FAREWELL TOUR',
@@ -40,8 +36,7 @@ export const QUIET_GOODBYE_VIEW: OptionView = {
   watermark: 'END',
 };
 
-/** Star-and-up players can force their way out - a new team, at a cost to your
- *  standing with the one you left. */
+/** Stars can demand a trade, at a cost to their standing with the old team. */
 export const DEMAND_TRADE_VIEW: OptionView = {
   id: 'demand_trade',
   label: 'DEMAND A TRADE',
@@ -53,7 +48,7 @@ export const DEMAND_TRADE_VIEW: OptionView = {
 
 const money = (m: number): string => `$${m % 1 === 0 ? m.toFixed(0) : m.toFixed(1)}M`;
 
-/** A team offer rendered as an option card. */
+/** A team offer as an option card. */
 export function teamOfferView(offer: TeamOffer, resign: boolean): OptionView {
   const titleOdds = Math.round(offer.contender * 100);
   return {
@@ -67,7 +62,7 @@ export function teamOfferView(offer: TeamOffer, resign: boolean): OptionView {
   };
 }
 
-/** A EuroLeague club offer rendered as an option card. */
+/** A EuroLeague club offer as an option card. */
 export function clubOfferView(offer: ClubOffer): OptionView {
   const stay = offer.choiceId === 'euro_stay';
   return {
@@ -81,11 +76,7 @@ export function clubOfferView(offer: ClubOffer): OptionView {
   };
 }
 
-/**
- * One "sign a veteran deal back in the NBA" option per interested team, shown
- * once market value recovers. `choiceId` lowercases the team id to satisfy the
- * choice-id charset; the resolver upper-cases it back.
- */
+/** An option to return to the NBA for each interested team. The team id is lowercased in the choice id. */
 export function nbaReturnTeamView(team: TeamRef, salary: number): OptionView {
   return {
     id: `nba_return_${team.id.toLowerCase()}`,

@@ -13,7 +13,7 @@ import type {
 import { mergeEffects, type SeasonEffect } from './effects.js';
 import { derivedRng, simulateSeason } from './season-sim.js';
 
-/** Which EuroLeague tier your NBA market value maps onto (0.5 fringe … 0.95 giant). */
+/** Maps NBA market value to a EuroLeague club level. */
 function targetPrestige(marketValue: number): number {
   return clamp(0.52 + (marketValue - 6) * 0.02, 0.5, 0.95);
 }
@@ -40,11 +40,11 @@ export interface EuroOfferArgs {
   tag: number | string;
   marketValue: number;
   count?: number;
-  /** Kept out of the sample (already offered as "re-sign"). */
+  /** Already offered as the re-sign option. */
   excludeClubId?: string;
 }
 
-/** Two or three EuroLeague clubs willing to sign you. */
+/** Two or three EuroLeague clubs that want you. */
 export function euroClubOffers({
   seed,
   tag,
@@ -81,7 +81,7 @@ export function euroResignOffer(
   };
 }
 
-/** A veteran-minimum-ish deal back to the NBA once your value recovers. */
+/** A small salary to return to the NBA. */
 export function nbaReturnSalary(marketValue: number): number {
   return roundTo(clamp(marketValue * 0.5, 2.5, 9), 1);
 }
@@ -113,10 +113,7 @@ const RESULT_HEADLINE: Record<EuroResult, string> = {
   euro_missed: 'A quiet year - no silverware this time.',
 };
 
-/**
- * A season abroad. You're the centrepiece, so usage runs high; the club's
- * `prestige` plus your production decide how deep the EuroLeague run goes.
- */
+/** One season overseas. You're the star, so usage is high. */
 export function simulateOverseasSeason(rng: Rng, args: OverseasSimArgs): OverseasSimResult {
   const sim = simulateSeason(rng, {
     ratings: args.ratings,

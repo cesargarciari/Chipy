@@ -26,7 +26,7 @@ export function CreatePlayer() {
   const [name, setName] = useState('');
   const [position, setPosition] = useState<Position>('PG');
   const [archetype, setArchetype] = useState<ArchetypeId>(archetypesFor('PG')[0]!.id);
-  // Typed freely; defaults to 0. An empty field reads as 0.
+  // Defaults to 0. An empty field counts as 0.
   const [jersey, setJersey] = useState('0');
   const jerseyNumber =
     jersey === '' ? 0 : Math.max(0, Math.min(99, Math.trunc(Number(jersey) || 0)));
@@ -43,7 +43,7 @@ export function CreatePlayer() {
 
   function onSubmit(e: FormEvent) {
     e.preventDefault();
-    // Home market is no longer a player choice - it's rolled with the career.
+    // Home market is picked at random.
     const market = MARKETS[Math.floor(randomSeed() % MARKETS.length)]!;
     const parsed = playerProfileSchema.safeParse({
       name,
@@ -165,9 +165,7 @@ export function CreatePlayer() {
             </div>
           </div>
 
-          {/* Position and archetype sit in one tight cluster (space-y-3): the
-              archetype list is a direct function of the position picked right
-              above it, so they read as one decision, not two unrelated rows. */}
+          {/* Position and archetype are grouped since the archetypes depend on the position. */}
           <div className="space-y-3">
             <div className="space-y-1.5">
               <span className="text-xs uppercase tracking-wide text-ink-dim">

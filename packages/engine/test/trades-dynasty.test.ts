@@ -30,7 +30,7 @@ describe('status tier', () => {
     expect(statusTier({ ...base, overall: 88 })).toBe('star');
     expect(statusTier({ ...base, overall: 90 })).toBe('superstar');
     expect(statusTier({ ...base, overall: 95, peakOverall: 95, mvps: 2 })).toBe('generational');
-    // an ageing ex-MVP keeps superstar status even at a modest overall
+    // An older former MVP stays a superstar at a lower overall.
     expect(statusRank(statusTier({ ...base, overall: 79, mvps: 1 }))).toBe(statusRank('superstar'));
   });
 });
@@ -196,7 +196,7 @@ describe('championship window + no World Cup', () => {
     }
     expect(anyWc).toBe(0);
     expect(ringCareers).toBeGreaterThan(0);
-    // Repeat titles happen, but they're the exception — not every ring-winner.
+    // Repeat titles happen, but not for every champion.
     expect(repeatWithin5).toBeGreaterThan(0);
     expect(repeatWithin5).toBeLessThan(ringCareers);
   });

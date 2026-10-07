@@ -17,12 +17,7 @@ import {
 
 const META_KEYS = ['athleticism', 'durability', 'hype', 'draftStock'] as const;
 
-/**
- * How much of an option's *written* rating bump actually lands. Deliberately
- * heavy so ratings climb slowly - a `+8` reads as `+4`, a `+3` as `+2`. Basketball
- * IQ is suppressed hard on top (it barely declines with age, so it used to
- * ratchet straight to 99). `rare` breakthrough options bypass this entirely.
- */
+/** Ratings boosts are scaled down so players improve slowly. Basketball IQ is scaled down even more. Rare breakthroughs skip this. */
 const RATING_SCALE = 0.85;
 const IQ_SCALE = 0.26;
 
@@ -31,7 +26,7 @@ function scaleRatingDelta(key: RatingKey, nominal: number): number {
   return Math.round(nominal * s);
 }
 
-/** An option's rating effect after the global slowdown (unless it's a rare breakthrough). */
+/** The rating changes an option actually gives after scaling. */
 export function effectiveRatings(option: GameOption): Partial<Ratings> {
   const src = option.effect.ratings;
   if (!src) return {};
@@ -44,16 +39,11 @@ export function effectiveRatings(option: GameOption): Partial<Ratings> {
   return out;
 }
 
-/**
- * Turn a flat effect into ordered chips: money first, then ratings (biggest
- * first), then meta. When `current` ratings are passed, each rating chip's
- * `delta` is trimmed to the room actually left under 99 (or above 25) so the
- * card promises exactly what the player will get - `nominal` keeps the original.
- */
+/** Turns an effect into chips: money first, then ratings, then the rest. With current ratings, chips show only what fits under the 99 cap. */
 export function describeEffects(effect: OptionEffect, current?: Ratings): EffectChip[] {
   const chips: EffectChip[] = [];
 
-  // Money is the headline for endorsements and perk buys - always pinned first.
+  // Money always goes first.
   if (effect.money) {
     chips.push({ key: 'money', label: 'MONEY', short: '$', delta: effect.money });
   }
@@ -69,7 +59,7 @@ export function describeEffects(effect: OptionEffect, current?: Ratings): Effect
       delta =
         nominal > 0 ? Math.max(0, Math.min(nominal, room)) : Math.min(0, Math.max(nominal, room));
     }
-    // A stat already at the cap simply drops off the card - no "MAX +0" chip.
+    // Skip stats already at the cap.
     if (current && delta === 0) continue;
     ratingChips.push({
       key,
@@ -80,12 +70,7 @@ export function describeEffects(effect: OptionEffect, current?: Ratings): Effect
     });
   }
 
-  // Perimeter + interior D show as one DEFENSE tile - the weighted *average*
-  // `defenseRatingOf`, not a sum - so the chip predicts that tile's move. A
-  // rating tile can only ever shift by an average of its inputs, so `+2` to each
-  // D moves DEFENSE by `+2`, never `+4`. `nominal` is only set when the 99 cap
-  // genuinely trims the move (same rule as every other chip), so the number the
-  // player sees is straight, not "pulled down".
+  // Both defense ratings show as one DEFENSE chip using their average.
   const perimNom = effect.ratings?.perimeterDefense ?? 0;
   const intNom = effect.ratings?.interiorDefense ?? 0;
   if (perimNom || intNom) {
@@ -101,8 +86,7 @@ export function describeEffects(effect: OptionEffect, current?: Ratings): Effect
         Math.round(blend(current.interiorDefense + intNom, current.perimeterDefense + perimNom)) -
         before;
     } else {
-      // No current ratings (a preview): the tile move sits between the two bumps,
-      // so their mean is the honest estimate.
+      // Without current ratings, use the average of the two boosts.
       delta = uncapped = Math.round((intNom + perimNom) / 2);
     }
     if (!current || delta !== 0) {
@@ -131,7 +115,7 @@ export function describeEffects(effect: OptionEffect, current?: Ratings): Effect
   return chips;
 }
 
-/** The serialisable, render-ready view of an option. */
+/** The option ready to send to the client. */
 export function optionView(option: GameOption, current?: Ratings): OptionView {
   const effects = describeEffects({ ...option.effect, ratings: effectiveRatings(option) }, current);
   return {
@@ -154,12 +138,7 @@ function addRatings(base: Ratings, deltas: Partial<Ratings> | undefined): Rating
   return next;
 }
 
-/**
- * Apply an option's deterministic `effect` and register its lingering
- * `stance.growthBias`. Returns a new state; the input is not mutated. The
- * `stance` sim knobs (impactMult, roleBias, …) are read separately by the
- * season pipeline via `optionStanceEffect`.
- */
+/** Applies an option's effect and saves its growth boost. Returns a new state. */
 export function applyOption(state: CareerState, option: GameOption): CareerState {
   const e = { ...option.effect, ratings: effectiveRatings(option) };
   const growthBiases = [...state.growthBiases];
@@ -176,8 +155,7 @@ export function applyOption(state: CareerState, option: GameOption): CareerState
       seasonsLeft: option.stance.valueMultSeasons ?? 3,
     });
   }
-  // Positive money is income (banked and counted toward career earnings); negative
-  // money is a purchase (bank only). The shop only offers affordable buys.
+  // Positive money counts as income, negative money is a purchase.
   const money = e.money ?? 0;
   return {
     ...state,

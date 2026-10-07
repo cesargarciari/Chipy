@@ -1,10 +1,6 @@
 import type { Scenario } from '../scenario-types.js';
 
-/**
- * Fires once, the first offseason after fame hits 80. Each brand is a different
- * mix of up-front money, hype, and a lingering market-value tail. `simulate.ts`
- * reads the chosen option id back through `SHOE_BRANDS` to set `state.shoeDeal`.
- */
+/** Shoe deal offers, once fame first hits 80. Each brand mixes upfront money, hype and long-term value. */
 export const shoeScenarios: Scenario[] = [
   {
     id: 'scn_shoe_deal',

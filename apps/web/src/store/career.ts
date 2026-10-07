@@ -10,7 +10,7 @@ import { persist } from 'zustand/middleware';
 interface CareerRunState {
   seed: number;
   profile: PlayerProfile | null;
-  /** One entry per resolved node, in order (prologue, landing, s1, s2, …). */
+  /** One entry per choice, in order. */
   choices: ChoiceSelection[];
 
   start: (profile: PlayerProfile) => void;
@@ -29,12 +29,11 @@ export const useCareerRun = create<CareerRunState>()(
       start: (profile) => set({ profile, seed: randomSeed(), choices: [] }),
       choose: (nodeId, choiceId) =>
         set((s) => {
-          // The perks shop is a repeatable node - each purchase is an extra
-          // choice appended in order, not a re-choice.
+          // Each perk purchase is added as its own choice.
           if (/^perks\d+$/.test(nodeId)) {
             return { choices: [...s.choices, { nodeId, choiceId }] };
           }
-          // Re-choosing an earlier node invalidates everything after it.
+          // Changing an earlier choice drops everything after it.
           const i = s.choices.findIndex((c) => c.nodeId === nodeId);
           const base = i === -1 ? s.choices : s.choices.slice(0, i);
           return { choices: [...base, { nodeId, choiceId }] };
@@ -42,8 +41,7 @@ export const useCareerRun = create<CareerRunState>()(
       undoLast: () => set((s) => ({ choices: s.choices.slice(0, -1) })),
       reset: () => set({ profile: null, seed: randomSeed(), choices: [] }),
     }),
-    // Key the store to the engine version - any rules change that could make a
-    // persisted `choices` array un-replayable starts players from a clean slate.
+    // Saved per engine version, so old saves start fresh after rule changes.
     { name: `chipy.run.${ENGINE_VERSION}` },
   ),
 );

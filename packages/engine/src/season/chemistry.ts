@@ -2,19 +2,12 @@ import { weightedPick, type Rng } from '../rng.js';
 import { RATING_KEYS, type GameOption, type Ratings } from '../types.js';
 import type { SeasonEffect } from './effects.js';
 
-/**
- * The chemistry channel - a lightweight question that fires on its own roll,
- * separate from the fame / mid-season one, so both can land in the same season
- * (they're about different things). Every scenario is the same shape of choice:
- * be one of the guys (chemistry up) or keep it strictly professional (chemistry
- * down). Which side of a given scenario leaves you sharper and which nicks your
- * game is decided at random, so neither option is always the "safe" one.
- */
+/** Chemistry questions. Rolled separately from mid-season situations. One option raises chemistry, the other lowers it, and which one helps your game is random. */
 export interface ChemistryScenario {
   id: string;
   title: string;
   prompt: string;
-  /** [0] is the sociable / +chemistry option, [1] is the professional / -chemistry one. */
+  /** The first option raises chemistry, the second lowers it. */
   options: [GameOption, GameOption];
 }
 
@@ -101,7 +94,7 @@ export interface ChemResolution {
   note: string;
 }
 
-/** Direction-neutral outcome per option - the stat tail is appended after. */
+/** Result text for each option. */
 const CHEM_NOTE: Record<string, string> = {
   chm_dinner_join: 'The room warms to you.',
   chm_dinner_skip: 'Professional to a fault. The guys stop inviting you.',
@@ -120,7 +113,7 @@ const CHEM_NOTE: Record<string, string> = {
 const SHARP_TAIL = 'You come out of it sharp.';
 const DULL_TAIL = 'It takes a small edge off your game.';
 
-/** An even, small ratings nudge across every skill - about half an overall point. */
+/** A small boost or drop spread across every rating. */
 function spread(delta: number): Partial<Ratings> {
   return RATING_KEYS.reduce((acc, k) => {
     acc[k] = delta;
@@ -128,12 +121,7 @@ function spread(delta: number): Partial<Ratings> {
   }, {} as Partial<Ratings>);
 }
 
-/**
- * Resolve a chemistry choice. The sociable option (`[0]`) always gains chemistry
- * and the professional option (`[1]`) always loses it - but which of the two
- * *sharpens* your game and which *dulls* it (by about half an overall point) is
- * a coin flip per scenario, so there is no option that is always the safe pick.
- */
+/** Resolves a chemistry choice. Which option helps your game is a coin flip. */
 export function resolveChemistry(rng: Rng, scenarioId: string, optionId: string): ChemResolution {
   const scenario = CHEMISTRY_SCENARIOS.find((s) => s.id === scenarioId);
   const isSocial = scenario?.options[0]?.id === optionId;

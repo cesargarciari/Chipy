@@ -3,19 +3,12 @@ import type { CareerPhase, GameOption, Role } from '../types.js';
 import type { SeasonEffect } from './effects.js';
 import type { Scenario, ScenarioContext } from './scenario-types.js';
 
-/**
- * Bizarre, branching in-season situations - drawn ~30% of seasons in place of
- * the silent auto-event. These never touch ratings: they hit *this season's*
- * development instead (minutes, role, chemistry, focus) and how much the
- * front office / fans trust you. The concrete cost is rolled at resolve time
- * and scaled by the player's status - a young player loses minutes, a star just
- * loses goodwill.
- */
+/** Odd mid-season situations, about 30% of seasons. They affect this season and how the team feels about you, not your ratings. */
 export const MIDSEASON_SCENARIOS: Scenario[] = [
   {
     id: 'msx_star_fight',
     theme: 'team',
-    // Once you ARE the team's best player, there's no bigger dog to defer to.
+    // Skip if you're already the best player on the team.
     gate: {
       minSeason: 3,
       weight: 1.2,
@@ -67,7 +60,7 @@ export const MIDSEASON_SCENARIOS: Scenario[] = [
   {
     id: 'msx_benched_4th',
     theme: 'team',
-    // A superstar closes games. This one only lands on players who don't yet.
+    // Only for players who aren't superstars yet.
     gate: {
       minSeason: 2,
       weight: 1,
@@ -379,17 +372,17 @@ export interface MidResolveCtx {
 
 export interface MidResolution {
   effect: SeasonEffect;
-  /** Change to the standing with the current team (usually negative). */
+  /** Change in standing with the current team. */
   franchiseDelta: number;
-  /** Change to team chemistry (0..100). Negative from drama, positive from bonding. */
+  /** Change in team chemistry. */
   chemistryDelta: number;
-  /** One-line description of how it actually landed - a real consequence. */
+  /** One line about what actually happened. */
   note: string;
 }
 
 interface ResolveArgs {
   rng: Rng;
-  /** 0.6 … 1.5 severity multiplier for the season. */
+  /** How hard it hits this season, 0.6 to 1.5. */
   m: number;
   star: boolean;
   young: boolean;
@@ -397,7 +390,7 @@ interface ResolveArgs {
 
 type OutcomeFn = (a: ResolveArgs) => Partial<MidResolution> & { effect?: SeasonEffect };
 
-/** "The front office isn't happy - the situation is tense." Feeds trade odds. */
+/** The front office cools on you, which raises trade odds. */
 function frontOfficeCold(a: ResolveArgs): Partial<MidResolution> {
   return {
     franchiseDelta: -Math.round((a.star ? 22 : 12) * a.m),
@@ -407,10 +400,7 @@ function frontOfficeCold(a: ResolveArgs): Partial<MidResolution> {
   };
 }
 
-/**
- * A groggy stretch or a nagging distraction. It only dents *this season's*
- * production (`impactMult`) - off-court noise never permanently guts a rating.
- */
+/** A rough stretch that only hurts this season's numbers. */
 function ownGameDips(a: ResolveArgs): Partial<MidResolution> {
   return {
     effect: { impactMult: 1 - (0.03 + 0.05 * a.m) },
@@ -418,11 +408,7 @@ function ownGameDips(a: ResolveArgs): Partial<MidResolution> {
   };
 }
 
-/**
- * Per-option resolvers. Every branch produces a *concrete* consequence - lost
- * overall, a chemistry swing, a colder front office (which raises trade odds),
- * or a genuine spark. Anything not listed just blows over.
- */
+/** What each option leads to. Options not listed have no effect. */
 export const MIDSEASON_OUTCOMES: Record<string, OutcomeFn> = {
   // Fight with the star
   msx_fight_hash: (a) => ({
@@ -547,10 +533,7 @@ export const MIDSEASON_OUTCOMES: Record<string, OutcomeFn> = {
   }),
 };
 
-/**
- * Turn a chosen option into this season's concrete consequence, rolled and
- * scaled by status. Consumes RNG - call once, at resolve time.
- */
+/** Rolls the result of the chosen option. Uses RNG, so call it once. */
 export function resolveMidseason(rng: Rng, optionId: string, ctx: MidResolveCtx): MidResolution {
   const fn = MIDSEASON_OUTCOMES[optionId];
   const star = ctx.role === 'franchise' || ctx.role === 'starter';
@@ -617,7 +600,7 @@ export function eligibleMidseason(ctx: ScenarioContext): Scenario[] {
   return MIDSEASON_SCENARIOS.filter((s) => gateMatches(s, ctx));
 }
 
-/** Weight-pick a mid-season situation, or `null` if none fits this state. */
+/** Picks a mid-season situation, or null if none fit. */
 export function pickMidseason(rng: Rng, ctx: ScenarioContext): Scenario | null {
   const eligible = eligibleMidseason(ctx);
   if (eligible.length === 0) return null;

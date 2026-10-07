@@ -1,6 +1,6 @@
 import '@testing-library/jest-dom/vitest';
 
-// jsdom doesn't implement these; components that call them shouldn't crash tests.
+// jsdom doesn't have these, so stub them for tests.
 if (!('matchMedia' in window)) {
   Object.defineProperty(window, 'matchMedia', {
     writable: true,

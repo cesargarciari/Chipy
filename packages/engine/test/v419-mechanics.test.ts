@@ -21,7 +21,7 @@ const star = (over: Partial<PlayerProfile> = {}): PlayerProfile => ({
   ...over,
 });
 
-/** id -> soundness across every scenario (ids are globally unique). */
+/** Play id to soundness for every scenario. */
 const SOUNDNESS = new Map<string, number>(
   FINALS_SCENARIOS.flatMap((s) => s.plays.map((p) => [p.id, p.soundness] as const)),
 );
@@ -58,10 +58,7 @@ function pick(p: Pending): string {
   }
 }
 
-/**
- * Walk a career; at the first Finals, take the play with the wanted soundness
- * (0 = always wins, 2 = always loses). Returns the season that Finals decided.
- */
+/** Plays until the first Finals and picks a play with the given soundness. Returns that season. */
 function playToFirstFinals(seed: string, wantSoundness: number) {
   const choices: Array<{ nodeId: string; choiceId: string }> = [];
   let finalsSeasonIndex = -1;
@@ -218,8 +215,7 @@ describe('award coherence (v4.19)', () => {
   });
 
   it('a superstar-tier All-Star lands on one of the top two All-NBA teams', () => {
-    // Not every All-Star year (a fringe pick can miss the teams) - but across a
-    // long star career, All-NBA Third Team should be the exception, not the norm.
+    // Star careers should rarely land on All-NBA Third Team.
     let topTwo = 0;
     let third = 0;
     for (let i = 0; i < 60; i += 1) {

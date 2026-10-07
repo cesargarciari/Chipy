@@ -10,7 +10,7 @@ import {
   type Ratings,
 } from './types.js';
 
-/** Per-position weights (each column sums to 1) for collapsing ratings to an overall. */
+/** How much each rating counts toward overall, per position. */
 const POSITION_WEIGHTS: Record<Position, Ratings> = {
   PG: {
     playmaking: 0.24,
@@ -77,13 +77,9 @@ export function emptyRatings(fill = 0): Ratings {
 
 export function overallFor(position: Position, ratings: Ratings): number {
   const weights = POSITION_WEIGHTS[position];
-  // A per-position weighted average of the eight skills - so a big bump to one
-  // rating only nudges the overall (weights sum to 1). The card's per-axis chips
-  // predict the *tile* change, not this overall.
+  // Weighted average of the eight ratings.
   const raw = RATING_KEYS.reduce((sum, key) => sum + ratings[key] * weights[key], 0);
-  // Being genuinely elite at your craft counts for a bit more than the average
-  // implies - but the top-end bonus is capped so a 92+ overall (a genuine
-  // "generational" tier) stays rare rather than routine.
+  // A small capped bonus for elite ratings, so 92+ stays rare.
   let eliteBonus = 0;
   for (const key of RATING_KEYS) {
     if (ratings[key] >= 88) eliteBonus += 1;
@@ -92,12 +88,7 @@ export function overallFor(position: Position, ratings: Ratings): number {
   return clamp(Math.round(raw + Math.min(eliteBonus, 4)), RATING_FLOOR, RATING_CEIL);
 }
 
-/**
- * A single "defense" number from the two D ratings, weighted toward the stronger
- * one - a true specialist (elite on one end, ordinary on the other) still reads
- * as an elite defender, and a genuine two-way stopper can push into the 90s.
- * Used for the merged DEFENSE tile and the DPOY consideration bar.
- */
+/** One defense number from the two defense ratings, leaning toward the better one. */
 export function defenseRatingOf(interiorDefense: number, perimeterDefense: number): number {
   const hi = Math.max(interiorDefense, perimeterDefense);
   const lo = Math.min(interiorDefense, perimeterDefense);
@@ -111,7 +102,7 @@ export function clampRatings(ratings: Ratings): Ratings {
   }, {} as Ratings);
 }
 
-/** Starting ratings: flat baseline + archetype identity + small seeded jitter. */
+/** Starting ratings from a baseline, the archetype and a bit of randomness. */
 export function rollStartingRatings(rng: Rng, archetypeId: ArchetypeId): Ratings {
   const bias = getArchetype(archetypeId).ratingBias;
   return RATING_KEYS.reduce((acc, key) => {

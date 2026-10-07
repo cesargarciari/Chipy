@@ -1,31 +1,27 @@
 import { clamp, jitter, type Rng } from '../rng.js';
 import type { DraftResult } from '../types.js';
 
-/** Share of gross pay that actually reaches the bank (taxes + agent + lifestyle). */
+/** Share of pay you keep after taxes, agents and spending. */
 export const KEEP_RATE = 0.62;
 
-/** First-contract salary ($M/yr) from where you were drafted. */
+/** Rookie salary by draft slot, in millions per year. */
 export function rookieScale(draft: DraftResult): number {
   if (draft.undrafted || draft.pick === null) return 1.2;
-  // pick 1 ≈ 10.5, pick 14 ≈ 4.4, pick 30 ≈ 2.6, pick 60 ≈ 1.4
+  // Pick 1 is about 10.5, pick 30 about 2.6, pick 60 about 1.4.
   return clamp(10.8 - Math.log2(draft.pick + 1) * 2.35, 1.3, 11);
 }
 
 export interface MarketValueArgs {
   overall: number;
   age: number;
-  /** Last played season's `impact` (0 if none / injured). */
+  /** Last season's impact, or 0 if none. */
   lastImpact: number;
   hype: number;
-  /** Perk / shoe-deal multiplier. */
+  /** Multiplier from perks and shoe deals. */
   valueMult: number;
 }
 
-/**
- * What the market would pay per year ($M). Driven mostly by overall, boosted by
- * recent production and fame, discounted past ~31. Deliberately modest so that
- * a $10–20M perk is a real slice of a career, not pocket change.
- */
+/** What the market would pay per year, in millions. Mostly based on overall, lower after 31. */
 export function marketValueFor({
   overall,
   age,
@@ -40,7 +36,7 @@ export function marketValueFor({
   return clamp((base + production + fame + agePenalty) * valueMult, 0.8, 38);
 }
 
-/** A team's actual offer ($M/yr): rebuilders overpay, contenders pay a touch under. */
+/** A team's actual offer. Rebuilding teams pay more, contenders a bit less. */
 export function offerSalary(
   rng: Rng,
   marketValue: number,
@@ -56,7 +52,7 @@ export function offerSalary(
   );
 }
 
-/** Overseas pay (€M ≈ $M here) - a fraction of NBA money. */
+/** Overseas pay, a fraction of NBA money. */
 export function euroSalary(rng: Rng, marketValue: number, prestige: number): number {
   const base = clamp(marketValue * 0.5 * (0.7 + prestige * 0.7), 1.4, 11);
   return Math.round((base + jitter(rng, 1) / 2) * 10) / 10;

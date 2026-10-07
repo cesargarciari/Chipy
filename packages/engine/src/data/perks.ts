@@ -1,10 +1,6 @@
 import type { PerkDef } from '../types.js';
 
-/**
- * The perks shop. `yearly` perks cost their `cost` every season they're active
- * (auto-renewed from the bank); `permanent` perks cost `cost` once and never
- * lapse. Effects are deliberately modest - an edge, not a cheat code.
- */
+/** The perk shop. Yearly perks are paid every season, permanent ones once. */
 const P = (
   id: string,
   name: string,
@@ -17,7 +13,7 @@ const P = (
 ): PerkDef => ({ id, name, category, kind, cost, blurb, effect, minSeason });
 
 export const PERKS: readonly PerkDef[] = [
-  // ---- Yearly: cheaper, renew from the bank -------------------------------
+  // Yearly perks
   P(
     'shooting_trainer',
     'Shooting trainer',
@@ -99,7 +95,7 @@ export const PERKS: readonly PerkDef[] = [
     },
   ),
 
-  // ---- Permanent: expensive, mid-career, never lapse -------------------
+  // Permanent perks
   P(
     'personal_court',
     'Personal court',

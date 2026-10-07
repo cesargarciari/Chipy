@@ -10,13 +10,7 @@ import { tableInput } from './table-schema.js';
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-/**
- * Create the single table if it is missing. Runs only against DynamoDB Local
- * (guarded by an explicit endpoint) — on AWS the table is Terraform's job.
- *
- * Retries the first connection: in `docker compose` the API can win the race
- * against DynamoDB Local accepting requests.
- */
+/** Creates the table if it's missing, only on DynamoDB Local. Retries in case DynamoDB Local isn't ready yet. */
 export async function ensureTable(
   dynamo: AppConfig['dynamo'],
   { attempts = 10, delayMs = 1000 }: { attempts?: number; delayMs?: number } = {},
@@ -44,7 +38,7 @@ export async function ensureTable(
     try {
       await client.send(new CreateTableCommand(tableInput(dynamo.table)));
     } catch (err) {
-      // Another instance created it first — fine.
+      // Another instance already created it.
       if (!(err instanceof ResourceInUseException)) throw err;
     }
   } finally {

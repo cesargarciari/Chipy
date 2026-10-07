@@ -6,7 +6,7 @@ import { ScenarioFrame } from './ScenarioFrame.js';
 
 type Midseason = NonNullable<PendingDecision['midseason']>;
 
-/** A bizarre in-season situation - every option is a real fork. */
+/** An unexpected mid-season situation. */
 export function MidseasonScreen({
   midseason,
   onChoose,

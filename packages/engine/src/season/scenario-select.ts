@@ -20,7 +20,7 @@ export function eligibleScenarios(ctx: ScenarioContext): Scenario[] {
   return SCENARIOS.filter((s) => gateMatches(s, ctx));
 }
 
-/** Weight-pick the next offseason scenario for this career state. */
+/** Picks the next offseason scenario. */
 export function pickScenario(rng: Rng, ctx: ScenarioContext): Scenario {
   const eligible = eligibleScenarios(ctx);
   if (eligible.length === 0) {

@@ -1,11 +1,4 @@
-/**
- * `@chipy/engine` - the pure, framework-free NBA career simulation.
- *
- * Nothing here touches the network, the DOM, the filesystem, or the clock
- * (except `randomSeed`). `runCareer` replays an entire career deterministically
- * from `(seed, profile, choices)` - the browser runs it for instant play, the
- * API runs it as the source of truth.
- */
+/** @chipy/engine: the NBA career simulation. No network, DOM, files or clock. */
 
 export {
   ENGINE_VERSION,

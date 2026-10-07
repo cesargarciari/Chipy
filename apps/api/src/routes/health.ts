@@ -2,12 +2,7 @@ import { healthResponseSchema, readyResponseSchema } from '@chipy/shared';
 import { ENGINE_VERSION } from '@chipy/engine';
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod';
 
-/**
- * `/` is a human-friendly index (this is an API, the web app is elsewhere).
- * `/healthz` is liveness (is the process up?), `/readyz` is readiness (can it
- * serve traffic, i.e. reach DynamoDB?). Load balancers and uptime checks want
- * the distinction.
- */
+/** / is a simple index, /healthz checks the process is up, /readyz checks it can reach DynamoDB. */
 export const healthRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get('/', { schema: { hide: true } }, async () => ({
     name: 'chipy-api',

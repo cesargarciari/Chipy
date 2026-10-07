@@ -1,4 +1,4 @@
-/** Structural shape of the bits of a ZodError we read (avoids a zod dep in the web app). */
+/** The parts of a zod error we use. */
 export interface ZodIssueLike {
   path: ReadonlyArray<PropertyKey>;
   code?: string;
@@ -8,7 +8,7 @@ export interface ZodErrorLike {
   issues: ReadonlyArray<ZodIssueLike>;
 }
 
-/** Friendly, human copy for the field-level errors the create form can produce. */
+/** Friendly messages for form errors. */
 const FRIENDLY: Record<string, string> = {
   name: 'Give your player a name (at least 2 characters).',
   'name.too_small': 'Give your player a name (at least 2 characters).',
@@ -20,7 +20,7 @@ const FRIENDLY: Record<string, string> = {
   market: 'Pick a home market.',
 };
 
-/** First error from a ZodError, mapped to friendly copy and keyed by field. */
+/** First form error with a friendly message. */
 export function firstFriendlyError(error: ZodErrorLike): { field: string; message: string } {
   const issue = error.issues[0];
   const field = String(issue?.path[0] ?? '');

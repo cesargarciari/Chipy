@@ -5,17 +5,7 @@ import { cn } from '../../lib/cn.js';
 import { countryName, moneyM } from '../../lib/format.js';
 import { useT } from '../../lib/i18n.js';
 
-/**
- * The persistent heads-up display above every in-career decision: a big
- * OVERALL with FAME beside it, the money line (bank / salary / market value),
- * and the stat-tile strip - `highlight` keys lit gold while an option is hovered.
- *
- * `recentDeltas` (the effects of whatever was just chosen) does two things:
- * it lights a brief tick on the RatingStrip tiles that moved, and it tints
- * the panel's border warm or cool depending on whether that one call was a
- * net gain or a net cost - an ambient read on how the last decision landed,
- * not just how the whole season is trending.
- */
+/** The stats panel above every decision: overall, fame, money and ratings. The border turns warm or cool based on whether the last choice helped or hurt. */
 export function CareerHud({
   preview,
   highlight,

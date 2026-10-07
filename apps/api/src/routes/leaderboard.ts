@@ -2,7 +2,7 @@ import { leaderboardQuerySchema, leaderboardResponseSchema, monthKey } from '@ch
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod';
 
 export const leaderboardRoutes: FastifyPluginAsyncZod = async (app) => {
-  /** Top careers for a month (defaults to the current UTC month). */
+  /** Top careers for a month, current month by default. */
   app.get(
     '/leaderboard',
     {

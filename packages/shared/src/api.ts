@@ -6,9 +6,7 @@ import { careerSummarySchema, legacySchema } from './career-summary.js';
 export const ID_REGEX = /^[A-Za-z0-9_-]{12}$/;
 export const idSchema = z.string().regex(ID_REGEX, 'invalid career id');
 
-/** `POST /api/careers` body — the exact inputs the engine needs to replay a
- *  *finished* career. `.min(3)` is only a sanity floor (2 prologue + landing);
- *  the engine returning `status: 'complete'` is the real completeness check. */
+/** Body for saving a finished career. The server replays it to check it's complete. */
 export const createCareerRequestSchema = runCareerInputSchema.extend({
   choices: runCareerInputSchema.shape.choices.min(3),
 });
@@ -19,7 +17,7 @@ export const choiceStatSchema = z.object({
   choiceId: z.string(),
   label: z.string().min(1),
   count: z.number().int().nonnegative(),
-  /** This pick's share of all careers that reached this node, 0..100. */
+  /** Percent of careers at this node that made this pick. */
   pct: z.number().min(0).max(100),
 });
 export type ChoiceStat = z.infer<typeof choiceStatSchema>;
@@ -55,7 +53,7 @@ export const leaderboardEntrySchema = z.object({
   seasons: z.number().int(),
   rings: z.number().int(),
   mvps: z.number().int(),
-  /** Career earnings in $M — denormalised for the board. */
+  /** Career earnings in millions. */
   earnings: z.number().nonnegative(),
   createdAt: z.iso.datetime(),
 });
@@ -85,14 +83,14 @@ export const apiErrorSchema = z.object({
 });
 export type ApiError = z.infer<typeof apiErrorSchema>;
 
-/** UTC `YYYYMM`, the partition for a month's leaderboard. */
+/** UTC year and month, used to group the monthly leaderboard. */
 export function monthKey(date: Date = new Date()): string {
   const y = date.getUTCFullYear();
   const m = String(date.getUTCMonth() + 1).padStart(2, '0');
   return `${y}${m}`;
 }
 
-/** Client-side route for a shared career. */
+/** Web route for a shared career. */
 export function buildSharePath(id: string): string {
   return `/c/${id}`;
 }
