@@ -1,16 +1,32 @@
 import type { CareerSummaryDto } from '@chipy/shared';
+import { ChevronRight, Star, Trophy, Zap } from 'lucide-react';
 import { useState } from 'react';
 import { awardArt } from '../../lib/art.js';
+import { cn } from '../../lib/cn.js';
 import { GRADE_TONE, moneyM, TEAM_RESULT_LABELS } from '../../lib/format.js';
 
 const ALL_STAR_ART = awardArt('all_star');
 const RING_ART = awardArt('ring');
 
 const RESULT_TONE: Record<string, string> = {
-  champion: 'text-amber',
-  finals: 'text-emerald-400',
-  conf_finals: 'text-sky-400',
+  champion: 'text-gold',
+  finals: 'text-up',
+  conf_finals: 'text-cool',
 };
+
+const HEADERS: Array<[string, string?]> = [
+  ['#'],
+  ['Age'],
+  ['Team'],
+  ['PPG', 'text-right'],
+  ['RPG', 'text-right'],
+  ['APG', 'text-right'],
+  ['Salary', 'text-right'],
+  ['Seed', 'text-right'],
+  ['Result'],
+  ['Grade', 'text-center'],
+  ['Honours'],
+];
 
 export function SeasonTable({ seasons }: { seasons: CareerSummaryDto['seasons'] }) {
   const [open, setOpen] = useState(false);
@@ -18,59 +34,64 @@ export function SeasonTable({ seasons }: { seasons: CareerSummaryDto['seasons'] 
   return (
     <div>
       <button
+        type="button"
         onClick={() => setOpen((v) => !v)}
-        className="text-sm font-semibold text-ink-dim hover:text-ink"
+        aria-expanded={open}
+        className="-mx-2 inline-flex items-center gap-2 rounded-full px-2 py-1 text-[1.0625rem] text-ink transition-colors hover:text-ink/75"
       >
-        {open ? '▾' : '▸'} Season by season ({seasons.length})
+        <ChevronRight
+          size={18}
+          strokeWidth={1.75}
+          aria-hidden
+          className={cn(
+            'text-ink/60 transition-[rotate] duration-300 ease-out',
+            open && 'rotate-90',
+          )}
+        />
+        Season by season ({seasons.length})
       </button>
 
       {open && (
-        <div className="mt-3 overflow-x-auto">
-          <table className="w-full min-w-[640px] text-left text-xs">
-            <thead className="text-ink-dim">
-              <tr className="border-b border-court-700">
-                <th className="py-1.5 pr-2">#</th>
-                <th className="pr-2">Age</th>
-                <th className="pr-2">Team</th>
-                <th className="pr-2 text-right">PPG</th>
-                <th className="pr-2 text-right">RPG</th>
-                <th className="pr-2 text-right">APG</th>
-                <th className="pr-2 text-right">Salary</th>
-                <th className="pr-2 text-right">Seed</th>
-                <th className="pr-2">Result</th>
-                <th className="pr-2 text-center">Grade</th>
-                <th>Honours</th>
+        <div className="enter -mx-1 mt-5 overflow-x-auto px-1 [--blur:4px] [--rise:8px]">
+          <table className="w-full min-w-[680px] text-left text-sm">
+            <thead>
+              <tr className="border-b border-ink/10">
+                {HEADERS.map(([label, align]) => (
+                  <th key={label} className={cn('t-label py-2.5 pr-3 font-medium', align)}>
+                    {label}
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody>
               {seasons.map((s) => (
-                <tr key={s.index} className="border-b border-court-800/60">
-                  <td className="py-1.5 pr-2 font-mono text-ink-dim">{s.index}</td>
-                  <td className="pr-2">{s.age}</td>
-                  <td className="pr-2 font-semibold">{s.teamId}</td>
-                  <td className="pr-2 text-right font-mono tabular-nums">{s.stats.ppg}</td>
-                  <td className="pr-2 text-right font-mono tabular-nums">{s.stats.rpg}</td>
-                  <td className="pr-2 text-right font-mono tabular-nums">{s.stats.apg}</td>
-                  <td className="pr-2 text-right font-mono tabular-nums text-ink-dim">
-                    {moneyM(s.salary)}
-                  </td>
-                  <td className="pr-2 text-right font-mono tabular-nums text-ink-dim">
+                <tr key={s.index} className="border-b border-ink/6 last:border-0">
+                  <td className="t-num py-2.5 pr-3 text-ink/60">{s.index}</td>
+                  <td className="t-num pr-3">{s.age}</td>
+                  <td className="t-num pr-3 text-ink">{s.teamId}</td>
+                  <td className="t-num pr-3 text-right">{s.stats.ppg}</td>
+                  <td className="t-num pr-3 text-right">{s.stats.rpg}</td>
+                  <td className="t-num pr-3 text-right">{s.stats.apg}</td>
+                  <td className="t-num pr-3 text-right text-ink/60">{moneyM(s.salary)}</td>
+                  <td className="t-num pr-3 text-right text-ink/60">
                     {s.seed >= 1 ? `#${s.seed}` : '-'}
                   </td>
                   <td
-                    className={`pr-2 ${RESULT_TONE[s.teamResult] ?? 'text-ink-dim'}`}
+                    className={cn('pr-3', RESULT_TONE[s.teamResult] ?? 'text-ink/60')}
                     title={s.finalsHeadline ?? s.recap}
                   >
                     {TEAM_RESULT_LABELS[s.teamResult]}
                   </td>
-                  <td
-                    className={`pr-2 text-center font-display leading-none ${GRADE_TONE[s.grade]}`}
-                  >
+                  <td className={cn('t-num pr-3 text-center text-base', GRADE_TONE[s.grade])}>
                     {s.grade}
                   </td>
-                  <td className="text-ink-dim">
-                    <span className="inline-flex items-center gap-1 align-middle">
-                      {s.midseasonId && <span title={s.midseasonHeadline ?? ''}>◆</span>}
+                  <td className="text-ink/60">
+                    <span className="inline-flex items-center gap-1.5 align-middle">
+                      {s.midseasonId && (
+                        <span title={s.midseasonHeadline ?? ''}>
+                          <Zap size={13} strokeWidth={2} aria-label="Mid-season fork" />
+                        </span>
+                      )}
                       {s.awards.includes('all_star') &&
                         (ALL_STAR_ART ? (
                           <img
@@ -80,9 +101,14 @@ export function SeasonTable({ seasons }: { seasons: CareerSummaryDto['seasons'] 
                             className="inline-block h-4 w-4 object-contain"
                           />
                         ) : (
-                          <span className="text-amber">★</span>
+                          <Star
+                            size={13}
+                            strokeWidth={2}
+                            className="text-gold"
+                            aria-label="All-Star"
+                          />
                         ))}
-                      {s.awards.includes('mvp') && <span className="text-amber">MVP</span>}
+                      {s.awards.includes('mvp') && <span className="text-xs text-gold">MVP</span>}
                       {s.awards.includes('champion') &&
                         (RING_ART ? (
                           <img
@@ -92,11 +118,14 @@ export function SeasonTable({ seasons }: { seasons: CareerSummaryDto['seasons'] 
                             className="inline-block h-4 w-4 object-contain"
                           />
                         ) : (
-                          <span className="text-amber" title="Champion">
-                            🏆
-                          </span>
+                          <Trophy
+                            size={13}
+                            strokeWidth={2}
+                            className="text-gold"
+                            aria-label="Champion"
+                          />
                         ))}
-                      {s.awards.includes('dpoy') && <span className="text-sky-400">DPOY</span>}
+                      {s.awards.includes('dpoy') && <span className="text-xs text-cool">DPOY</span>}
                     </span>
                   </td>
                 </tr>

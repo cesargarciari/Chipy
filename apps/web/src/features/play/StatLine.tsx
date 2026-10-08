@@ -3,10 +3,10 @@ import { cn } from '../../lib/cn.js';
 
 type Stats = CareerSummaryDto['seasons'][number]['stats'];
 
-const CELLS: Array<[string, (s: Stats) => number | string, string?]> = [
+const CELLS: Array<[string, (s: Stats) => number | string, boolean?]> = [
   ['GP', (s) => s.gp],
   ['MPG', (s) => s.mpg],
-  ['PPG', (s) => s.ppg, 'text-amber'],
+  ['PPG', (s) => s.ppg, true],
   ['RPG', (s) => s.rpg],
   ['APG', (s) => s.apg],
   ['SPG', (s) => s.spg],
@@ -14,17 +14,20 @@ const CELLS: Array<[string, (s: Stats) => number | string, string?]> = [
   ['TS%', (s) => (s.tsPct * 100).toFixed(1)],
 ];
 
+/** A box-score line: no boxes, just the numbers in a row. */
 export function StatLine({ stats }: { stats: Stats }) {
   return (
-    <div className="grid grid-cols-4 gap-2 text-center sm:grid-cols-8">
-      {CELLS.map(([label, get, tone]) => (
-        <div key={label} className="rounded-lg bg-court-800 py-2">
-          <div className={cn('font-mono text-base font-bold tabular-nums', tone ?? 'text-ink')}>
+    <dl className="grid grid-cols-4 gap-x-4 gap-y-5 sm:grid-cols-8">
+      {CELLS.map(([label, get, lead]) => (
+        <div key={label}>
+          <dt className="t-label">{label}</dt>
+          <dd
+            className={cn('t-num mt-1.5 text-xl leading-none', lead ? 'text-ink' : 'text-ink/75')}
+          >
             {get(stats)}
-          </div>
-          <div className="text-[10px] uppercase tracking-wide text-ink-dim">{label}</div>
+          </dd>
         </div>
       ))}
-    </div>
+    </dl>
   );
 }

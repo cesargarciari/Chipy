@@ -1,11 +1,10 @@
 import type { EffectChip } from '@chipy/engine';
 import { clubCrest, teamLogo } from '../lib/art.js';
 import { cn } from '../lib/cn.js';
-import { moneyM } from '../lib/format.js';
 import { useT } from '../lib/i18n.js';
-import { mergeDefenseChips, toDisplayKey } from '../lib/ratings.js';
-
-type ChoiceAccent = 'amber' | 'sky' | 'emerald';
+import { toDisplayKey } from '../lib/ratings.js';
+import { DecisionSurface } from './DecisionSurface.js';
+import { EffectChips } from './EffectChips.js';
 
 interface ChoiceCardProps {
   title: string;
@@ -19,27 +18,17 @@ interface ChoiceCardProps {
   rare?: boolean;
   /** Team or club id, used to show its logo. */
   teamId?: string;
-  /** Colour of the left stripe and hover border. */
-  accent?: ChoiceAccent;
+  /** Position in the deal, so the cards arrive one after another. */
+  index?: number;
+  /** Keeps the accent ring on, for a pick that stays on screen. */
+  selected?: boolean;
   /** Extra classes for the button. */
   className?: string;
-  /** Reports which stats this option would change, or null when the mouse leaves. */
+  /** Reports which stats this option would change, or null when the pointer leaves. */
   onHoverKeys?: (keys: string[] | null) => void;
 }
 
-const ACCENT_BORDER: Record<ChoiceAccent, string> = {
-  amber: 'hover:border-amber hover:bg-amber/[0.04]',
-  sky: 'hover:border-sky-400 hover:bg-sky-400/[0.05]',
-  emerald: 'hover:border-emerald-400 hover:bg-emerald-400/[0.05]',
-};
-
-const ACCENT_STRAND: Record<ChoiceAccent, string> = {
-  amber: 'bg-amber/40 group-hover:bg-amber',
-  sky: 'bg-sky-400/40 group-hover:bg-sky-400',
-  emerald: 'bg-emerald-400/40 group-hover:bg-emerald-400',
-};
-
-/** An option card with a title, blurb, effect chips and a faint watermark. */
+/** One option: its art, its name in jersey lettering, a blurb, and the exact cost. */
 export function ChoiceCard({
   title,
   description,
@@ -50,140 +39,87 @@ export function ChoiceCard({
   tone = 'default',
   rare = false,
   teamId,
-  accent,
+  index = 0,
+  selected,
   className,
   onHoverKeys,
 }: ChoiceCardProps) {
   const t = useT();
   const logo = teamId ? (teamLogo(teamId) ?? clubCrest(teamId)) : undefined;
-  const shown = mergeDefenseChips(effects);
   const statKeys = effects.filter((e) => e.key !== 'money').map((e) => toDisplayKey(e.key));
   const hoverOn = onHoverKeys ? () => onHoverKeys(statKeys) : undefined;
   const hoverOff = onHoverKeys ? () => onHoverKeys(null) : undefined;
-  // Gold and danger cards keep their own styling.
-  const strand = accent && !rare && tone !== 'danger' ? accent : null;
 
   return (
-    <button
+    <DecisionSurface
+      index={index}
+      tone={rare ? 'rare' : tone}
+      selected={selected}
+      aria-pressed={selected}
       onClick={onClick}
       onMouseEnter={hoverOn}
       onMouseLeave={hoverOff}
       onFocus={hoverOn}
       onBlur={hoverOff}
-      className={cn(
-        'group relative flex flex-col overflow-hidden rounded-2xl border p-5 text-left transition-colors',
-        rare
-          ? 'border-amber bg-amber/[0.06] shadow-[0_0_0_1px_rgba(249,115,22,0.35)] hover:bg-amber/10'
-          : tone === 'danger'
-            ? 'border-court-700 hover:border-rose-500'
-            : strand
-              ? cn('border-court-700 bg-court-900', ACCENT_BORDER[strand])
-              : 'border-court-700 bg-court-900 hover:border-amber hover:bg-amber/[0.04]',
-        className,
-      )}
+      className={className}
+      faceClassName="min-h-[14rem] p-6"
     >
-      {strand && (
-        <span
-          aria-hidden
-          className={cn(
-            'pointer-events-none absolute inset-y-0 left-0 w-[3px] transition-colors',
-            ACCENT_STRAND[strand],
-          )}
-        />
-      )}
       {watermark && (
         <span
           aria-hidden
           className={cn(
-            'pointer-events-none absolute -right-3 bottom-0 select-none font-display text-[5.5rem] leading-none tracking-tight',
-            rare ? 'text-amber/15' : 'text-court-800/70',
+            't-jersey pointer-events-none absolute -bottom-4 -right-2 select-none text-[7.5rem] leading-none',
+            'transition-[translate,color] duration-500 ease-out group-hover:-translate-x-2',
+            rare ? 'text-gold/12 group-hover:text-gold/20' : 'text-ink/5 group-hover:text-ink/9',
           )}
         >
           {watermark}
         </span>
       )}
 
-      <div className="relative z-10 flex flex-1 flex-col">
-        {rare && (
-          <span className="mb-1 inline-flex w-fit items-center gap-1 rounded-full bg-amber px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-court-950">
-            {t.play.gold}
+      <span className="relative flex flex-1 flex-col">
+        {(logo || rare) && (
+          <span className="mb-5 flex items-start justify-between gap-3">
+            {logo ? (
+              <img
+                src={logo}
+                alt=""
+                className="h-12 w-12 object-contain transition-[scale] duration-500 ease-out group-hover:scale-[1.07]"
+              />
+            ) : (
+              <span />
+            )}
+            {rare && (
+              <span className="inline-flex h-6 items-center rounded-full bg-gold px-2.5 text-xs font-medium text-ground">
+                {t.play.gold}
+              </span>
+            )}
           </span>
         )}
-        {logo && <img src={logo} alt="" className="mb-2 h-10 w-10 object-contain" />}
+
         <h3
           className={cn(
-            'font-display text-2xl leading-none tracking-wide',
-            rare
-              ? 'text-amber'
-              : tone === 'danger'
-                ? 'text-ink-dim group-hover:text-ink'
-                : 'text-ink',
+            't-jersey text-[1.75rem] transition-colors duration-300',
+            tone === 'danger' && !rare ? 'text-ink/65 group-hover:text-ink' : 'text-ink',
           )}
         >
           {title}
         </h3>
-        <p className="mt-2 max-w-[26ch] text-sm text-ink-dim">{description}</p>
+        <span className="mt-2.5 block max-w-[32ch] text-[0.9375rem] leading-snug text-ink/65">
+          {description}
+        </span>
 
-        <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1">
-          {shown.map((e) =>
-            e.key === 'money' ? (
-              <span key={e.key} className="inline-flex items-baseline gap-1">
-                <span
-                  className={cn(
-                    'font-display text-xl leading-none',
-                    e.delta >= 0 ? 'text-amber' : 'text-rose-400',
-                  )}
-                >
-                  {e.delta >= 0 ? '+' : '−'}
-                  {moneyM(Math.abs(e.delta))}
-                </span>
+        {(effects.length > 0 || tag) && (
+          <span className="mt-auto flex flex-wrap items-baseline gap-x-4 gap-y-2 pt-6">
+            <EffectChips effects={effects} rare={rare} />
+            {tag && (
+              <span className="inline-flex h-6 items-center rounded-full px-2.5 text-xs text-ink/60 inset-ring inset-ring-ink/12">
+                {tag}
               </span>
-            ) : (
-              <span key={e.key} className="inline-flex items-baseline gap-1">
-                <span
-                  className={cn(
-                    'font-display text-xl leading-none',
-                    rare
-                      ? 'text-amber'
-                      : e.delta > 0
-                        ? 'text-emerald-400'
-                        : e.delta < 0
-                          ? 'text-rose-400'
-                          : 'text-ink-dim',
-                  )}
-                >
-                  {e.delta === 0 && e.nominal ? 'MAX' : `${e.delta >= 0 ? '+' : ''}${e.delta}`}
-                </span>
-                {e.nominal !== undefined && e.delta !== 0 && (
-                  <span className="text-[10px] text-ink-dim line-through">
-                    {e.nominal >= 0 ? '+' : ''}
-                    {e.nominal}
-                  </span>
-                )}
-                <span
-                  className={cn(
-                    'text-[11px] font-bold uppercase tracking-wide',
-                    rare
-                      ? 'text-amber/80'
-                      : e.delta > 0
-                        ? 'text-emerald-400/80'
-                        : e.delta < 0
-                          ? 'text-rose-400/80'
-                          : 'text-ink-dim',
-                  )}
-                >
-                  {e.label}
-                </span>
-              </span>
-            ),
-          )}
-          {tag && (
-            <span className="rounded-full bg-court-700 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-ink-dim">
-              {tag}
-            </span>
-          )}
-        </div>
-      </div>
-    </button>
+            )}
+          </span>
+        )}
+      </span>
+    </DecisionSurface>
   );
 }

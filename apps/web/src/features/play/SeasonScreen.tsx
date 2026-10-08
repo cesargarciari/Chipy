@@ -1,35 +1,28 @@
-import type { EffectChip, PendingDecision, PlayerProfile } from '@chipy/engine';
-import { useState } from 'react';
+import type { PendingDecision, PlayerProfile } from '@chipy/engine';
 import { ChoiceCard } from '../../components/ChoiceCard.js';
 import { MomentModal, isHeadlineMoment } from '../../components/MomentModal.js';
-import { Card, CardBody } from '../../components/ui/card.js';
-import { clubCrest, teamLogo } from '../../lib/art.js';
+import { cn } from '../../lib/cn.js';
 import { GRADE_TONE, TEAM_RESULT_LABELS, teamName } from '../../lib/format.js';
 import { AwardChips } from './AwardChips.js';
-import { CareerHud } from './CareerHud.js';
-import { PerksDrawer } from './PerksDrawer.js';
-import { ScenarioFrame } from './ScenarioFrame.js';
+import { ChoiceGrid, DEAL_START, Stage } from './Stage.js';
 import { StatLine } from './StatLine.js';
 
 type Season = NonNullable<PendingDecision['season']>;
+type LastSeason = NonNullable<Season['preview']['lastSeason']>;
 
+/** The offseason call. It opens on how last season went, then asks the question. */
 export function SeasonScreen({
   season,
   profile,
   onChoose,
-  onBuyPerk,
-  recentDeltas,
-  echoSeq,
+  onHoverKeys,
 }: {
   season: Season;
   profile: PlayerProfile;
   onChoose: (choiceId: string) => void;
-  onBuyPerk: (choiceId: string) => void;
-  recentDeltas?: readonly EffectChip[];
-  echoSeq?: number;
+  onHoverKeys: (keys: readonly string[] | null) => void;
 }) {
-  const [highlight, setHighlight] = useState<readonly string[] | undefined>(undefined);
-  const { preview, decision, shop } = season;
+  const { preview, decision } = season;
   const last = preview.lastSeason;
   const headlineMoments = preview.moments.filter(isHeadlineMoment);
   const where =
@@ -38,86 +31,33 @@ export function SeasonScreen({
       : preview.team
         ? teamName(preview.team.id)
         : '-';
-  const crest =
-    preview.league === 'overseas' ? clubCrest(preview.club?.id) : teamLogo(preview.team?.id);
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
-        <div className="font-semibold">
-          Season {preview.seasonNumber} · Age {preview.age}
-        </div>
-        <div className="flex items-center gap-2 text-ink-dim">
-          <span className="inline-flex items-center gap-1.5">
-            {crest && <img src={crest} alt="" className="h-5 w-5 object-contain" />}
-            {where}
-            {preview.contractYear && <span className="ml-1 text-amber">· contract year</span>}
-          </span>
-          <PerksDrawer
-            shop={shop}
-            onBuy={onBuyPerk}
-            onHoverKeys={(k) => setHighlight(k ?? undefined)}
-          />
-        </div>
-      </div>
-
+    <>
       <MomentModal key={preview.seasonNumber} moments={headlineMoments} />
-
-      <CareerHud
-        preview={preview}
-        highlight={highlight}
-        recentDeltas={recentDeltas}
-        echoSeq={echoSeq}
-      />
-
-      {last ? (
-        <Card>
-          <CardBody className="space-y-3">
-            <div className="flex items-center justify-between gap-2">
-              <h3 className="font-bold">Last season - {teamName(last.teamId)}</h3>
-              <span className="inline-flex items-center gap-2 text-xs uppercase tracking-wide text-ink-dim">
-                {last.seed >= 1 && <span>#{last.seed} seed</span>}
-                <span>{TEAM_RESULT_LABELS[last.teamResult]}</span>
-                <span className={`font-display text-base leading-none ${GRADE_TONE[last.grade]}`}>
-                  {last.grade}
-                </span>
-              </span>
-            </div>
-            {last.finalsHeadline && (
-              <p className="text-sm font-semibold text-amber">{last.finalsHeadline}</p>
-            )}
-            <p className="text-sm text-ink">{last.recap}</p>
-            {(last.midseasonHeadline ?? last.eventHeadline) && (
-              <p className="text-sm text-ink-dim">{last.midseasonHeadline ?? last.eventHeadline}</p>
-            )}
-            <StatLine stats={last.stats} />
-            <AwardChips awards={last.awards} />
-          </CardBody>
-        </Card>
-      ) : (
-        <Card>
-          <CardBody className="space-y-2">
-            <h3 className="font-bold">Welcome to the league</h3>
-            <p className="text-sm text-ink-dim">
-              You&apos;re a {profile.position} with the {where}. Time to make your name.
-            </p>
-          </CardBody>
-        </Card>
-      )}
-
-      <ScenarioFrame
-        key={decision.nodeId}
-        accent="amber"
-        kicker={decision.theme}
+      <Stage
         title={decision.title}
         prompt={decision.prompt}
+        preface={
+          last ? (
+            <LastSeasonRecap last={last} />
+          ) : (
+            <div className="border-b border-ink/8 pb-9">
+              <h3 className="t-voice text-[1.75rem] leading-tight text-ink">
+                Welcome to the league.
+              </h3>
+              <p className="mt-3 text-ink/65">
+                You&apos;re a {profile.position} with the {where}. Time to make your name.
+              </p>
+            </div>
+          )
+        }
       >
-        <div className="grid gap-3 sm:grid-cols-2">
-          {decision.options.map((o) => (
+        <ChoiceGrid>
+          {decision.options.map((o, i) => (
             <ChoiceCard
               key={o.id}
-              className="option-enter"
-              accent="amber"
+              index={DEAL_START + i}
               title={o.label}
               description={o.blurb}
               effects={o.effects}
@@ -126,12 +66,51 @@ export function SeasonScreen({
               watermark={o.watermark}
               teamId={o.teamId}
               tone={o.id === 'retire' || o.id === 'demand_trade' ? 'danger' : 'default'}
-              onHoverKeys={(k) => setHighlight(k ?? undefined)}
+              onHoverKeys={onHoverKeys}
               onClick={() => onChoose(o.id)}
             />
           ))}
+        </ChoiceGrid>
+      </Stage>
+    </>
+  );
+}
+
+function LastSeasonRecap({ last }: { last: LastSeason }) {
+  return (
+    <div className="border-b border-ink/8 pb-9">
+      <div className="flex items-start justify-between gap-6">
+        <div className="min-w-0">
+          <h3 className="text-sm text-ink/60">Last season, {teamName(last.teamId)}</h3>
+          <p className="mt-2 flex flex-wrap gap-x-3 text-sm text-ink/60">
+            {last.seed >= 1 && <span className="t-num">#{last.seed} seed</span>}
+            <span className="text-ink">{TEAM_RESULT_LABELS[last.teamResult]}</span>
+          </p>
         </div>
-      </ScenarioFrame>
+        <span
+          className={cn('t-num shrink-0 text-[3.25rem] leading-[0.8]', GRADE_TONE[last.grade])}
+          aria-label={`Grade ${last.grade}`}
+        >
+          {last.grade}
+        </span>
+      </div>
+
+      {last.finalsHeadline && <p className="mt-5 text-accent-ink">{last.finalsHeadline}</p>}
+      <p className="t-voice mt-4 max-w-[46ch] text-[1.3125rem] leading-snug text-ink">
+        {last.recap}
+      </p>
+      {(last.midseasonHeadline ?? last.eventHeadline) && (
+        <p className="mt-3 text-sm text-ink/60">{last.midseasonHeadline ?? last.eventHeadline}</p>
+      )}
+
+      <div className="mt-7">
+        <StatLine stats={last.stats} />
+      </div>
+      {last.awards.length > 0 && (
+        <div className="mt-6">
+          <AwardChips awards={last.awards} />
+        </div>
+      )}
     </div>
   );
 }

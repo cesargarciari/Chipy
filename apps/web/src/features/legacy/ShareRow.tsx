@@ -13,28 +13,28 @@ export function ShareRow({
 }) {
   const [copied, setCopied] = useState(false);
 
-  if (saving) return <p className="text-center text-sm text-ink-dim">Saving your career…</p>;
+  if (saving) return <p className="text-center text-sm text-ink/60">Saving your career…</p>;
   if (!shareUrl) {
     return (
-      <p className="text-center text-sm text-ink-dim">
+      <p className="text-center text-sm text-ink/60">
         {saveError
-          ? `Couldn't save online (${saveError}) - your career still stands.`
-          : 'Playing offline - this career was not saved.'}
+          ? `Couldn't save online (${saveError}). Your career still stands.`
+          : 'Playing offline. This career was not saved.'}
       </p>
     );
   }
 
   return (
-    <div className="flex gap-2">
+    <div className="flex gap-2 rounded-full bg-raised p-1.5 inset-ring inset-ring-ink/8">
       <input
         readOnly
         value={shareUrl}
         aria-label="Share link"
         onFocusCapture={(e) => e.currentTarget.select()}
-        className="flex-1 rounded-lg border border-court-600 bg-court-800 px-3 py-2 text-sm text-ink-dim"
+        className="t-num min-w-0 flex-1 bg-transparent px-4 text-sm text-ink/70 outline-none"
       />
       <Button
-        variant="outline"
+        variant="primary"
         onClick={async () => {
           try {
             await navigator.clipboard.writeText(shareUrl);

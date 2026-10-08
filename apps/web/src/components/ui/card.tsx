@@ -1,16 +1,11 @@
 import type { HTMLAttributes } from 'react';
 import { cn } from '../../lib/cn.js';
 
+/** A raised surface: a step lighter than the ground, a hairline edge, a top rim in the dark. */
+export const SURFACE = 'bg-raised inset-ring inset-ring-ink/7 shadow-rim';
+
 export function Card({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
-  return (
-    <div
-      className={cn(
-        'rounded-2xl border border-court-700 bg-court-900/80 shadow-xl shadow-black/40 backdrop-blur',
-        className,
-      )}
-      {...props}
-    />
-  );
+  return <div className={cn(SURFACE, 'rounded-card', className)} {...props} />;
 }
 
 export function CardBody({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
@@ -18,5 +13,5 @@ export function CardBody({ className, ...props }: HTMLAttributes<HTMLDivElement>
 }
 
 export function CardTitle({ className, ...props }: HTMLAttributes<HTMLHeadingElement>) {
-  return <h2 className={cn('text-xl font-bold tracking-tight text-ink', className)} {...props} />;
+  return <h2 className={cn('t-title text-ink', className)} {...props} />;
 }

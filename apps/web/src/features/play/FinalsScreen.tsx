@@ -1,43 +1,37 @@
 import type { PendingDecision } from '@chipy/engine';
-import { CareerHud } from './CareerHud.js';
-import { ScenarioFrame } from './ScenarioFrame.js';
+import { DecisionSurface } from '../../components/DecisionSurface.js';
+import { DEAL_START, Stage } from './Stage.js';
 
 type Finals = NonNullable<PendingDecision['finals']>;
 
-/** The NBA Finals come down to one play the player picks. */
+/** The NBA Finals come down to one possession, drawn over the half court. */
 export function FinalsScreen({
   finals,
   onChoose,
-  echoSeq,
 }: {
   finals: Finals;
   onChoose: (choiceId: string) => void;
-  echoSeq?: number;
 }) {
-  const { game, preview } = finals;
+  const { game } = finals;
 
   return (
-    <ScenarioFrame
-      accent="amber"
-      kicker={`${game.kicker} · Age ${preview.age}`}
-      title={game.situation}
-      prompt={game.prompt}
-      footer={<CareerHud preview={preview} echoSeq={echoSeq} />}
-    >
+    <Stage title={game.situation} prompt={game.prompt} court>
       <div className="space-y-3">
         {game.options.map((o, i) => (
-          <button
+          <DecisionSurface
             key={o.id}
-            className="option-enter group flex w-full items-start gap-4 rounded-2xl border border-court-700 bg-court-900 p-5 text-left transition-colors hover:border-amber hover:bg-amber/[0.04]"
+            index={DEAL_START + i}
+            className="w-full"
+            faceClassName="flex-row items-start gap-6 p-6 sm:p-7"
             onClick={() => onChoose(o.id)}
           >
-            <span className="mt-0.5 font-display text-2xl leading-none text-amber/70 group-hover:text-amber">
+            <span className="t-num text-[2.25rem] leading-[0.8] text-accent-ink">
               {String.fromCharCode(65 + i)}
             </span>
-            <span className="text-sm leading-relaxed text-ink">{o.label}</span>
-          </button>
+            <span className="t-lead text-ink">{o.label}</span>
+          </DecisionSurface>
         ))}
       </div>
-    </ScenarioFrame>
+    </Stage>
   );
 }

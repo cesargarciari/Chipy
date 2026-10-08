@@ -48,13 +48,13 @@ export function TrophyShelf({ awards }: TrophyShelfProps) {
   const rest = TROPHY_ORDER.filter((id) => (awards[id] ?? 0) > 0 && !shelf.includes(id as AwardId));
 
   if (shelf.length === 0 && rest.length === 0) {
-    return <p className="text-sm text-ink-dim">No hardware - but every legend starts somewhere.</p>;
+    return <p className="text-ink/60">No hardware, but every legend starts somewhere.</p>;
   }
 
   return (
     <div className="space-y-4">
       {shelf.length > 0 && (
-        <div className="trophy-shelf flex flex-wrap items-end gap-x-7 gap-y-5 rounded-xl border border-court-700 bg-gradient-to-b from-court-800/70 to-court-900 px-5 pb-4 pt-5">
+        <div className="flex flex-wrap items-end gap-x-8 gap-y-6 rounded-2xl bg-ink/4 px-6 pb-5 pt-6">
           {shelf.map((id) => {
             const count = awards[id] ?? 0;
             const src = awardArt(id)!;
@@ -62,7 +62,7 @@ export function TrophyShelf({ awards }: TrophyShelfProps) {
             return (
               <div
                 key={id}
-                className="trophy-group flex shrink-0 flex-col items-center rounded-lg outline-none focus-visible:ring-1 focus-visible:ring-amber/60"
+                className="trophy-group flex shrink-0 flex-col items-center rounded-xl outline-offset-4"
                 title={label}
                 aria-label={label}
                 tabIndex={0}
@@ -73,13 +73,13 @@ export function TrophyShelf({ awards }: TrophyShelfProps) {
                       key={k}
                       src={src}
                       alt=""
-                      className="h-14 w-14 shrink-0 object-contain p-1 drop-shadow-[0_4px_10px_rgba(0,0,0,0.5)]"
+                      className="h-16 w-16 shrink-0 object-contain p-1 drop-shadow-[0_8px_14px_var(--shadow-tint)]"
                     />
                   ))}
                 </div>
-                <div className="mt-1.5 text-center text-[10px] font-semibold uppercase tracking-wide text-ink-dim">
+                <div className="t-label mt-2 text-center">
                   {SHORT[id as AwardId] ?? AWARD_LABELS[id as AwardId]}
-                  {count > 1 && <span className="ml-1 text-amber">x{count}</span>}
+                  {count > 1 && <span className="t-num ml-1 text-gold">x{count}</span>}
                 </div>
               </div>
             );
@@ -92,10 +92,10 @@ export function TrophyShelf({ awards }: TrophyShelfProps) {
           {rest.map((id) => (
             <span
               key={id}
-              className="inline-flex items-center gap-1 rounded-lg border border-court-600 bg-court-800 px-2.5 py-1 text-xs"
+              className="inline-flex h-8 items-center gap-1.5 rounded-full bg-ink/6 px-3.5 text-sm text-ink/75"
             >
-              <Trophy size={11} className="text-amber" />
-              <span className="font-mono font-bold text-amber">{awards[id]}x</span>{' '}
+              <Trophy size={13} strokeWidth={2} className="text-gold" aria-hidden />
+              <span className="t-num text-gold">{awards[id]}x</span>
               {AWARD_LABELS[id as AwardId]}
             </span>
           ))}

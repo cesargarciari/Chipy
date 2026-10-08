@@ -1,47 +1,33 @@
 import type { EffectChip } from '@chipy/engine';
-import { cn } from '../../lib/cn.js';
-import { moneyM } from '../../lib/format.js';
+import { Check } from 'lucide-react';
+import { EffectChips } from '../../components/EffectChips.js';
 import { useT } from '../../lib/i18n.js';
-import { mergeDefenseChips } from '../../lib/ratings.js';
 
 export interface DecisionEchoData {
   label: string;
   effects: EffectChip[];
 }
 
-/** A one-line recap of the choice the player just made. */
+/** The call you just made lands here, so the next scene opens on its consequence. */
 export function DecisionEcho({ echo, echoSeq }: { echo: DecisionEchoData; echoSeq: number }) {
   const t = useT();
-  const chips = mergeDefenseChips(echo.effects);
 
   return (
     <div
       key={echoSeq}
-      className="decision-enter flex flex-wrap items-center gap-x-3 gap-y-1 rounded-xl border border-court-800 bg-court-900/40 px-3 py-2 text-xs"
+      role="status"
+      className="toast-in inline-flex max-w-full flex-wrap items-center gap-x-3 gap-y-1.5 rounded-[1.375rem] bg-float py-2 pl-2 pr-4 shadow-lift inset-ring inset-ring-ink/8"
     >
-      <span className="font-bold uppercase tracking-wide text-ink-dim">{t.play.lastCall}</span>
-      <span className="font-semibold text-ink">{echo.label}</span>
-      {chips.map((c) => (
-        <span
-          key={c.key}
-          className={cn(
-            'font-mono font-bold',
-            c.key === 'money'
-              ? c.delta >= 0
-                ? 'text-amber'
-                : 'text-rose-400'
-              : c.delta > 0
-                ? 'text-emerald-400'
-                : c.delta < 0
-                  ? 'text-rose-400'
-                  : 'text-ink-dim',
-          )}
-        >
-          {c.key === 'money'
-            ? `${c.delta >= 0 ? '+' : '−'}${moneyM(Math.abs(c.delta))}`
-            : `${c.delta >= 0 ? '+' : ''}${c.delta} ${c.label}`}
+      <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-accent text-on-accent">
+        <Check size={14} strokeWidth={2.25} aria-hidden />
+      </span>
+      <span className="t-label">{t.play.lastCall}</span>
+      <span className="t-jersey text-[1.0625rem] text-ink">{echo.label}</span>
+      {echo.effects.length > 0 && (
+        <span className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+          <EffectChips effects={echo.effects} size="sm" />
         </span>
-      ))}
+      )}
     </div>
   );
 }
