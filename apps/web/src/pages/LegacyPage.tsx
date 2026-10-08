@@ -51,16 +51,18 @@ export function LegacyPage() {
     save.error instanceof ApiError ? save.error.message : save.error ? 'unknown error' : null;
 
   return (
-    <LegacyCard
-      summary={summary}
-      choiceStats={save.data?.choiceStats}
-      shareUrl={shareUrl}
-      saving={save.isLoading}
-      saveError={saveError}
-      onPlayAgain={() => {
-        reset();
-        navigate('/create');
-      }}
-    />
+    <div className="mx-auto max-w-5xl px-4 pb-10 pt-8 sm:px-6 lg:pt-14">
+      <LegacyCard
+        summary={summary}
+        choiceStats={save.data?.choiceStats}
+        shareUrl={shareUrl}
+        saving={save.isLoading}
+        saveError={saveError}
+        onPlayAgain={() => {
+          reset();
+          navigate('/create');
+        }}
+      />
+    </div>
   );
 }

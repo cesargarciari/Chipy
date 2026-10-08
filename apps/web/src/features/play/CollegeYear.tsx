@@ -1,65 +1,71 @@
 import type { PendingDecision } from '@chipy/engine';
+import type { CSSProperties } from 'react';
 import { ChoiceCard } from '../../components/ChoiceCard.js';
-import { Card, CardBody } from '../../components/ui/card.js';
+import { ChoiceGrid, DEAL_START, Stage } from './Stage.js';
+
+type CollegeYearData = NonNullable<PendingDecision['collegeYear']>;
 
 const COLLEGE_YEAR_LABEL = ['', 'Freshman', 'Sophomore', 'Junior'] as const;
 const ACADEMY_YEAR_LABEL = ['', 'First', 'Second', 'Third'] as const;
+
+/** "Freshman year" at a college, "Second season" at an overseas academy. */
+export function collegeYearLabel(year: CollegeYearData): string {
+  const n = year.recap.year;
+  return year.tier === 'overseas'
+    ? `${ACADEMY_YEAR_LABEL[n] ?? `Year ${n}`} season`
+    : `${COLLEGE_YEAR_LABEL[n] ?? `Year ${n}`} year`;
+}
 
 export function CollegeYear({
   year,
   onChoose,
 }: {
-  year: NonNullable<PendingDecision['collegeYear']>;
+  year: CollegeYearData;
   onChoose: (choiceId: string) => void;
 }) {
-  const { recap, options, tier } = year;
+  const { recap, options } = year;
   const s = recap.stats;
-  const academy = tier === 'overseas';
-  const yearLabel = academy
-    ? (ACADEMY_YEAR_LABEL[recap.year] ?? `Year ${recap.year}`)
-    : (COLLEGE_YEAR_LABEL[recap.year] ?? `Year ${recap.year}`);
 
   return (
-    <div className="space-y-4">
-      <Card>
-        <CardBody className="space-y-3">
-          <div className="flex items-baseline justify-between">
-            <h2 className="text-2xl">{recap.school.toUpperCase()}</h2>
-            <span className="text-xs uppercase tracking-wide text-ink-dim">
-              {yearLabel} {academy ? 'season' : 'year'}
-            </span>
-          </div>
-          <div className="grid grid-cols-4 gap-2 text-center">
-            {[
+    <Stage title={recap.school.toUpperCase()} prompt={recap.headline}>
+      <div
+        className="enter border-b border-ink/8 pb-9"
+        style={{ '--i': DEAL_START } as CSSProperties}
+      >
+        <dl className="grid max-w-md grid-cols-4 gap-4">
+          {(
+            [
               ['PPG', s.ppg],
               ['RPG', s.rpg],
               ['APG', s.apg],
               ['FG%', (s.fgPct * 100).toFixed(0)],
-            ].map(([label, val]) => (
-              <div key={label} className="rounded-lg bg-court-800 py-2">
-                <div className="font-display text-xl leading-none tabular-nums">{val}</div>
-                <div className="text-[10px] uppercase tracking-wide text-ink-dim">{label}</div>
-              </div>
-            ))}
-          </div>
-          <p className="text-sm text-amber">{recap.result}</p>
-          <p className="text-sm text-ink-dim">{recap.headline}</p>
-        </CardBody>
-      </Card>
-
-      <div className="grid gap-3 sm:grid-cols-3">
-        {options.map((o) => (
-          <ChoiceCard
-            key={o.id}
-            title={o.label}
-            description={o.blurb}
-            effects={o.effects}
-            tag={o.tag}
-            watermark={o.watermark}
-            onClick={() => onChoose(o.id)}
-          />
-        ))}
+            ] as const
+          ).map(([label, val]) => (
+            <div key={label}>
+              <dt className="t-label">{label}</dt>
+              <dd className="t-num mt-1.5 text-[1.75rem] leading-none text-ink">{val}</dd>
+            </div>
+          ))}
+        </dl>
+        <p className="mt-6 text-accent-ink">{recap.result}</p>
       </div>
-    </div>
+
+      <div className="mt-9">
+        <ChoiceGrid>
+          {options.map((o, i) => (
+            <ChoiceCard
+              key={o.id}
+              index={DEAL_START + 1 + i}
+              title={o.label}
+              description={o.blurb}
+              effects={o.effects}
+              tag={o.tag}
+              watermark={o.watermark}
+              onClick={() => onChoose(o.id)}
+            />
+          ))}
+        </ChoiceGrid>
+      </div>
+    </Stage>
   );
 }

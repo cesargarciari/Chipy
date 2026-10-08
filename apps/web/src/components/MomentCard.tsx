@@ -29,15 +29,15 @@ const ICON: Record<CareerMomentDto['kind'], LucideIcon> = {
 };
 
 const TONE: Record<CareerMomentDto['kind'], string> = {
-  award: 'from-amber/20 border-amber/50',
-  ring: 'from-amber/25 border-amber',
-  trade: 'from-court-700/40 border-court-600',
-  signing: 'from-court-700/40 border-court-600',
-  franchise: 'from-amber/15 border-amber/40',
-  shoe: 'from-amber/15 border-amber/40',
-  milestone: 'from-sky-500/15 border-sky-500/40',
-  midseason: 'from-court-700/40 border-court-600',
-  injury: 'from-rose-500/15 border-rose-500/40',
+  award: 'text-gold',
+  ring: 'text-gold',
+  trade: 'text-ink/70',
+  signing: 'text-ink/70',
+  franchise: 'text-gold',
+  shoe: 'text-accent-ink',
+  milestone: 'text-cool',
+  midseason: 'text-ink/70',
+  injury: 'text-down',
 };
 
 /** One highlight from the season. Shows award art if it exists, otherwise an icon. */
@@ -45,13 +45,13 @@ export function MomentCard({ moment }: { moment: CareerMomentDto }) {
   const art = awardArt(moment.awardId);
   const Icon = ICON[moment.kind];
   return (
-    <div
-      className={cn(
-        'flex items-center gap-4 rounded-2xl border bg-gradient-to-r to-transparent p-4',
-        TONE[moment.kind],
-      )}
-    >
-      <div className="grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-xl bg-court-900 text-ink-dim">
+    <div className="flex items-center gap-4 rounded-2xl bg-ink/4 p-4">
+      <div
+        className={cn(
+          'grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-xl bg-raised',
+          TONE[moment.kind],
+        )}
+      >
         {art ? (
           <img src={art} alt="" className="h-full w-full object-contain p-1" />
         ) : (
@@ -59,13 +59,11 @@ export function MomentCard({ moment }: { moment: CareerMomentDto }) {
         )}
       </div>
       <div className="min-w-0">
-        <div className="font-display text-xl leading-none tracking-wide text-ink">
-          {moment.title}
-        </div>
+        <div className="t-jersey text-xl text-ink">{moment.title}</div>
         {moment.choice && (
-          <div className="mt-1 text-xs font-semibold text-amber">You chose: {moment.choice}</div>
+          <div className="mt-1 text-xs text-accent-ink">You chose: {moment.choice}</div>
         )}
-        <div className="mt-1 text-xs text-ink-dim">
+        <div className="mt-1 text-xs text-ink/60">
           {moment.subtitle}
           {moment.teamId && moment.kind !== 'franchise' && !moment.subtitle.includes('·') && (
             <> · {teamName(moment.teamId)}</>

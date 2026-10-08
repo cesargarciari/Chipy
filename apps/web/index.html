@@ -1,20 +1,31 @@
 <!doctype html>
-<html lang="en" class="dark">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f5f3f1" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#110e0c" />
     <meta
       name="description"
-      content="Chipy — build an NBA prospect and steer a full career, one decision at a time. Your calls, your legacy."
+      content="Chipy: build an NBA prospect and steer a full career, one decision at a time. Your calls, your legacy."
     />
+    <script>
+      // Apply a saved light or dark choice before first paint, so the page never flashes.
+      try {
+        var saved = JSON.parse(localStorage.getItem('chipy.theme') || 'null');
+        var theme = saved && saved.state && saved.state.theme;
+        if (theme === 'light' || theme === 'dark') document.documentElement.dataset.theme = theme;
+      } catch (e) {}
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow+Condensed:wght@600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..500&family=Bodoni+Moda:ital,opsz,wght@1,6..96,400&display=swap"
       rel="stylesheet"
     />
-    <title>Chipy — NBA Career Simulator</title>
+    <title>Chipy: NBA Career Simulator</title>
   </head>
   <body>
     <div id="root"></div>

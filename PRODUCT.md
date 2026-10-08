@@ -107,10 +107,12 @@ pnpm test`, in that order. Engine changes also require
   decision card with explicit `+N ATTRIBUTE` / `plus or minus $M` effect chips
   and a persistent stat strip and money bar that light the tiles an option
   moves. This survives any redesign.
-- **Current, non-binding visual facts** a redesign may revisit: a single
-  committed dark "arena at night" theme (amber on court-black, Anton and Barlow
-  Condensed display type, no light mode); the UI runs on emoji glyphs by
-  default with optional real-art drop-in.
+- **Current, non-binding visual facts** a redesign may revisit: a calm
+  flagship style ("lights down, ball up") with matching dark and light themes
+  that follow the OS or a header switch; ball-leather orange for the primary
+  action, trophy gold for hardware; Archivo (calm grotesk plus narrow jersey
+  lettering) with a Bodoni Moda italic voice; lucide icons, with optional
+  real-art drop-in for teams, clubs and awards. See DESIGN.md.
 - **No escape hatches:** zero `any`, `@ts-ignore`, or `eslint-disable` in the
   repo. Strict ESM: `engine` and `api` relative imports carry the `.js`
   extension; `web` does not.
@@ -166,6 +168,8 @@ pnpm test`, in that order. Engine changes also require
 ## Accessibility & Inclusion
 
 No formal conformance level has been committed (an open decision). Current
-behavior to preserve: all decorative motion is opacity-only and disabled under
-`prefers-reduced-motion`, and interactive elements use `:focus-visible`
-affordances. The single-column layout is readable from phone widths up.
+behavior to preserve: pickable buttons only fade and sharpen in (movement lives
+on an inner face), spatial motion collapses to short fades under
+`prefers-reduced-motion`, small text stays at or above 4.5:1 in both themes,
+and interactive elements use `:focus-visible` affordances. The play layout
+collapses to one column at phone widths.

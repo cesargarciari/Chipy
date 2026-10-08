@@ -1,8 +1,8 @@
-import { ArrowRight, ChevronDown } from 'lucide-react';
-import { Fragment } from 'react';
+import type { CSSProperties } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { CourtLines } from '../components/CourtLines.js';
 import { Button } from '../components/ui/button.js';
-import { DecisionPreview } from '../features/landing/DecisionPreview.js';
+import { SampleCall } from '../features/landing/SampleCall.js';
 import { TaglineReveal } from '../features/landing/TaglineReveal.js';
 import { useT } from '../lib/i18n.js';
 import { runCareerSafe } from '../lib/runCareerSafe.js';
@@ -17,43 +17,38 @@ export function Home() {
     profile !== null && runCareerSafe({ seed, profile, choices }).status === 'awaiting_choice';
 
   return (
-    <div className="relative isolate flex flex-col">
-      {/* Warm glow behind the headline. */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 -top-20 -z-10 mx-auto h-105 w-full max-w-180"
-        style={{
-          background:
-            'radial-gradient(ellipse 60% 55% at 50% 46%, rgba(249,115,22,0.11), transparent 72%)',
-        }}
-      />
-
-      {/* Full screen height minus the header and footer, so the hero is centered. */}
-      <section className="flex min-h-[calc(100dvh-9.5rem)] flex-col items-center justify-center gap-10 py-12 sm:gap-14">
-        <div className="decision-enter flex flex-col items-center gap-5 text-center">
-          <h1 className="max-w-2xl text-pretty text-4xl italic font-light tracking-tight text-ink sm:text-6xl">
-            {t.home.headline}{' '}
-            <span className="font-medium not-italic text-amber">{t.home.headlineAccent}</span>
+    <div>
+      {/* The greeting, under the center circle. The only thing that moves on load. */}
+      <section className="relative isolate overflow-hidden">
+        <CourtLines
+          variant="center"
+          className="enter absolute inset-0 -z-10 h-full w-full [mask-image:radial-gradient(ellipse_55%_60%_at_50%_50%,black,transparent)] [--blur:0px] [--rise:0px]"
+        />
+        <div className="mx-auto flex min-h-[calc(100svh-3.5rem)] max-w-6xl flex-col items-center justify-center px-4 pb-24 pt-16 text-center sm:px-6">
+          <h1
+            className="enter t-voice text-[clamp(3.5rem,2rem+6.5vw,7.5rem)] leading-[0.95] tracking-[-0.03em] text-ink"
+            style={{ '--i': 1 } as CSSProperties}
+          >
+            {t.home.greeting}
           </h1>
-          <p className="max-w-md text-pretty text-base leading-relaxed text-ink-dim sm:max-w-2xl sm:text-lg">
+          <p
+            className="enter t-lead mt-7 max-w-[42ch] text-ink/65"
+            style={{ '--i': 2 } as CSSProperties}
+          >
             {t.home.subhead}
           </p>
-        </div>
-
-        <div className="decision-enter flex flex-col items-center gap-3">
-          <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
-            <Button
-              size="lg"
-              className="w-full sm:w-auto sm:min-w-56"
-              onClick={() => navigate('/create')}
-            >
+          <div
+            className="enter mt-11 flex w-full flex-col items-center gap-3 sm:w-auto sm:flex-row"
+            style={{ '--i': 3 } as CSSProperties}
+          >
+            <Button size="lg" className="w-full sm:w-auto" onClick={() => navigate('/create')}>
               {t.home.startNew}
             </Button>
             {inProgress && (
               <Button
                 size="lg"
-                variant="outline"
-                className="w-full sm:w-auto sm:min-w-56"
+                variant="secondary"
+                className="w-full sm:w-auto"
                 onClick={() => navigate('/play')}
               >
                 {t.home.resume}
@@ -61,46 +56,50 @@ export function Home() {
             )}
           </div>
         </div>
-
-        <div className="flex w-full max-w-2xl flex-col items-center gap-2.5 border-t border-court-800 pt-8 text-[11px] font-bold uppercase tracking-[0.14em] text-ink-dim sm:flex-row sm:justify-between sm:gap-4">
-          {t.home.arc.map((step, i) => (
-            <Fragment key={step}>
-              <span className="whitespace-nowrap">{step}</span>
-              {i < t.home.arc.length - 1 && (
-                <>
-                  <ArrowRight
-                    aria-hidden
-                    className="hidden h-3.5 w-3.5 shrink-0 text-court-600 sm:block"
-                  />
-                  <span aria-hidden className="h-3 w-px bg-court-700 sm:hidden" />
-                </>
-              )}
-            </Fragment>
-          ))}
-        </div>
-
-        <ChevronDown aria-hidden className="scroll-cue h-5 w-5 text-court-600" />
       </section>
 
-      <section className="flex flex-col items-center gap-16 border-t border-court-800 px-4 py-20 sm:py-24">
-        <div className="flex flex-col items-center gap-6">
-          <span className="text-[11px] font-bold uppercase tracking-[0.22em] text-ink-dim">
-            {t.home.sampleCallLabel}
-          </span>
-          <DecisionPreview />
+      {/* Statement with proof: a real call, playable here. */}
+      <section className="mx-auto max-w-6xl px-4 py-24 sm:px-6 lg:py-36">
+        <div className="grid grid-cols-1 gap-14 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-20">
+          <div className="lg:pt-3">
+            <h2 className="t-title max-w-[15ch]">{t.home.sampleTitle}</h2>
+            <p className="t-lead mt-5 max-w-[34ch] text-ink/65">{t.home.sampleLead}</p>
+          </div>
+          <SampleCall />
         </div>
+      </section>
 
-        <TaglineReveal lines={[...t.home.tagline]} />
+      {/* The arc of a career, as a ledger. */}
+      <section className="mx-auto max-w-6xl px-4 pb-24 sm:px-6 lg:pb-36">
+        <ol>
+          {t.home.promises.map((p) => (
+            <li
+              key={p.title}
+              className="grid grid-cols-1 gap-3 border-t border-ink/10 py-9 lg:grid-cols-2 lg:gap-16 lg:py-12"
+            >
+              <h3 className="t-title text-[clamp(1.625rem,1.3rem+1.2vw,2.25rem)]">{p.title}</h3>
+              <p className="t-lead max-w-[44ch] text-ink/65 lg:pt-1.5">{p.body}</p>
+            </li>
+          ))}
+        </ol>
+      </section>
 
-        {inProgress ? (
-          <Button size="lg" className="min-w-56" onClick={() => navigate('/play')}>
-            {t.home.keepPlaying}
-          </Button>
-        ) : (
-          <Button size="lg" className="min-w-56" onClick={() => navigate('/create')}>
-            {t.home.startYourCareer}
-          </Button>
-        )}
+      {/* The one place the page flips its lights. */}
+      <section className="scheme-flip bg-ground text-ink">
+        <div className="mx-auto max-w-6xl px-4 py-32 sm:px-6 lg:py-44">
+          <TaglineReveal lines={[...t.home.tagline]} />
+          <div className="mt-14">
+            {inProgress ? (
+              <Button size="lg" onClick={() => navigate('/play')}>
+                {t.home.keepPlaying}
+              </Button>
+            ) : (
+              <Button size="lg" onClick={() => navigate('/create')}>
+                {t.home.startYourCareer}
+              </Button>
+            )}
+          </div>
+        </div>
       </section>
     </div>
   );

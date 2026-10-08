@@ -1,6 +1,8 @@
 import type { AwardId } from '@chipy/engine';
+import { cn } from '../../lib/cn.js';
 import { AWARD_LABELS } from '../../lib/format.js';
 
+/** The headline honours read as hardware; the rest stay quiet. */
 const BIG = new Set<AwardId>([
   'mvp',
   'finals_mvp',
@@ -18,9 +20,10 @@ export function AwardChips({ awards }: { awards: AwardId[] }) {
       {awards.map((a, i) => (
         <span
           key={`${a}-${i}`}
-          className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
-            BIG.has(a) ? 'bg-amber/20 text-amber' : 'bg-court-700 text-ink-dim'
-          }`}
+          className={cn(
+            'inline-flex h-7 items-center rounded-full px-3 text-xs',
+            BIG.has(a) ? 'bg-gold/14 text-gold' : 'bg-ink/6 text-ink/70',
+          )}
         >
           {AWARD_LABELS[a]}
         </span>

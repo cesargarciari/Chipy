@@ -19,12 +19,12 @@ export type { FranchiseTier };
 
 /** Colour for each franchise tier on the legacy card. */
 export const FRANCHISE_TIER_TONE: Record<FranchiseTier, string> = {
-  none: 'text-ink-dim',
-  known: 'text-ink-dim',
-  favorite: 'text-sky-400',
-  cornerstone: 'text-emerald-400',
-  idol: 'text-amber',
-  legend: 'text-amber',
+  none: 'text-ink/60',
+  known: 'text-ink/60',
+  favorite: 'text-cool',
+  cornerstone: 'text-up',
+  idol: 'text-gold',
+  legend: 'text-gold',
 };
 
 type LegacyTier = CareerSummaryDto['legacy']['tier'];
@@ -95,11 +95,11 @@ export function draftLabel(draft: CareerSummaryDto['draft']): string {
 }
 
 export const GRADE_TONE: Record<GradeLetter, string> = {
-  S: 'text-amber',
-  A: 'text-emerald-400',
-  B: 'text-sky-400',
-  C: 'text-ink-dim',
-  D: 'text-rose-400',
+  S: 'text-gold',
+  A: 'text-up',
+  B: 'text-cool',
+  C: 'text-ink/60',
+  D: 'text-down',
 };
 
 export const LEGACY_TIER_LABELS: Record<LegacyTier, string> = {

@@ -19,7 +19,7 @@ describe('<RatingStrip />', () => {
     expect(screen.getAllByRole('listitem')).toHaveLength(DISPLAY_AXES.length + 2);
   });
 
-  it('lights highlighted tiles gold, mapping either defense key to DEFENSE', () => {
+  it('lights highlighted tiles, mapping either defense key to DEFENSE', () => {
     render(
       <RatingStrip
         ratings={ratings}
@@ -31,8 +31,8 @@ describe('<RatingStrip />', () => {
     const def = screen.getByText('DEFENSE').closest('[role="listitem"]');
     const dur = screen.getByText('DURABILITY').closest('[role="listitem"]');
     const iq = screen.getByText('BASKETBALL IQ').closest('[role="listitem"]');
-    expect(def?.className).toContain('border-amber');
-    expect(dur?.className).toContain('border-amber');
-    expect(iq?.className).not.toContain('border-amber');
+    expect(def).toHaveAttribute('data-lit', 'true');
+    expect(dur).toHaveAttribute('data-lit', 'true');
+    expect(iq).not.toHaveAttribute('data-lit');
   });
 });

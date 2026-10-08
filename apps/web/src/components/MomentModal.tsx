@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { awardArt, clubCrest, teamLogo } from '../lib/art.js';
+import { cn } from '../lib/cn.js';
 import { teamName } from '../lib/format.js';
 
 /** Awards that get a full-screen celebration. Rings and trades do too. */
@@ -108,7 +109,7 @@ export function isHeadlineMoment(m: CareerMomentDto): boolean {
   );
 }
 
-/** Full-screen celebration for the season's biggest moments, shown one at a time. */
+/** The gala: the season's biggest moments, one at a time, with the house lights down. */
 export function MomentModal({
   moments,
   onDone,
@@ -122,10 +123,17 @@ export function MomentModal({
   useEffect(() => {
     if (done) return;
     const onKey = (e: KeyboardEvent) => {
+      // A focused button already turns Enter into a click.
+      if (e.key === 'Enter' && e.target instanceof HTMLButtonElement) return;
       if (e.key === 'Escape' || e.key === 'Enter') setI((n) => n + 1);
     };
     window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
+    const overflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      document.body.style.overflow = overflow;
+    };
   }, [done]);
 
   useEffect(() => {
@@ -140,11 +148,6 @@ export function MomentModal({
   const art = isTrade ? logo : awardArt(m.awardId);
   const Icon = isTrade ? ArrowLeftRight : ((m.awardId && ICON[m.awardId]) ?? Trophy);
 
-  const kicker = isTrade
-    ? 'The window · Deadline day'
-    : m.kind === 'ring'
-      ? 'The gala · Champions'
-      : 'The gala · The hardware';
   const badge = isTrade ? 'TRADED' : ((m.awardId && BADGE[m.awardId]) ?? m.title);
   const headline = isTrade
     ? m.title
@@ -156,77 +159,91 @@ export function MomentModal({
 
   return (
     <div
-      className="fixed inset-0 z-[60] flex items-center justify-center bg-court-950/90 p-4 backdrop-blur-sm"
+      className="gala-scrim fixed inset-0 z-[60] grid place-items-center overflow-y-auto bg-ground/75 p-4 backdrop-blur-xl"
       onClick={() => setI((n) => n + 1)}
     >
       <div
+        key={i}
         role="dialog"
+        aria-modal="true"
         aria-label={m.title}
-        className="w-full max-w-md overflow-hidden rounded-2xl bg-court-950 text-center shadow-[0_0_80px_-16px_rgba(249,115,22,0.5)] ring-1 ring-amber/40"
+        className="gala-panel relative w-full max-w-md overflow-hidden rounded-sheet bg-float text-center shadow-float"
         onClick={(e) => e.stopPropagation()}
-        style={{
-          backgroundImage:
-            'radial-gradient(120% 60% at 50% 0%, rgba(120,80,20,0.35), transparent 60%), linear-gradient(180deg, #1a130a 0%, #0a0a0b 55%)',
-        }}
       >
-        {/* Gold top bar */}
-        <div className="h-1 w-full bg-gradient-to-r from-transparent via-amber to-transparent" />
-
-        <div className="px-7 pb-6 pt-8">
-          <div className="text-[10px] font-bold uppercase tracking-[0.35em] text-amber/90">
-            {kicker}
-          </div>
-
-          <div className="mt-2 font-display text-4xl italic leading-none tracking-wide text-gold-gradient">
+        <div className="gala-rise px-8 pt-10">
+          <div className="t-num text-sm text-ink/60">Season {m.seasonIndex}</div>
+          <p
+            className={cn(
+              't-jersey mt-3 text-[2.5rem] leading-none',
+              isTrade ? 'text-ink' : 'text-gold',
+            )}
+          >
             {badge}
-          </div>
-          <div className="mt-2 text-[11px] font-semibold uppercase tracking-[0.35em] text-amber/60">
-            Season {m.seasonIndex}
-          </div>
+          </p>
 
-          {/* Trophy with a soft glow */}
-          <div className="relative mx-auto my-6 flex h-40 w-40 items-center justify-center">
+          <div className="relative mx-auto my-8 grid h-44 w-44 place-items-center">
             <div
               aria-hidden
               className="absolute inset-0 rounded-full"
               style={{
-                background:
-                  'radial-gradient(circle, rgba(249,180,80,0.35) 0%, rgba(249,180,80,0.08) 45%, transparent 70%)',
+                background: `radial-gradient(circle, color-mix(in oklab, var(${
+                  isTrade ? '--ink' : '--gold'
+                }) 22%, transparent) 0%, transparent 68%)`,
               }}
             />
             {art ? (
               <img
                 src={art}
                 alt={m.title}
-                className="relative block max-h-full max-w-full object-contain drop-shadow-[0_10px_24px_rgba(0,0,0,0.6)]"
+                className="trophy-in relative block h-full w-full object-contain drop-shadow-[0_18px_28px_var(--shadow-tint)]"
               />
             ) : (
-              <Icon size={72} strokeWidth={1.5} className="relative text-amber" />
+              <Icon
+                size={76}
+                strokeWidth={1.25}
+                className={cn('trophy-in relative', isTrade ? 'text-ink' : 'text-gold')}
+              />
+            )}
+            {!isTrade && (
+              <span
+                aria-hidden
+                className="pointer-events-none absolute inset-0 overflow-hidden rounded-full"
+              >
+                <span
+                  className="light-sweep absolute inset-y-0 left-1/4 w-1/2"
+                  style={{
+                    background:
+                      'linear-gradient(90deg, transparent, color-mix(in oklab, var(--gold) 30%, transparent), transparent)',
+                  }}
+                />
+              </span>
             )}
           </div>
 
-          <h2 className="font-display text-2xl leading-tight tracking-wide text-ink">{headline}</h2>
-
-          <p className="mt-2 text-sm text-ink-dim">{m.subtitle}</p>
+          <h2 className="t-jersey text-[1.875rem] text-ink">{headline}</h2>
+          <p className="mt-3 text-sm text-ink/60">{m.subtitle}</p>
 
           {!isTrade && m.teamId && (
-            <div className="mt-2 inline-flex items-center gap-2 text-xs font-semibold text-amber/80">
+            <div className="mt-2 inline-flex items-center gap-2 text-sm text-ink/70">
               {logo && <img src={logo} alt="" className="h-4 w-4 object-contain" />}
               {teamName(m.teamId)}
             </div>
           )}
 
-          <p className="mx-auto mt-4 max-w-[30ch] text-[13px] italic leading-relaxed text-ink-dim">
+          <p className="t-voice mx-auto mt-6 max-w-[30ch] text-lg leading-snug text-ink/80">
             {flavor}
           </p>
         </div>
 
-        <button
-          onClick={() => setI((n) => n + 1)}
-          className="w-full bg-gradient-to-r from-amber to-amber-soft px-6 py-3.5 font-display text-sm uppercase tracking-[0.2em] text-court-950 transition-[filter] hover:brightness-110"
-        >
-          {last ? 'Follow the career →' : `Next (${i + 1}/${moments.length}) →`}
-        </button>
+        <div className="px-6 pb-6 pt-9">
+          <button
+            type="button"
+            onClick={() => setI((n) => n + 1)}
+            className="h-13 w-full rounded-full bg-accent text-base font-medium text-on-accent shadow-lift transition-[background-color,scale] duration-200 hover:bg-accent/88 active:scale-[.98]"
+          >
+            {last ? 'Follow the career' : `Next (${i + 1}/${moments.length})`}
+          </button>
+        </div>
       </div>
     </div>
   );

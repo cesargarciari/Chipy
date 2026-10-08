@@ -1,8 +1,6 @@
-import type { EffectChip, PendingDecision } from '@chipy/engine';
-import { useState } from 'react';
+import type { PendingDecision } from '@chipy/engine';
 import { ChoiceCard } from '../../components/ChoiceCard.js';
-import { CareerHud } from './CareerHud.js';
-import { ScenarioFrame } from './ScenarioFrame.js';
+import { ChoiceGrid, DEAL_START, Stage } from './Stage.js';
 
 type Chemistry = NonNullable<PendingDecision['chemistry']>;
 
@@ -10,48 +8,31 @@ type Chemistry = NonNullable<PendingDecision['chemistry']>;
 export function ChemistryScreen({
   chemistry,
   onChoose,
-  recentDeltas,
-  echoSeq,
+  onHoverKeys,
 }: {
   chemistry: Chemistry;
   onChoose: (choiceId: string) => void;
-  recentDeltas?: readonly EffectChip[];
-  echoSeq?: number;
+  onHoverKeys: (keys: readonly string[] | null) => void;
 }) {
-  const [highlight, setHighlight] = useState<readonly string[] | undefined>(undefined);
-  const { decision, preview } = chemistry;
+  const { decision } = chemistry;
 
   return (
-    <ScenarioFrame
-      accent="sky"
-      kicker={`Locker room · Age ${preview.age}`}
-      title={decision.title}
-      prompt={decision.prompt}
-      footer={
-        <CareerHud
-          preview={preview}
-          highlight={highlight}
-          recentDeltas={recentDeltas}
-          echoSeq={echoSeq}
-        />
-      }
-    >
-      <div className="grid gap-3 sm:grid-cols-2">
-        {decision.options.map((o) => (
+    <Stage title={decision.title} prompt={decision.prompt}>
+      <ChoiceGrid>
+        {decision.options.map((o, i) => (
           <ChoiceCard
             key={o.id}
-            className="option-enter"
-            accent="sky"
+            index={DEAL_START + i}
             title={o.label}
             description={o.blurb}
             effects={o.effects}
             tag={o.tag}
             watermark={o.watermark}
-            onHoverKeys={(k) => setHighlight(k ?? undefined)}
+            onHoverKeys={onHoverKeys}
             onClick={() => onChoose(o.id)}
           />
         ))}
-      </div>
-    </ScenarioFrame>
+      </ChoiceGrid>
+    </Stage>
   );
 }

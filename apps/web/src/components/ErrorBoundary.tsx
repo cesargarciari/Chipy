@@ -1,13 +1,12 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
 import { getT } from '../lib/i18n.js';
 import { Button } from './ui/button.js';
-import { Card, CardBody } from './ui/card.js';
 
 interface State {
   error: Error | null;
 }
 
-/** Shows a recovery card if anything below crashes. "Start over" clears the saved career and reloads. */
+/** Shows a recovery screen if anything below crashes. "Start over" clears the saved career and reloads. */
 export class ErrorBoundary extends Component<{ children: ReactNode }, State> {
   override state: State = { error: null };
 
@@ -36,16 +35,12 @@ export class ErrorBoundary extends Component<{ children: ReactNode }, State> {
     const t = getT().errorBoundary;
 
     return (
-      <div className="mx-auto max-w-md px-4 py-16">
-        <Card>
-          <CardBody className="space-y-4 text-center">
-            <h1 className="text-2xl">{t.title}</h1>
-            <p className="text-sm text-ink-dim">{t.body}</p>
-            <Button className="w-full" onClick={this.reset}>
-              {t.button}
-            </Button>
-          </CardBody>
-        </Card>
+      <div className="mx-auto flex max-w-xl flex-col items-center px-4 py-24 text-center sm:px-6">
+        <h1 className="t-title">{t.title}</h1>
+        <p className="t-lead mt-4 text-ink/65">{t.body}</p>
+        <Button size="lg" className="mt-10" onClick={this.reset}>
+          {t.button}
+        </Button>
       </div>
     );
   }
