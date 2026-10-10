@@ -5,7 +5,6 @@ import { cn } from '../lib/cn.js';
 import { useT } from '../lib/i18n.js';
 import { useLanguage, type Lang } from '../store/language.js';
 import { useResolvedTheme, useTheme } from '../store/theme.js';
-import { ChipyMark } from './ChipyMark.js';
 
 const navItem = ({ isActive }: { isActive: boolean }) =>
   cn(
@@ -101,7 +100,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             aria-label={t.nav.homeLabel}
             className="-ml-1 flex items-center gap-2.5 rounded-full p-1"
           >
-            <ChipyMark className="h-7 w-7" />
+            <img src="/chipy-logo-320.png" alt="" className="h-8 w-8 shrink-0 rounded-[0.55rem]" />
             <span className="hidden text-[1.0625rem] font-medium tracking-[-0.035em] min-[400px]:inline">
               Chipy
             </span>
@@ -125,7 +124,11 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       <footer className="mx-auto w-full max-w-6xl px-4 pb-10 pt-16 sm:px-6">
         <div className="flex items-center gap-3 border-t border-ink/8 pt-6 text-sm text-ink/60">
-          <ChipyMark className="h-5 w-5 opacity-80" />
+          <img
+            src="/chipy-logo-320.png"
+            alt=""
+            className="h-5 w-5 shrink-0 rounded-[0.3rem] opacity-90"
+          />
           <p>{t.nav.footer}</p>
         </div>
       </footer>

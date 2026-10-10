@@ -213,5 +213,6 @@ One grammar: things arrive a few pixels low and slightly out of focus, then shar
 - **Don't** add eyebrow labels, gradient text, coloured side stripes, or glow.
 - **Don't** introduce a second accent hue or new grey hex values; use ink opacity.
 
-The wordmark keeps its committed form (a leather-orange circle holding a dark "C", which
-doubles as the ball's seam), with "Chipy" set in Archivo 500 at tight tracking.
+The logo is the court-tile app icon in `apps/web/public/chipy-logo-320.png` (also the
+apple-touch icon), with `public/favicon.ico` (16 and 32 px) as the browser favicon. The
+header shows it beside "Chipy" set in Archivo 500 at tight tracking.

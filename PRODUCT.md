@@ -122,8 +122,9 @@ pnpm test`, in that order. Engine changes also require
 
 ## Brand Commitments
 
-- **Name: Chipy.** Wordmark is an amber circle holding a black "C", with "Chipy"
-  set in a heavy, tight-tracked sans.
+- **Name: Chipy.** The logo is an orange basketball-court app tile
+  (`apps/web/public/chipy-logo-320.png`, favicon `favicon.ico`), with "Chipy"
+  set beside it in a tight-tracked sans.
 - **Voice:** terse, second person, present tense, sports-broadcast cadence
   ("One prospect. Fifteen years. Your calls." / "a jersey in the rafters").
   Effect chips read as lowercase stat callouts.
