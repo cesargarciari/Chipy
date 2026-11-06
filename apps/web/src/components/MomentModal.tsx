@@ -181,7 +181,8 @@ export function MomentModal({
             {badge}
           </p>
 
-          <div className="relative mx-auto my-8 grid h-44 w-44 place-items-center">
+          {/* One fixed 1fr row: an auto row would grow to a tall trophy's own height and spill onto the headline. */}
+          <div className="relative mx-auto my-8 grid h-44 w-44 grid-cols-1 grid-rows-1 place-items-center">
             <div
               aria-hidden
               className="absolute inset-0 rounded-full"

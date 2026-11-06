@@ -48,7 +48,8 @@ export function MomentCard({ moment }: { moment: CareerMomentDto }) {
     <div className="flex items-center gap-4 rounded-2xl bg-ink/4 p-4">
       <div
         className={cn(
-          'grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-xl bg-raised',
+          // Fixed track, so tall award art scales down to fit instead of being cropped.
+          'grid h-12 w-12 shrink-0 grid-cols-1 grid-rows-1 place-items-center overflow-hidden rounded-xl bg-raised',
           TONE[moment.kind],
         )}
       >
